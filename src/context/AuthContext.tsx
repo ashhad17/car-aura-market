@@ -1,5 +1,7 @@
+
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 export type UserRole = "user" | "admin" | "service_provider";
@@ -13,18 +15,15 @@ type User = {
   phone?: string;
   joinedDate?: string;
   address?: string;
-  
 };
 
 type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
-  isAuthModalOpen: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  openAuthModal: () => void;
-  closeAuthModal: () => void;
+  redirectToLogin: () => void;
   updateUser: (userData: Partial<User>) => void;
 };
 
@@ -32,8 +31,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Check if there's a stored token and fetch user data
@@ -166,14 +165,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       title: "Logged Out",
       description: "You have been successfully logged out"
     });
+    navigate('/');
   };
 
-  const openAuthModal = () => {
-    setIsAuthModalOpen(true);
-  };
-
-  const closeAuthModal = () => {
-    setIsAuthModalOpen(false);
+  const redirectToLogin = () => {
+    navigate('/login');
   };
 
   const updateUser = (userData: Partial<User>) => {
@@ -187,12 +183,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       value={{
         user,
         isAuthenticated: !!user,
-        isAuthModalOpen,
         login,
         register,
         logout,
-        openAuthModal,
-        closeAuthModal,
+        redirectToLogin,
         updateUser,
       }}
     >

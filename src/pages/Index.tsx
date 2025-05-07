@@ -1,5 +1,6 @@
 
-import React, { useState } from "react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Hero from "@/components/home/Hero";
@@ -7,13 +8,15 @@ import Features from "@/components/home/Features";
 import CarListingPreview from "@/components/home/CarListingPreview";
 import ServiceSection from "@/components/home/ServiceSection";
 import Testimonials from "@/components/home/Testimonials";
-import { useAuthModal } from "@/components/auth/AuthModalProvider";
-import ServiceProviderModal from "@/components/partner/ServiceProviderModal";
-import {  services } from "@/lib/data";
+import { services } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
-  const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
+  const navigate = useNavigate();
+  
+  const handlePartnerClick = () => {
+    navigate('/service-provider-dashboard');
+  };
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -32,7 +35,7 @@ const Index = () => {
             <Button 
               size="lg"
               className="px-8 bg-primary hover:bg-primary/90"
-              onClick={() => setIsPartnerModalOpen(true)}
+              onClick={handlePartnerClick}
             >
               Become a Service Partner
             </Button>
@@ -40,11 +43,6 @@ const Index = () => {
         </section>
         <ServiceSection services={services} />
         <Testimonials />
-        {/* AuthModal is now handled by AuthModalProvider */}
-        <ServiceProviderModal 
-          isOpen={isPartnerModalOpen}
-          onClose={() => setIsPartnerModalOpen(false)}
-        />
       </main>
       <Footer />
     </div>

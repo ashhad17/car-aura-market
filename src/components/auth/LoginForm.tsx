@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -12,10 +13,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 
 const formSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -34,6 +34,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onComplete, onForgotPassword, onO
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
+  const { login } = useAuth();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(formSchema),
@@ -47,36 +48,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onComplete, onForgotPassword, onO
     setIsLoading(true);
 
     try {
-      // Simulate API request
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // In a real app, you would make an API call here to authenticate the user
-      // const response = await axios.post('/api/login', data);
-      // if (response.data.success) {
-      //   onComplete();
-      // } else {
-      //   toast({
-      //     title: "Error",
-      //     description: "Invalid credentials. Please try again.",
-      //     variant: "destructive",
-      //   });
-      // }
-
-      // For demo purposes, we'll just simulate a successful login
-      toast({
-        title: "Login Successful",
-        description: "You have successfully logged in.",
-      });
-
-      setTimeout(() => {
-        onComplete();
-      }, 1000);
+      await login(data.email, data.password);
+      onComplete();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Invalid credentials. Please try again.",
-        variant: "destructive",
-      });
+      console.error('Login error:', error);
+      // Error toast is already shown by login method
     } finally {
       setIsLoading(false);
     }
@@ -144,10 +120,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onComplete, onForgotPassword, onO
           />
 
           <div className="flex justify-between">
-            <Button variant="link" onClick={onForgotPassword}>
+            <Button variant="link" onClick={onForgotPassword} type="button">
               Forgot password?
             </Button>
-            <Button variant="link" onClick={onOtpLogin}>
+            <Button variant="link" onClick={onOtpLogin} type="button">
               Login with OTP
             </Button>
           </div>

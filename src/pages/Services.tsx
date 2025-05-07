@@ -1,14 +1,24 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Helmet } from "react-helmet-async";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ServiceGrid from "@/components/service/ServiceGrid";
-import ServiceProviderModal from "@/components/partner/ServiceProviderModal";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 
 const Services = () => {
-  const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
+  const handlePartnerClick = () => {
+    if (isAuthenticated) {
+      navigate('/service-provider-dashboard');
+    } else {
+      navigate('/login');
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -31,22 +41,16 @@ const Services = () => {
             </div>
             <Button 
               className="mt-4 md:mt-0 bg-primary hover:bg-primary/90"
-              onClick={() => setIsPartnerModalOpen(true)}
+              onClick={handlePartnerClick}
             >
               Become a Partner
             </Button>
           </div>
           
-          {/* Use ServiceGrid without providing services - it will fetch them from API */}
           <ServiceGrid />
         </div>
       </main>
       <Footer />
-      {/* AuthModal is now handled by AuthModalProvider */}
-      <ServiceProviderModal 
-        isOpen={isPartnerModalOpen}
-        onClose={() => setIsPartnerModalOpen(false)}
-      />
     </div>
   );
 };
