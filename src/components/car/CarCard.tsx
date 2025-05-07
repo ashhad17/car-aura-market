@@ -10,7 +10,7 @@ import { Car, MapPin, Calendar, Heart, Share, User } from "lucide-react";
 
 interface CarCardProps {
   car: {
-    id: string;
+    _id: string;
     title: string;
     price: number;
     year: number;
@@ -50,7 +50,7 @@ const CarCard: React.FC<CarCardProps> = ({ car, variant = "full" }) => {
       return;
     }
 
-    navigate(`/cars/details/${car.id}`);
+    navigate(`/cars/details/${car._id}`);
   };
 
   const isCompact = variant === "compact";
@@ -58,7 +58,7 @@ const CarCard: React.FC<CarCardProps> = ({ car, variant = "full" }) => {
   return (
     <Card className={`overflow-hidden ${car.featured ? "ring-2 ring-primary" : ""}`}>
       <div className="relative">
-        <Link to={`/cars/details/${car.id}`}>
+        <Link to={`/cars/details/${car._id}`}>
           <img
             src={car.imageUrl}
             alt={car.title}
@@ -94,7 +94,7 @@ const CarCard: React.FC<CarCardProps> = ({ car, variant = "full" }) => {
         <div className="space-y-3">
           <div className="flex justify-between">
             <h3 className={`${isCompact ? "text-base" : "text-lg"} font-semibold`}>
-              <Link to={`/cars/details/${car.id}`}>{car.title}</Link>
+              <Link to={`/cars/details/${car._id}`}>{car.title}</Link>
             </h3>
             <span className="font-bold text-primary">
               ${car.price.toLocaleString()}

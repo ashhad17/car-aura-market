@@ -17,3 +17,17 @@ export function useIsMobile() {
 
   return !!isMobile
 }
+export function useScrollPosition(offset: number = 0) {
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > offset);
+    };
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [offset]);
+
+  return scrolled;
+}

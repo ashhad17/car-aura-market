@@ -26,7 +26,7 @@ import OtpLogin from "./pages/OtpLogin";
 import ForgotPassword from "./pages/ForgotPassword";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import FindYourCar from "./pages/FindYourCar";
-
+import CarDetailsAdmin from "./components/car/CarDetailsAdmin";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -67,6 +67,8 @@ const App = () => {
                 {/* Role-Specific Routes */}
                 <Route element={<PrivateRoute requiredRole="admin" />}>
                   <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
+                  <Route path="/admin-dashboard/cars/details/:id" element={<CarDetailsAdmin />} />
+
                 </Route>
                 
                 <Route element={<PrivateRoute requiredRole="service_provider" />}>

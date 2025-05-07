@@ -25,7 +25,51 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative bg-gradient-to-b from-primary/5 to-transparent pt-32 pb-24 md:py-48">
+    <section className="relative min-h-screen bg-gradient-to-b  from-primary/5 to-transparent pt-16 pb-24 md:py-48">
+      
+      <div className="absolute top-20 right-0 w-3/4 h-3/4 opacity-10">
+        <div className="absolute rounded-full bg-primary w-96 h-96 blur-3xl -top-20 -right-20"></div>
+        <div className="absolute rounded-full bg-accent w-64 h-64 blur-3xl bottom-10 left-10"></div>
+      </div>
+
+      <div className="container mx-auto px-4 py-20 z-10">
+        <div className="grid md:grid-cols-2 gap-10 items-center">
+          <div className="max-w-xl md:mr-auto animate-fade-in">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 tracking-tight">
+              <span className="text-gradient">The smarter way</span>
+              <br />
+              to buy, sell & service your car
+            </h1>
+            <p className="text-lg text-gray-700 mb-8">
+              A transparent marketplace built on trust, connecting vehicle owners with reliable buyers and trusted service providers.
+            </p>
+            
+            
+          </div>
+          
+          <div className="hidden md:block relative">
+            <img
+              src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=2070&auto=format&fit=crop"
+              alt="Car hero"
+              className="rounded-lg shadow-2xl transform hover-scale animate-scale-in"
+            />
+            
+            <div className="absolute -bottom-5 -left-5 bg-white p-4 rounded-lg shadow-lg animate-slide-in-bottom">
+              <div className="flex items-center">
+                <div className="bg-green-100 p-2 rounded-full mr-3">
+                  <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-medium">Verified Sellers</p>
+                  <p className="text-sm text-gray-600">100% transparency & trust</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div className="container mx-auto px-4 text-center">
         <h1 className="text-4xl md:text-6xl font-bold mb-6">
           Find Your Perfect Car Match
@@ -50,6 +94,7 @@ const Hero = () => {
           </Button>
         </div>
       </div>
+      
     </section>
   );
 };

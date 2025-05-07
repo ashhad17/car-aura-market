@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { Calendar as CalendarIcon, Clock, Star, MapPin, CheckCircle, AlertCircle, Car, Share, Heart, Info, Shield, Tool, Fuel, Gauge } from "lucide-react";
+import { Calendar as CalendarIcon,Phone, Clock, Star, MapPin, CheckCircle, AlertCircle, Car, Share,LogOut,Settings, Heart, Info, Shield, Fuel, Gauge } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -298,7 +298,7 @@ const CarDetails = () => {
                     <span>{carDetails.fuelType}</span>
                   </div>
                   <div className="flex items-center">
-                    <Tool className="h-5 w-5 text-gray-500 mr-2" />
+                    <Settings className="h-5 w-5 text-gray-500 mr-2" />
                     <span>{carDetails.transmission}</span>
                   </div>
                   <div className="flex items-center">

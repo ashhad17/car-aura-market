@@ -143,7 +143,7 @@ const CarListingCard = ({
             <p className="text-gray-700 mb-4 line-clamp-2">{car.description}</p>
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" asChild>
-                <Link to={`/cars/details/${car._id}`}>
+                <Link to={`/admin-dashboard/cars/details/${car._id}`}>
                   <Eye className="h-4 w-4 mr-1" /> View
                 </Link>
               </Button>
