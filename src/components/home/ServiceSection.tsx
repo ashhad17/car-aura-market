@@ -28,10 +28,10 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({ services: providedServi
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Explore Our <span className="text-gradient">Services</span>
+            Explore Our <span className="text-gradient">Service Providers</span>
           </h2>
           <p className="text-gray-600">
-            We offer a wide range of automotive services to keep your vehicle
+            We offer a wide range of automotive service providers to keep your vehicle
             running smoothly.
           </p>
         </div>
@@ -54,7 +54,7 @@ const ServiceSection: React.FC<ServiceSectionProps> = ({ services: providedServi
                   <span className="text-primary font-bold">
                     {formatPrice(service.price)}
                   </span>
-                  <Link to={`/services/${service.id}`}>
+                  <Link to={`/service-providers/${service.id}`}>
                     <Button variant="secondary">Learn More</Button>
                   </Link>
                 </div>

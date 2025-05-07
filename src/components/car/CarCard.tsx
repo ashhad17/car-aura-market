@@ -1,150 +1,170 @@
 
 import React from "react";
-import { Card } from "@/components/ui/card";
+import { Link, useNavigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CarType } from "@/lib/data";
 import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { Info } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Car, MapPin, Calendar, Heart, Share, User } from "lucide-react";
 
-interface BackendCar {
-  _id: string;
-  title: string;
-  make: string;
-  model: string;
-  year: string;
-  price: string;
-  mileage: string;
-  condition: string;
-  location: string;
-  description: string;
-  images: Array<{
-    url: string;
-    publicId: string;
-  }>;
-  seller: {
-    _id: string;
-    name: string;
-  };
-  status: string;
-  createdAt: string;
-  features?: string[];
-  exteriorColor?: string;
-  interiorColor?: string;
-  fuelType?: string;
-  transmission?: string;
-}
 interface CarCardProps {
-  car: BackendCar ; // Accept both BackendCar and CarType
+  car: {
+    id: string;
+    title: string;
+    price: number;
+    year: number;
+    mileage: number;
+    location: string;
+    imageUrl: string;
+    condition: string;
+    fuel?: string;
+    transmission?: string;
+    sellerName?: string;
+    sellerType?: string;
+    featured?: boolean;
+  };
+  variant?: "compact" | "full";
 }
 
-const CarCard: React.FC<CarCardProps> = ({ car }) => {
-  const { isAuthenticated, openAuthModal } = useAuth();
+const CarCard: React.FC<CarCardProps> = ({ car, variant = "full" }) => {
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleViewDetails = () => {
-    navigate(`/cars/details/${car._id}`);
+  const handleTestDrive = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    toast({
+      title: "Test Drive Requested",
+      description: `We'll contact you to schedule a test drive for this ${car.year} ${car.title}`,
+    });
   };
 
-  const formatPrice = (price: number | string) => {
-    const numericPrice = typeof price === 'string' ? parseFloat(price.replace(/[^\d.]/g, '')) : price;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0,
-    }).format(numericPrice);
+  const handleBookNow = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+      return;
+    }
+
+    navigate(`/cars/details/${car.id}`);
   };
 
-  const formatMileage = (mileage: number) => {
-    return new Intl.NumberFormat("en-US").format(mileage);
-  };
-
-  // Use car.title or construct one if it doesn't exist
-  const title = car.title || `${car.make} ${car.model} ${car.year}`;
-
-  // Safely format the transmission if it exists
-  const formattedTransmission = car.transmission 
-    ? car.transmission.charAt(0).toUpperCase() + car.transmission.slice(1) 
-    : "N/A";
+  const isCompact = variant === "compact";
 
   return (
-    <Card className="overflow-hidden hover-scale transition-all duration-300 shadow-md h-full flex flex-col">
+    <Card className={`overflow-hidden ${car.featured ? "ring-2 ring-primary" : ""}`}>
       <div className="relative">
-        <img
-          src={car.images[0].url} // Fixed: Use images[0] instead of image
-          alt={title}
-          className="w-full h-48 object-cover"
-        />
-        {car.condition && (
-          <Badge
-            variant="default"
-            className={`absolute top-3 right-3 ${
-              car.condition === "Excellent"
-                ? "bg-green-600"
-                : car.condition === "Good"
-                ? "bg-blue-600"
-                : "bg-amber-600"
-            }`}
-          >
-            {car.condition}
+        <Link to={`/cars/details/${car.id}`}>
+          <img
+            src={car.imageUrl}
+            alt={car.title}
+            className={`w-full ${isCompact ? "h-36" : "h-48 md:h-60"} object-cover`}
+          />
+        </Link>
+        {car.featured && (
+          <Badge className="absolute top-2 left-2 bg-primary text-white">
+            Featured
           </Badge>
         )}
-        {car.seller && (
-          <Badge
-            variant="outline"
-            className="absolute top-3 left-3 bg-white bg-opacity-80"
+        <div className="absolute top-2 right-2 flex gap-2">
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-8 w-8 rounded-full bg-white/80 hover:bg-white"
           >
-            "Private Seller"
-          </Badge>
-        )}
-      </div>
-      
-      <div className="p-5 flex flex-col flex-grow">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="font-bold text-lg">{title}</h3>
-          <span className="text-lg font-semibold text-primary">
-            {typeof car.price === 'string' ? car.price : formatPrice(car.price)}
-          </span>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-y-2 gap-x-4 mt-2 mb-4">
-          <div className="flex items-center text-sm text-gray-600">
-            <span className="font-medium">Year:</span>
-            <span className="ml-1">{car.year}</span>
-          </div>
-          <div className="flex items-center text-sm text-gray-600">
-            <span className="font-medium">Mileage:</span>
-            <span className="ml-1">{car.mileage} mi</span>
-          </div>
-          {car.fuelType && (
-            <div className="flex items-center text-sm text-gray-600">
-              <span className="font-medium">Fuel:</span>
-              <span className="ml-1">{car.fuelType}</span>
-            </div>
-          )}
-          {car.transmission && (
-            <div className="flex items-center text-sm text-gray-600">
-              <span className="font-medium">Transmission:</span>
-              <span className="ml-1">{formattedTransmission}</span>
-            </div>
-          )}
-        </div>
-        
-        <div className="mt-auto flex flex-col">
-          <div className="flex items-center text-xs text-gray-600 mb-3">
-            <Info className="h-3 w-3 mr-1" />
-            <span>Located in {car.location}</span>
-          </div>
-          
-          <Button 
-            className="w-full button-gradient text-white"
-            onClick={handleViewDetails}
+            <Heart className="h-4 w-4" />
+            <span className="sr-only">Add to favorites</span>
+          </Button>
+          <Button
+            size="icon"
+            variant="secondary"
+            className="h-8 w-8 rounded-full bg-white/80 hover:bg-white"
           >
-            View Details
+            <Share className="h-4 w-4" />
+            <span className="sr-only">Share</span>
           </Button>
         </div>
       </div>
+
+      <CardContent className={`${isCompact ? "p-3" : "p-5"}`}>
+        <div className="space-y-3">
+          <div className="flex justify-between">
+            <h3 className={`${isCompact ? "text-base" : "text-lg"} font-semibold`}>
+              <Link to={`/cars/details/${car.id}`}>{car.title}</Link>
+            </h3>
+            <span className="font-bold text-primary">
+              ${car.price.toLocaleString()}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap gap-y-2 text-sm text-gray-500">
+            <div className="flex items-center w-1/2">
+              <Calendar className="h-4 w-4 mr-1" />
+              <span>{car.year}</span>
+            </div>
+            <div className="flex items-center w-1/2">
+              <Car className="h-4 w-4 mr-1" />
+              <span>{car.mileage.toLocaleString()} mi</span>
+            </div>
+            {!isCompact && (
+              <>
+                <div className="flex items-center w-1/2">
+                  <span className="bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded">
+                    {car.condition}
+                  </span>
+                </div>
+                <div className="flex items-center w-1/2">
+                  <MapPin className="h-4 w-4 mr-1" />
+                  <span>{car.location}</span>
+                </div>
+              </>
+            )}
+          </div>
+
+          {!isCompact && (
+            <div className="flex flex-wrap gap-2 pt-2">
+              {car.fuel && (
+                <Badge variant="outline">{car.fuel}</Badge>
+              )}
+              {car.transmission && (
+                <Badge variant="outline">{car.transmission}</Badge>
+              )}
+            </div>
+          )}
+
+          {!isCompact && car.sellerName && (
+            <div className="flex items-center pt-2 text-sm text-gray-500">
+              <User className="h-4 w-4 mr-1" />
+              <span>
+                {car.sellerName} • {car.sellerType}
+              </span>
+            </div>
+          )}
+
+          {!isCompact && (
+            <div className="flex gap-2 pt-3">
+              <Button
+                variant="default"
+                className="flex-1"
+                onClick={handleBookNow}
+              >
+                Book Now
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={handleTestDrive}
+              >
+                Test Drive
+              </Button>
+            </div>
+          )}
+        </div>
+      </CardContent>
     </Card>
   );
 };

@@ -10,6 +10,8 @@ import Index from "./pages/Index";
 import CarsBuy from "./pages/CarsBuy";
 import CarsSell from "./pages/CarsSell";
 import CarDetails from "./pages/CarDetails";
+import ServiceProviders from "./pages/ServiceProviders";
+import ServiceProviderDetails from "./pages/ServiceDetails";
 import Services from "./pages/Services";
 import ServiceDetails from "./pages/ServiceDetails";
 import About from "./pages/About";
@@ -18,12 +20,12 @@ import Notifications from "./pages/Notifications";
 import AdminDashboard from "./pages/AdminDashboard";
 import ServiceProviderDashboard from "./pages/ServiceProviderDashboard";
 import NotFound from "./pages/NotFound";
-import ChatSystem from "./components/chat/ChatSystem";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import OtpLogin from "./pages/OtpLogin";
 import ForgotPassword from "./pages/ForgotPassword";
 import PrivateRoute from "./components/auth/PrivateRoute";
+import FindYourCar from "./pages/FindYourCar";
 
 const queryClient = new QueryClient();
 
@@ -42,8 +44,11 @@ const App = () => {
                 <Route path="/cars/buy" element={<CarsBuy />} />
                 <Route path="/cars/details/:id" element={<CarDetails />} />
                 <Route path="/cars" element={<Navigate to="/cars/buy" replace />} />
+                <Route path="/service-providers" element={<ServiceProviders />} />
+                <Route path="/service-providers/:id" element={<ServiceProviderDetails />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/services/:id" element={<ServiceDetails />} />
+                <Route path="/find-your-car" element={<FindYourCar />} />
                 <Route path="/about" element={<About />} />
                 
                 {/* Auth Routes */}
@@ -70,7 +75,6 @@ const App = () => {
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              <ChatSystem minimized={true} />
             </AuthProvider>
           </TooltipProvider>
         </HelmetProvider>
