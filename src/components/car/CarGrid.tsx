@@ -106,8 +106,8 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
     const priceMatch = !filters.price || String(car.price).includes(filters.price);
     const mileageMatch =
       !filters.mileage || String(car.mileage).includes(filters.mileage);
-    const bodyTypeMatch =
-      !filters.bodyType || car.bodyType.toLowerCase().includes(filters.bodyType.toLowerCase());
+    // const bodyTypeMatch =
+    //   !filters.bodyType || car.bodyType.toLowerCase().includes(filters.bodyType.toLowerCase());
     const fuelTypeMatch =
       !filters.fuelType || car.fuelType.toLowerCase().includes(filters.fuelType.toLowerCase());
     const transmissionMatch =
@@ -125,7 +125,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
       yearMatch &&
       priceMatch &&
       mileageMatch &&
-      bodyTypeMatch &&
+      // bodyTypeMatch &&
       fuelTypeMatch &&
       transmissionMatch &&
       searchTermMatch
@@ -137,11 +137,11 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
 
     switch (sortBy) {
       case "price":
-        return order * (a.price - b.price);
+        return order * (Number(a.price) - Number(b.price));
       case "year":
         return order * (Number(a.year) - Number(b.year));
       case "mileage":
-        return order * (a.mileage - b.mileage);
+        return order * (Number(a.mileage) - Number(b.mileage));
       default:
         return 0;
     }
@@ -157,47 +157,47 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
     setCurrentPage(newPage);
   };
 
-  const generateMockData = (count: number): CarType[] => {
-    const makes = ["Toyota", "Honda", "Ford", "BMW", "Mercedes"];
-    const colors = ["Red", "Blue", "Silver", "Black", "White"];
-    const engines = ["2.0L I4", "3.5L V6", "5.0L V8"];
-    const transmissions = ["Automatic", "Manual"];
-    const bodyTypes = ["Sedan", "SUV", "Truck", "Hatchback"];
-    const fuelTypes = ["Gasoline", "Diesel", "Electric"];
-    const locations = ["New York, NY", "Los Angeles, CA", "Chicago, IL"];
-    const conditions = ["Excellent", "Good", "Fair"];
-    const statuses = ["Available", "Sold", "Pending"];
-    const sellerTypes = ["Dealer", "Private"];
+  // const generateMockData = (count: number): CarType[] => {
+  //   const makes = ["Toyota", "Honda", "Ford", "BMW", "Mercedes"];
+  //   const colors = ["Red", "Blue", "Silver", "Black", "White"];
+  //   const engines = ["2.0L I4", "3.5L V6", "5.0L V8"];
+  //   const transmissions = ["Automatic", "Manual"];
+  //   const bodyTypes = ["Sedan", "SUV", "Truck", "Hatchback"];
+  //   const fuelTypes = ["Gasoline", "Diesel", "Electric"];
+  //   const locations = ["New York, NY", "Los Angeles, CA", "Chicago, IL"];
+  //   const conditions = ["Excellent", "Good", "Fair"];
+  //   const statuses = ["Available", "Sold", "Pending"];
+  //   const sellerTypes = ["Dealer", "Private"];
 
-    const mockCars: CarType[] = Array(count).fill(0).map((_, index) => ({
-      id: `mock-${index}`,
-      make: makes[Math.floor(Math.random() * makes.length)],
-      model: `Model ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
-      year: 2015 + Math.floor(Math.random() * 9),
-      price: 15000 + Math.floor(Math.random() * 35000),
-      mileage: 10000 + Math.floor(Math.random() * 90000),
-      color: colors[Math.floor(Math.random() * colors.length)],
-      engine: engines[Math.floor(Math.random() * engines.length)],
-      transmission: transmissions[Math.floor(Math.random() * transmissions.length)],
-      bodyType: bodyTypes[Math.floor(Math.random() * bodyTypes.length)],
-      fuelType: fuelTypes[Math.floor(Math.random() * fuelTypes.length)],
-      location: locations[Math.floor(Math.random() * locations.length)],
-      images: [
-        `https://images.unsplash.com/photo-${1550000000 + index}?auto=format&fit=crop&w=300&q=80`,
-      ],
-      description: "This is a sample car description.",
-      features: ["Feature 1", "Feature 2", "Feature 3"],
-      isFeatured: Math.random() > 0.7,
-      isAvailable: true,
-      // Add the optional fields being used
-      title: `${makes[Math.floor(Math.random() * makes.length)]} ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
-      condition: conditions[Math.floor(Math.random() * conditions.length)],
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      sellerType: sellerTypes[Math.floor(Math.random() * sellerTypes.length)],
-    }));
+  //   const mockCars: CarType[] = Array(count).fill(0).map((_, index) => ({
+  //     id: `mock-${index}`,
+  //     make: makes[Math.floor(Math.random() * makes.length)],
+  //     model: `Model ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
+  //     year: 2015 + Math.floor(Math.random() * 9),
+  //     price: 15000 + Math.floor(Math.random() * 35000),
+  //     mileage: 10000 + Math.floor(Math.random() * 90000),
+  //     color: colors[Math.floor(Math.random() * colors.length)],
+  //     engine: engines[Math.floor(Math.random() * engines.length)],
+  //     transmission: transmissions[Math.floor(Math.random() * transmissions.length)],
+  //     bodyType: bodyTypes[Math.floor(Math.random() * bodyTypes.length)],
+  //     fuelType: fuelTypes[Math.floor(Math.random() * fuelTypes.length)],
+  //     location: locations[Math.floor(Math.random() * locations.length)],
+  //     images: [
+  //       `https://images.unsplash.com/photo-${1550000000 + index}?auto=format&fit=crop&w=300&q=80`,
+  //     ],
+  //     description: "This is a sample car description.",
+  //     features: ["Feature 1", "Feature 2", "Feature 3"],
+  //     isFeatured: Math.random() > 0.7,
+  //     isAvailable: true,
+  //     // Add the optional fields being used
+  //     title: `${makes[Math.floor(Math.random() * makes.length)]} ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
+  //     condition: conditions[Math.floor(Math.random() * conditions.length)],
+  //     status: statuses[Math.floor(Math.random() * statuses.length)],
+  //     sellerType: sellerTypes[Math.floor(Math.random() * sellerTypes.length)],
+  //   }));
 
-    return mockCars;
-  };
+  //   return mockCars;
+  // };
 
   if (loading) {
     return <div className="text-center">Loading cars...</div>;
@@ -300,7 +300,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {carsToDisplay.length > 0 ? (
               carsToDisplay.map((car) => (
-                <CarCard key={car.id} car={car} />
+                <CarCard key={car._id} car={car} />
               ))
             ) : (
               <div className="col-span-3 text-center py-10">

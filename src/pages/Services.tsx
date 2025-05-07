@@ -4,13 +4,12 @@ import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ServiceGrid from "@/components/service/ServiceGrid";
+import AuthModal from "@/components/auth/AuthModal";
 import ServiceProviderModal from "@/components/partner/ServiceProviderModal";
 import { Button } from "@/components/ui/button";
-import { useAuthModal } from "@/components/auth/AuthModalProvider";
 
 const Services = () => {
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
-  const { openModal: openAuthModal } = useAuthModal();
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -44,6 +43,7 @@ const Services = () => {
         </div>
       </main>
       <Footer />
+      <AuthModal />
       <ServiceProviderModal 
         isOpen={isPartnerModalOpen}
         onClose={() => setIsPartnerModalOpen(false)}

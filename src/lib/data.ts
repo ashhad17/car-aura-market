@@ -1,35 +1,31 @@
 // src/lib/data.ts
 
 export interface CarType {
-  id: string;
+  _id: string;
+  title: string;
   make: string;
   model: string;
-  year: number;
-  color: string;
-  mileage: number;
-  price: number;
-  engine: string;
-  transmission: string;
-  bodyType: string;
-  fuelType: string;
+  year: string;
+  price: string;
+  mileage: string;
+  condition: string;
   location: string;
-  images: string[];
   description: string;
-  features: string[];
-  isFeatured: boolean;
-  isAvailable: boolean;
-  title?: string;
-  condition?: string;
-  sellerType?: string;
-  status?: string;
-  owner?: {
+  images: Array<{
+    url: string;
+    publicId: string;
+  }>;
+  seller: {
+    _id: string;
     name: string;
-    location: string;
-    rating: number;
-    reviewCount: number;
-    image?: string;
-    verified?: boolean;
   };
+  status: string;
+  createdAt: string;
+  features?: string[];
+  exteriorColor?: string;
+  interiorColor?: string;
+  fuelType?: string;
+  transmission?: string;
 }
 
 export interface ServiceType {
@@ -115,163 +111,163 @@ export const features = [
   }
 ];
 
-export const cars: CarType[] = [
-  {
-    id: '1',
-    make: 'Toyota',
-    model: 'Camry',
-    year: 2020,
-    color: 'Silver',
-    mileage: 35000,
-    price: 18500,
-    engine: '2.5L I4',
-    transmission: 'Automatic',
-    bodyType: 'Sedan',
-    fuelType: 'Gasoline',
-    location: 'New York, NY',
-    images: [
-      'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=300&q=80',
-      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=300&q=80',
-      'https://images.unsplash.com/photo-1605559424843-9e4c228d88c0?auto=format&fit=crop&w=300&q=80'
-    ],
-    description: 'Reliable and fuel-efficient sedan. Perfect for daily commute.',
-    features: ['Backup Camera', 'Bluetooth', 'Adaptive Cruise Control'],
-    isFeatured: true,
-    isAvailable: true,
-    owner: {
-      name: 'John Doe',
-      location: 'New York, NY',
-      rating: 4.5,
-      reviewCount: 50,
-      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=facearea&w=60&h=60&facepad=2',
-      verified: true
-    }
-  },
-  {
-    id: '2',
-    make: 'Honda',
-    model: 'Civic',
-    year: 2021,
-    color: 'Blue',
-    mileage: 28000,
-    price: 19200,
-    engine: '1.5L I4 Turbo',
-    transmission: 'CVT',
-    bodyType: 'Hatchback',
-    fuelType: 'Gasoline',
-    location: 'Los Angeles, CA',
-    images: [
-      'https://images.unsplash.com/photo-1541443103-5245472bf599?auto=format&fit=crop&w=300&q=80',
-      'https://images.unsplash.com/photo-1580273969890-c568db3e52e2?auto=format&fit=crop&w=300&q=80',
-      'https://images.unsplash.com/photo-1568605114967-8dd0b510ff61?auto=format&fit=crop&w=300&q=80'
-    ],
-    description: 'Sporty hatchback with great fuel economy and modern features.',
-    features: ['Sunroof', 'Apple CarPlay', 'Lane Departure Warning'],
-    isFeatured: false,
-    isAvailable: true,
-    owner: {
-      name: 'Jane Smith',
-      location: 'Los Angeles, CA',
-      rating: 4.8,
-      reviewCount: 75,
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b88360?auto=format&fit=facearea&w=60&h=60&facepad=2',
-      verified: true
-    }
-  },
-  {
-    id: '3',
-    make: 'Tesla',
-    model: 'Model 3',
-    year: 2022,
-    color: 'White',
-    mileage: 15000,
-    price: 45000,
-    engine: 'Electric',
-    transmission: 'Automatic',
-    bodyType: 'Sedan',
-    fuelType: 'Electric',
-    location: 'San Francisco, CA',
-    images: [
-      'https://images.unsplash.com/photo-1617583478489-f19989c7ca19?auto=format&fit=crop&w=300&q=80',
-      'https://images.unsplash.com/photo-1617583515937-4980708f4dd1?auto=format&fit=crop&w=300&q=80',
-      'https://images.unsplash.com/photo-1662585496848-69bca13f4e00?auto=format&fit=crop&w=300&q=80'
-    ],
-    description: 'High-performance electric sedan with advanced technology.',
-    features: ['Autopilot', 'Premium Interior', 'Supercharger Access'],
-    isFeatured: true,
-    isAvailable: true,
-    owner: {
-      name: 'Elon Musk',
-      location: 'San Francisco, CA',
-      rating: 4.9,
-      reviewCount: 100,
-      image: 'https://images.unsplash.com/photo-1519085360753-af0119f825cd?auto=format&fit=facearea&w=60&h=60&facepad=2',
-      verified: true
-    }
-  },
-  {
-    id: '4',
-    make: 'Ford',
-    model: 'F-150',
-    year: 2020,
-    color: 'Gray',
-    mileage: 42000,
-    price: 28000,
-    engine: '3.5L V6',
-    transmission: 'Automatic',
-    bodyType: 'Truck',
-    fuelType: 'Gasoline',
-    location: 'Houston, TX',
-    images: [
-      'https://images.unsplash.com/photo-1630239669894-c6923d18789b?auto=format&fit=crop&w=300&q=80',
-      'https://images.unsplash.com/photo-1567908457784-7f6c5e599746?auto=format&fit=crop&w=300&q=80',
-      'https://images.unsplash.com/photo-1589186850539-8793914363a4?auto=format&fit=crop&w=300&q=80'
-    ],
-    description: 'Tough and reliable pickup truck. Perfect for work and play.',
-    features: ['4x4', 'Towing Package', 'Bed Liner'],
-    isFeatured: false,
-    isAvailable: true,
-    owner: {
-      name: 'Bob Johnson',
-      location: 'Houston, TX',
-      rating: 4.6,
-      reviewCount: 60,
-      image: 'https://images.unsplash.com/photo-1534528741702-a0cfae562c9c?auto=format&fit=facearea&w=60&h=60&facepad=2',
-      verified: true
-    }
-  },
-  {
-    id: '5',
-    make: 'BMW',
-    model: 'X5',
-    year: 2019,
-    color: 'Black',
-    mileage: 51000,
-    price: 38000,
-    engine: '3.0L I6 Turbo',
-    transmission: 'Automatic',
-    bodyType: 'SUV',
-    fuelType: 'Gasoline',
-    location: 'Miami, FL',
-    images: [
-      'https://images.unsplash.com/photo-1580516943758-8652c348dc2a?auto=format&fit=crop&w=300&q=80',
-      'https://images.unsplash.com/photo-1599491714909-3f655219a6a8?auto=format&fit=crop&w=300&q=80',
-      'https://images.unsplash.com/photo-1607882904848-2c94e6533983?auto=format&fit=crop&w=300&q=80'
-    ],
-    description: 'Luxurious and spacious SUV with powerful engine.',
-    features: ['Leather Seats', 'Navigation System', 'Panoramic Sunroof'],
-    isFeatured: true,
-    isAvailable: true,
-    owner: {
-      name: 'Alice Williams',
-      location: 'Miami, FL',
-      rating: 4.7,
-      reviewCount: 80,
-      image: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936e7e?auto=format&fit=facearea&w=60&h=60&facepad=2',
-      verified: true
-    }
-  }
-];
+// export const cars: CarType[] = [
+//   {
+//     id: '1',
+//     make: 'Toyota',
+//     model: 'Camry',
+//     year: 2020,
+//     color: 'Silver',
+//     mileage: 35000,
+//     price: 18500,
+//     engine: '2.5L I4',
+//     transmission: 'Automatic',
+//     bodyType: 'Sedan',
+//     fuelType: 'Gasoline',
+//     location: 'New York, NY',
+//     images: [
+//       'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=300&q=80',
+//       'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=300&q=80',
+//       'https://images.unsplash.com/photo-1605559424843-9e4c228d88c0?auto=format&fit=crop&w=300&q=80'
+//     ],
+//     description: 'Reliable and fuel-efficient sedan. Perfect for daily commute.',
+//     features: ['Backup Camera', 'Bluetooth', 'Adaptive Cruise Control'],
+//     isFeatured: true,
+//     isAvailable: true,
+//     owner: {
+//       name: 'John Doe',
+//       location: 'New York, NY',
+//       rating: 4.5,
+//       reviewCount: 50,
+//       image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=facearea&w=60&h=60&facepad=2',
+//       verified: true
+//     }
+//   },
+//   {
+//     id: '2',
+//     make: 'Honda',
+//     model: 'Civic',
+//     year: 2021,
+//     color: 'Blue',
+//     mileage: 28000,
+//     price: 19200,
+//     engine: '1.5L I4 Turbo',
+//     transmission: 'CVT',
+//     bodyType: 'Hatchback',
+//     fuelType: 'Gasoline',
+//     location: 'Los Angeles, CA',
+//     images: [
+//       'https://images.unsplash.com/photo-1541443103-5245472bf599?auto=format&fit=crop&w=300&q=80',
+//       'https://images.unsplash.com/photo-1580273969890-c568db3e52e2?auto=format&fit=crop&w=300&q=80',
+//       'https://images.unsplash.com/photo-1568605114967-8dd0b510ff61?auto=format&fit=crop&w=300&q=80'
+//     ],
+//     description: 'Sporty hatchback with great fuel economy and modern features.',
+//     features: ['Sunroof', 'Apple CarPlay', 'Lane Departure Warning'],
+//     isFeatured: false,
+//     isAvailable: true,
+//     owner: {
+//       name: 'Jane Smith',
+//       location: 'Los Angeles, CA',
+//       rating: 4.8,
+//       reviewCount: 75,
+//       image: 'https://images.unsplash.com/photo-1494790108377-be9c29b88360?auto=format&fit=facearea&w=60&h=60&facepad=2',
+//       verified: true
+//     }
+//   },
+//   {
+//     id: '3',
+//     make: 'Tesla',
+//     model: 'Model 3',
+//     year: 2022,
+//     color: 'White',
+//     mileage: 15000,
+//     price: 45000,
+//     engine: 'Electric',
+//     transmission: 'Automatic',
+//     bodyType: 'Sedan',
+//     fuelType: 'Electric',
+//     location: 'San Francisco, CA',
+//     images: [
+//       'https://images.unsplash.com/photo-1617583478489-f19989c7ca19?auto=format&fit=crop&w=300&q=80',
+//       'https://images.unsplash.com/photo-1617583515937-4980708f4dd1?auto=format&fit=crop&w=300&q=80',
+//       'https://images.unsplash.com/photo-1662585496848-69bca13f4e00?auto=format&fit=crop&w=300&q=80'
+//     ],
+//     description: 'High-performance electric sedan with advanced technology.',
+//     features: ['Autopilot', 'Premium Interior', 'Supercharger Access'],
+//     isFeatured: true,
+//     isAvailable: true,
+//     owner: {
+//       name: 'Elon Musk',
+//       location: 'San Francisco, CA',
+//       rating: 4.9,
+//       reviewCount: 100,
+//       image: 'https://images.unsplash.com/photo-1519085360753-af0119f825cd?auto=format&fit=facearea&w=60&h=60&facepad=2',
+//       verified: true
+//     }
+//   },
+//   {
+//     id: '4',
+//     make: 'Ford',
+//     model: 'F-150',
+//     year: 2020,
+//     color: 'Gray',
+//     mileage: 42000,
+//     price: 28000,
+//     engine: '3.5L V6',
+//     transmission: 'Automatic',
+//     bodyType: 'Truck',
+//     fuelType: 'Gasoline',
+//     location: 'Houston, TX',
+//     images: [
+//       'https://images.unsplash.com/photo-1630239669894-c6923d18789b?auto=format&fit=crop&w=300&q=80',
+//       'https://images.unsplash.com/photo-1567908457784-7f6c5e599746?auto=format&fit=crop&w=300&q=80',
+//       'https://images.unsplash.com/photo-1589186850539-8793914363a4?auto=format&fit=crop&w=300&q=80'
+//     ],
+//     description: 'Tough and reliable pickup truck. Perfect for work and play.',
+//     features: ['4x4', 'Towing Package', 'Bed Liner'],
+//     isFeatured: false,
+//     isAvailable: true,
+//     owner: {
+//       name: 'Bob Johnson',
+//       location: 'Houston, TX',
+//       rating: 4.6,
+//       reviewCount: 60,
+//       image: 'https://images.unsplash.com/photo-1534528741702-a0cfae562c9c?auto=format&fit=facearea&w=60&h=60&facepad=2',
+//       verified: true
+//     }
+//   },
+//   {
+//     id: '5',
+//     make: 'BMW',
+//     model: 'X5',
+//     year: 2019,
+//     color: 'Black',
+//     mileage: 51000,
+//     price: 38000,
+//     engine: '3.0L I6 Turbo',
+//     transmission: 'Automatic',
+//     bodyType: 'SUV',
+//     fuelType: 'Gasoline',
+//     location: 'Miami, FL',
+//     images: [
+//       'https://images.unsplash.com/photo-1580516943758-8652c348dc2a?auto=format&fit=crop&w=300&q=80',
+//       'https://images.unsplash.com/photo-1599491714909-3f655219a6a8?auto=format&fit=crop&w=300&q=80',
+//       'https://images.unsplash.com/photo-1607882904848-2c94e6533983?auto=format&fit=crop&w=300&q=80'
+//     ],
+//     description: 'Luxurious and spacious SUV with powerful engine.',
+//     features: ['Leather Seats', 'Navigation System', 'Panoramic Sunroof'],
+//     isFeatured: true,
+//     isAvailable: true,
+//     owner: {
+//       name: 'Alice Williams',
+//       location: 'Miami, FL',
+//       rating: 4.7,
+//       reviewCount: 80,
+//       image: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936e7e?auto=format&fit=facearea&w=60&h=60&facepad=2',
+//       verified: true
+//     }
+//   }
+// ];
 
 export const services: ServiceType[] = [
   {

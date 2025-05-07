@@ -22,8 +22,8 @@ interface ServiceProvider {
   services: string[];
   rating: number;
   reviewCount: number;
-  address: {
-    street: string;
+  location: {
+    address: string;
     city: string;
     state: string;
     zipCode: string;
@@ -36,7 +36,7 @@ const serviceProviderFormSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number must be at least 10 characters"),
   address: z.object({
-    street: z.string().min(1, "Street is required"),
+    address: z.string().min(1, "Address is required"),
     city: z.string().min(1, "City is required"),
     state: z.string().min(1, "State is required"),
     zipCode: z.string().min(1, "Zip code is required"),
@@ -59,7 +59,7 @@ const ServiceProviderManagement = () => {
       email: "",
       phone: "",
       address: {
-        street: "",
+        address: "",
         city: "",
         state: "",
         zipCode: "",
@@ -88,7 +88,14 @@ const ServiceProviderManagement = () => {
       );
 
       if (response.data.success) {
-        setProviders(response.data.data);
+        const fetchedProviders = response.data.data.serviceProviders
+        ;
+        if (Array.isArray(fetchedProviders)) {
+          setProviders(fetchedProviders);
+        } else {
+          console.error("Expected an array but got:", fetchedProviders);
+          setProviders([]); // Fallback to an empty array
+        }
       } else {
         setError("Failed to fetch service providers");
         toast({
@@ -255,18 +262,21 @@ const ServiceProviderManagement = () => {
     }
   };
 
-  const filteredProviders = providers.filter(provider => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      provider.name.toLowerCase().includes(searchLower) ||
-      provider.email.toLowerCase().includes(searchLower) ||
-      provider.phone.toLowerCase().includes(searchLower)
-    );
-  });
+  const filteredProviders = Array.isArray(providers)
+    ? providers.filter((provider) => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          provider.name.toLowerCase().includes(searchLower) ||
+          provider.email.toLowerCase().includes(searchLower) ||
+          provider.phone.toLowerCase().includes(searchLower)
+        );
+      })
+    : [];
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
   };
+
 
   return (
     <div className="space-y-6">
@@ -287,8 +297,8 @@ const ServiceProviderManagement = () => {
               Add Provider
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
+          <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
               <DialogTitle>Add New Service Provider</DialogTitle>
               <DialogDescription>
                 Create a new service provider account with the following details.
@@ -339,7 +349,7 @@ const ServiceProviderManagement = () => {
                   <h4 className="text-sm font-medium">Address</h4>
                   <FormField
                     control={form.control}
-                    name="address.street"
+                    name="address.address"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Street</FormLabel>
@@ -494,7 +504,7 @@ const ServiceProviderManagement = () => {
                             name: provider.name,
                             email: provider.email,
                             phone: provider.phone,
-                            address: provider.address,
+                            address: provider.location,
                           });
                         }}
                       >
@@ -545,7 +555,7 @@ const ServiceProviderManagement = () => {
 
       {/* Edit Provider Dialog */}
       <Dialog open={!!editProvider} onOpenChange={(open) => !open && setEditProvider(null)}>
-        <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Service Provider</DialogTitle>
             <DialogDescription>
@@ -597,7 +607,7 @@ const ServiceProviderManagement = () => {
                 <h4 className="text-sm font-medium">Address</h4>
                 <FormField
                   control={form.control}
-                  name="address.street"
+                  name="address.address"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Street</FormLabel>

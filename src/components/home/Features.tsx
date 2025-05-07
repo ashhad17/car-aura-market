@@ -40,24 +40,7 @@ const Features = () => {
           ))}
         </div>
 
-        
-        <div className="mt-12">
-            <h3 className="text-2xl font-bold mb-4">Are you a service provider?</h3>
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div>
-                    <p className="text-gray-600 mb-6">
-                        Join our network of trusted automotive professionals. Increase your visibility,
-                        connect with customers, and grow your business with transparent pricing.
-                    </p>
-                
-                    <Link to="/services">
-                        <Button className="button-gradient text-white">
-                            Partner With Us
-                        </Button>
-                    </Link>
-                </div>
-            </div>
-        </div>
+     
     </div>
     </section>
   );

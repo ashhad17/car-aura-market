@@ -73,7 +73,7 @@ const Profile = () => {
         setProfileLoading(true);
         // Replace with your actual API endpoint
         // console.log(localStorage.getItem('token'));
-        const response = await axios.get('http://localhost:5000/api/v1/users/' + user._id, {
+        const response = await axios.get('http://localhost:5000/api/v1/users/' + user.id, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }
@@ -113,7 +113,7 @@ const Profile = () => {
 
     try {
       // Replace with your actual API endpoint
-      const response = await axios.put('http://localhost:5000/api/v1/users/' + user._id, userProfile, {
+      const response = await axios.put('http://localhost:5000/api/v1/users/' + user.id, userProfile, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
@@ -253,7 +253,7 @@ const Profile = () => {
       const { url, publicId } = await uploadToCloudinary(selectedFile);
 
       // 2. Update your backend with avatar + publicId
-      const response = await axios.put(`http://localhost:5000/api/v1/users/${user._id}`, {
+      const response = await axios.put(`http://localhost:5000/api/v1/users/${user.id}`, {
         avatar: url,
         avatarPublicId: publicId,
       }, {

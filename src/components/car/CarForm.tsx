@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -83,6 +83,74 @@ const CarForm: React.FC<CarFormProps> = ({ onSuccess, onCancel, carId }) => {
     insuranceDocument: null as File | null,
     pucDocument: null as File | null,
   });
+  const [isLoading, setIsLoading] = useState(false);
+  // const [isSubmitting, setIsSubmitting] = useState(false);
+  // const { toast } = useToast();
+  // const { isAuthenticated, openAuthModal } = useAuth();
+
+  useEffect(() => {
+    if (carId) {
+      fetchCarData(carId);
+    }
+  }, [carId]);
+
+  const fetchCarData = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/v1/cars/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        const car = response.data.data;
+
+        // Populate formData with the fetched car data
+        setFormData({
+          make: car.make || "",
+          model: car.model || "",
+          year: car.year || "",
+          mileage: car.mileage || "",
+          price: car.price || "",
+          description: car.description || "",
+          condition: car.condition || "Good",
+          exteriorColor: car.exteriorColor || "",
+          interiorColor: car.interiorColor || "",
+          fuelType: car.fuelType || "Gasoline",
+          transmission: car.transmission || "Automatic",
+          bodyType: car.bodyType || "Sedan",
+          features: car.features || [],
+          images: car.images || [],
+          contactName: car.contactName || "",
+          contactPhone: car.contactPhone || "",
+          contactEmail: car.contactEmail || "",
+          location: car.location || "",
+          rcDocument: null, // Documents are not fetched as files
+          insuranceDocument: null,
+          pucDocument: null,
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch car data.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching car data:", error);
+      toast({
+        title: "Error",
+        description: "An error occurred while fetching car data.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -256,7 +324,7 @@ console.log("Car Data "+carData);
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
+          <div className="space-y-3">
             <h3 className="text-lg font-semibold">Vehicle Details</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -472,45 +540,47 @@ console.log("Car Data "+carData);
             </div> */}
             {
     /* Photos section in step 2 */
+
     <div className="space-y-4">
-      <label className="text-sm font-medium">Photos</label>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {formData.images.map((img, index) => {
-          const imgSrc = typeof img === 'string' ? img : URL.createObjectURL(img);
-          return (
-            <div key={index} className="relative aspect-square bg-gray-100 rounded-md overflow-hidden">
-              <img 
-                src={imgSrc} 
-                alt={`Car photo ${index + 1}`} 
-                className="w-full h-full object-cover"
-              />
-              <button
-                type="button"
-                onClick={() => handleRemoveImage(index)}
-                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1"
-              >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          );
-        })}
-        
-        <label className="flex flex-col items-center justify-center aspect-square bg-gray-100 border-2 border-dashed border-gray-300 rounded-md p-4 hover:border-gray-400 cursor-pointer">
-          <Upload className="h-6 w-6 text-gray-400 mb-1" />
-          <span className="text-sm text-gray-500">Add Photo</span>
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            className="hidden"
-            onChange={handleAddImage}
+  <label className="text-sm font-medium">Photos</label>
+  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+    {formData.images.map((img, index) => {
+      // Use the image directly if it's a string (URL), otherwise create an object URL for File objects
+      const imgSrc = typeof img === "string" ? img : URL.createObjectURL(img as File);
+      return (
+        <div key={index} className="relative aspect-square bg-gray-100 rounded-md overflow-hidden">
+          <img
+            src={imgSrc}
+            alt={`Car photo ${index + 1}`}
+            className="w-full h-full object-cover"
           />
-        </label>
-      </div>
-      <p className="text-xs text-gray-500">Upload up to 10 photos. First photo will be used as the main image.</p>
-    </div>
+          <button
+            type="button"
+            onClick={() => handleRemoveImage(index)}
+            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      );
+    })}
+
+    <label className="flex flex-col items-center justify-center aspect-square bg-gray-100 border-2 border-dashed border-gray-300 rounded-md p-4 hover:border-gray-400 cursor-pointer">
+      <Upload className="h-6 w-6 text-gray-400 mb-1" />
+      <span className="text-sm text-gray-500">Add Photo</span>
+      <input
+        type="file"
+        multiple
+        accept="image/*"
+        className="hidden"
+        onChange={handleAddImage}
+      />
+    </label>
+  </div>
+  <p className="text-xs text-gray-500">Upload up to 10 photos. First photo will be used as the main image.</p>
+</div>
   }
 
 
@@ -773,7 +843,7 @@ console.log("Car Data "+carData);
 
   return (
     <>
-      <main className="pt-24 pb-16">
+      <main >
         <div className="container mx-auto px-4">
           <div className="p-6">
             <form>
@@ -782,8 +852,8 @@ console.log("Car Data "+carData);
           </div>
         </div>
       </main>
-      <AuthModal isOpen={false} onClose={() => {}} />
-      <Footer />
+      <AuthModal/>
+      {/* <Footer /> */}
     </>
   );
 };

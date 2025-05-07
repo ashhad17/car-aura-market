@@ -1,17 +1,16 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Search, Car as CarIcon, Settings } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useAuthModal } from "@/components/auth/AuthModalProvider";
 
 const Hero = () => {
-  const { isAuthenticated } = useAuth();
-  const { openModal } = useAuthModal();
+  const { openAuthModal, isAuthenticated } = useAuth();
   const [searchType, setSearchType] = useState<"buy" | "sell" | "service">("buy");
 
   const handleActionClick = () => {
     if (!isAuthenticated) {
-      openModal();
+      openAuthModal();
     } else {
       // Redirect to relevant page based on action
       window.location.href = 
@@ -40,7 +39,7 @@ const Hero = () => {
               A transparent marketplace built on trust, connecting vehicle owners with reliable buyers and trusted service providers.
             </p>
             
-            <div className="bg-white shadow-xl rounded-xl p-4 mb-8">
+            {/* <div className="bg-white shadow-xl rounded-xl p-4 mb-8">
               <div className="flex space-x-2 mb-4">
                 <Button
                   variant={searchType === "buy" ? "default" : "outline"}
@@ -88,9 +87,9 @@ const Hero = () => {
                   {searchType === "buy" ? "Search" : searchType === "sell" ? "List Now" : "Find"}
                 </Button>
               </div>
-            </div>
+            </div> */}
             
-            <div className="flex items-center space-x-2 text-sm text-gray-600">
+            {/* <div className="flex items-center space-x-2 text-sm text-gray-600">
               <div className="flex -space-x-2">
                 <img
                   src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=50&h=50&auto=format&fit=crop&crop=face"
@@ -109,7 +108,7 @@ const Hero = () => {
                 />
               </div>
               <p>Trusted by over <span className="font-semibold">50,000</span> happy customers</p>
-            </div>
+            </div> */}
           </div>
           
           <div className="hidden md:block relative">

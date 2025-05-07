@@ -1,55 +1,52 @@
+import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import axios from 'axios';
-import { User } from '@/types/user';
-import { useAuthModal } from '@/components/auth/AuthModalProvider';
+export type UserRole = "user" | "admin" | "service_provider";
 
-interface AuthContextProps {
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  avatar?: string;
+  phone?: string;
+  joinedDate?: string;
+  address?: string;
+  
+};
+
+type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string, name: string) => Promise<boolean>;
+  isAuthModalOpen: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  updateUser: (userData: Partial<User>) => Promise<boolean>;
   openAuthModal: () => void;
-}
+  closeAuthModal: () => void;
+  updateUser: (userData: Partial<User>) => void;
+};
 
-const AuthContext = createContext<AuthContextProps>({
-  user: null,
-  isAuthenticated: false,
-  isLoading: true,
-  login: async () => false,
-  signup: async () => false,
-  logout: () => {},
-  updateUser: async () => false,
-  openAuthModal: () => {},
-});
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => useContext(AuthContext);
-
-interface AuthProviderProps {
-  children: ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { openModal } = useAuthModal();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { toast } = useToast();
 
-  const checkAuthentication = async () => {
-    setIsLoading(true);
+  useEffect(() => {
+    // Check if there's a stored token and fetch user data
+    const token = localStorage.getItem('token');
+    if (token) {
+      fetchUserData(token);
+    }
+  }, []);
+
+  const fetchUserData = async (token: string) => {
     try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        setUser(null);
-        setIsLoading(false);
-        return;
-      }
-      
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/me`,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/me`, 
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -58,143 +55,156 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       );
       
       if (response.data.success) {
-        // Ensure user has both _id and id properties
         const userData = response.data.data;
-        userData.id = userData._id;
-        setUser(userData);
-      } else {
-        setUser(null);
-        localStorage.removeItem('token');
+        setUser({
+          id: userData._id,
+          name: userData.name,
+          email: userData.email,
+          role: userData.role,
+          avatar: userData.avatar,
+          phone: userData.phone,
+          joinedDate: userData.createdAt ? new Date(userData.createdAt).toISOString().split('T')[0] : undefined
+        });
+        console.log("Fetched user data:", userData);
       }
     } catch (error) {
-      console.error('Auth check error:', error);
-      setUser(null);
+      console.error("Error fetching user data:", error);
       localStorage.removeItem('token');
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    checkAuthentication();
-  }, []);
-
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string) => {
     try {
-      console.log('Login function called with:', { email });
-      
-      const apiUrl = `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/login`;
-      console.log('Attempting to login at URL:', apiUrl);
-      
       const response = await axios.post(
-        apiUrl,
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/login`, 
         { email, password }
       );
       
-      console.log('Login response:', response.data);
-      
       if (response.data.success) {
-        localStorage.setItem('token', response.data.token);
+        console.log("Login response:", response.data);
         
-        // Ensure user has both _id and id properties
-        const userData = response.data.data || response.data.user;
-        console.log('User data received:', userData);
+        // Get token and user data from response
+        const { token, data: userData } = response.data;
         
-        if (!userData) {
-          console.error('No user data received in successful response');
-          return false;
-        }
+        // Save token to localStorage
+        localStorage.setItem('token', token);
         
-        userData.id = userData._id;
+        // Safely handle potentially missing data
+        const user = {
+          id: userData?._id || "unknown",
+          name: userData?.name || "Unknown User",
+          email: userData?.email || email,
+          role: (userData?.role as UserRole) || "user",
+          avatar: userData?.avatar,
+          phone: userData?.phone,
+          joinedDate: userData?.createdAt ? new Date(userData.createdAt).toISOString().split('T')[0] : undefined
+        };
         
-        setUser(userData);
-        localStorage.setItem('currentUser', JSON.stringify(userData));
-        return true;
+        setUser(user);
+        console.log("Logged in as:", user);
+        
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!"
+        });
       }
-      
-      console.error('Login unsuccessful:', response.data);
-      return false;
     } catch (error: any) {
-      console.error('Login error:', error);
-      console.error('Response data:', error.response?.data);
-      console.error('Request config:', error.config);
-      return false;
+      console.error("Login error:", error);
+      toast({
+        title: "Login Failed",
+        description: error.response?.data?.error || "Invalid credentials",
+        variant: "destructive"
+      });
+      throw error;
     }
   };
 
-  const signup = async (email: string, password: string, name: string): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string) => {
     try {
-      console.log('Signup function called with:', { email, name });
-      
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/register`,
-        { email, password, name }
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/register`, 
+        { name, email, password }
       );
       
-      console.log('Signup response:', response.data);
-      
       if (response.data.success) {
-        // After successful signup, perform automatic login
-        const loginSuccess = await login(email, password);
-        return loginSuccess;
+        const { token, data: userData } = response.data;
+        
+        // Save token to localStorage
+        localStorage.setItem('token', token);
+        
+        // Safely handle potentially missing data
+        const user = {
+          id: userData?._id || "unknown",
+          name: userData?.name || name,
+          email: userData?.email || email,
+          role: (userData?.role as UserRole) || "user",
+          joinedDate: userData?.createdAt ? new Date(userData.createdAt).toISOString().split('T')[0] : undefined
+        };
+        
+        setUser(user);
+        
+        toast({
+          title: "Registration Successful",
+          description: "Welcome to WheelsTrust!"
+        });
       }
-      return false;
-    } catch (error) {
-      console.error('Signup error:', error);
-      return false;
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast({
+        title: "Registration Failed",
+        description: error.response?.data?.error || "Could not create account",
+        variant: "destructive"
+      });
+      throw error;
     }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
-    localStorage.removeItem('currentUser');
     setUser(null);
+    toast({
+      title: "Logged Out",
+      description: "You have been successfully logged out"
+    });
   };
 
-  const updateUser = async (userData: Partial<User>): Promise<boolean> => {
-    try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) return false;
-      
-      const response = await axios.put(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/updatedetails`,
-        userData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-      
-      if (response.data.success) {
-        // Ensure updated user has both _id and id
-        const updatedUser = response.data.data;
-        updatedUser.id = updatedUser._id;
-        
-        setUser(updatedUser);
-        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error('Update user error:', error);
-      return false;
+  const openAuthModal = () => {
+    setIsAuthModalOpen(true);
+  };
+
+  const closeAuthModal = () => {
+    setIsAuthModalOpen(false);
+  };
+
+  const updateUser = (userData: Partial<User>) => {
+    if (user) {
+      setUser({...user, ...userData});
     }
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      isAuthenticated: !!user, 
-      isLoading, 
-      login, 
-      signup, 
-      logout, 
-      updateUser,
-      openAuthModal: openModal
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isAuthModalOpen,
+        login,
+        register,
+        logout,
+        openAuthModal,
+        closeAuthModal,
+        updateUser,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };

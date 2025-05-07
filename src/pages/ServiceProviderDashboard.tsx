@@ -140,7 +140,7 @@ const ServiceProviderDashboard = () => {
   
       // Fetch service provider details
       const serviceProviderResponse = await axios.get(
-        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/v1/service-providers/by-user/${user?._id}`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/v1/service-providers/by-user/${user?.id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

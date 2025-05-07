@@ -32,7 +32,7 @@ const CarFormModal: React.FC<CarFormModalProps> = ({
       title={carId ? "Edit Car Listing" : "Create New Listing"}
       size="xl"
     >
-      <div className="p-4">
+      <div className="p-2">
         {/* Only render CarForm if open to avoid unnecessary mounting */}
         {isOpen && (
           <CarForm 

@@ -8,8 +8,35 @@ import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Info } from "lucide-react";
 
+interface BackendCar {
+  _id: string;
+  title: string;
+  make: string;
+  model: string;
+  year: string;
+  price: string;
+  mileage: string;
+  condition: string;
+  location: string;
+  description: string;
+  images: Array<{
+    url: string;
+    publicId: string;
+  }>;
+  seller: {
+    _id: string;
+    name: string;
+  };
+  status: string;
+  createdAt: string;
+  features?: string[];
+  exteriorColor?: string;
+  interiorColor?: string;
+  fuelType?: string;
+  transmission?: string;
+}
 interface CarCardProps {
-  car: CarType;
+  car: BackendCar ; // Accept both BackendCar and CarType
 }
 
 const CarCard: React.FC<CarCardProps> = ({ car }) => {
@@ -17,7 +44,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
   const navigate = useNavigate();
 
   const handleViewDetails = () => {
-    navigate(`/cars/details/${car.id}`);
+    navigate(`/cars/details/${car._id}`);
   };
 
   const formatPrice = (price: number | string) => {
@@ -45,7 +72,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
     <Card className="overflow-hidden hover-scale transition-all duration-300 shadow-md h-full flex flex-col">
       <div className="relative">
         <img
-          src={car.images[0]} // Fixed: Use images[0] instead of image
+          src={car.images[0].url} // Fixed: Use images[0] instead of image
           alt={title}
           className="w-full h-48 object-cover"
         />
@@ -63,12 +90,12 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
             {car.condition}
           </Badge>
         )}
-        {car.sellerType && (
+        {car.seller && (
           <Badge
             variant="outline"
             className="absolute top-3 left-3 bg-white bg-opacity-80"
           >
-            {car.sellerType === "dealer" ? "Dealer" : "Private Seller"}
+            "Private Seller"
           </Badge>
         )}
       </div>
@@ -88,7 +115,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
           </div>
           <div className="flex items-center text-sm text-gray-600">
             <span className="font-medium">Mileage:</span>
-            <span className="ml-1">{formatMileage(car.mileage)} mi</span>
+            <span className="ml-1">{car.mileage} mi</span>
           </div>
           {car.fuelType && (
             <div className="flex items-center text-sm text-gray-600">
