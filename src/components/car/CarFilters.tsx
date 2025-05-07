@@ -1,9 +1,39 @@
+
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Car } from "@/types";
+
+// Define Car type directly in this file instead of importing it
+interface Car {
+  _id: string;
+  title: string;
+  make: string;
+  model: string;
+  year: number | string;
+  price: number | string;
+  mileage: number | string;
+  condition: string;
+  bodyType: string;
+  description: string;
+  location: string;
+  exteriorColor?: string;
+  interiorColor?: string;
+  transmission?: string;
+  fuelType?: string;
+  features?: string[];
+  images?: { url: string; public_id: string }[];
+  status: 'active' | 'sold' | 'pending' | 'draft';
+  seller?: {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+}
 
 interface CarFiltersProps {
   cars: Car[];

@@ -16,7 +16,6 @@ import { Input } from '@/components/ui/input';
 import { Eye, EyeOff, User, Mail, Phone, Home, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion';
 
 // Password strength indicators
 const passwordStrengthSchema = z
@@ -61,12 +60,22 @@ const step3Schema = z.object({
   }),
 });
 
-// Combined schema for all steps
-// Using spread to correctly merge schemas instead of .merge()
+// Combined schema for all steps - Fixed by manually creating the complete schema
 const signUpSchema = z.object({
-  ...step1Schema.shape,
-  ...step2Schema.shape,
-  ...step3Schema.shape,
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: passwordStrengthSchema,
+  confirmPassword: z.string(),
+  phone: z.string().min(10, 'Phone number must be at least 10 characters'),
+  address: z.object({
+    street: z.string().min(1, 'Street address is required'),
+    city: z.string().min(1, 'City is required'),
+    state: z.string().min(1, 'State is required'),
+    zipCode: z.string().min(1, 'Zip code is required'),
+  }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'Passwords do not match',
+  path: ['confirmPassword'],
 });
 
 type SignUpFormValues = z.infer<typeof signUpSchema>;

@@ -7,14 +7,13 @@ import Features from "@/components/home/Features";
 import CarListingPreview from "@/components/home/CarListingPreview";
 import ServiceSection from "@/components/home/ServiceSection";
 import Testimonials from "@/components/home/Testimonials";
-import AuthModal from "@/components/auth/AuthModal";
+import { useAuthModal } from "@/components/auth/AuthModalProvider";
 import ServiceProviderModal from "@/components/partner/ServiceProviderModal";
 import {  services } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const [isPartnerModalOpen, setIsPartnerModalOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -41,8 +40,7 @@ const Index = () => {
         </section>
         <ServiceSection services={services} />
         <Testimonials />
-        <AuthModal 
-        />
+        {/* AuthModal is now handled by AuthModalProvider */}
         <ServiceProviderModal 
           isOpen={isPartnerModalOpen}
           onClose={() => setIsPartnerModalOpen(false)}

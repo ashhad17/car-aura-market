@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ServiceGrid from "@/components/service/ServiceGrid";
-import AuthModal from "@/components/auth/AuthModal";
 import ServiceProviderModal from "@/components/partner/ServiceProviderModal";
 import { Button } from "@/components/ui/button";
 
@@ -43,7 +42,7 @@ const Services = () => {
         </div>
       </main>
       <Footer />
-      <AuthModal />
+      {/* AuthModal is now handled by AuthModalProvider */}
       <ServiceProviderModal 
         isOpen={isPartnerModalOpen}
         onClose={() => setIsPartnerModalOpen(false)}
