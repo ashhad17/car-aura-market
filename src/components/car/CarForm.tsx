@@ -22,6 +22,7 @@ interface CarFormProps {
   onSuccess: () => void;
   onCancel: () => void;
   carId?: string;
+  initialData?: any; // Add this line to accept initialData prop
 }
 
 const makes = ["Toyota", "Honda", "Ford", "Chevrolet", "BMW", "Mercedes-Benz", "Audi", "Nissan", "Hyundai", "Kia"];
@@ -52,7 +53,7 @@ const uploadToCloudinary = async (file: File): Promise<{ url: string; publicId: 
 };
 
 
-const CarForm: React.FC<CarFormProps> = ({ onSuccess, onCancel, carId }) => {
+const CarForm: React.FC<CarFormProps> = ({ onSuccess, onCancel, carId, initialData }) => {
   
   const [activeTab, setActiveTab] = useState("sell-form");
   const [currentStep, setCurrentStep] = useState(1);
@@ -843,7 +844,7 @@ console.log("Car Data "+carData);
 
   return (
     <>
-      <main >
+      <main>
         <div className="container mx-auto px-4">
           <div className="p-6">
             <form>
@@ -852,8 +853,7 @@ console.log("Car Data "+carData);
           </div>
         </div>
       </main>
-      <AuthModal/>
-      {/* <Footer /> */}
+      <AuthModal isOpen={false} onClose={() => {}} /> {/* Fix the props here */}
     </>
   );
 };

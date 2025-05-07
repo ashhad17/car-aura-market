@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -16,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Eye, EyeOff, User, Mail, Phone, Home, ArrowRight, ArrowLeft, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Password strength indicators
 const passwordStrengthSchema = z

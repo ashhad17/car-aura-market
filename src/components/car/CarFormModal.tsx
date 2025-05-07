@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import Modal from "@/components/ui/modal";
 import CarForm from "./CarForm";
@@ -91,7 +90,6 @@ const CarFormModal: React.FC<CarFormModalProps> = ({
             onSuccess={handleSuccess} 
             onCancel={onClose}
             carId={carId}
-            // Make initialData optional in CarForm props type definition
             initialData={initialData}
           />
         )}
