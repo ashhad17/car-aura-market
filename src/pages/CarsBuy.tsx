@@ -5,9 +5,11 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import CarGrid from "@/components/car/CarGrid";
 import { Button } from "@/components/ui/button";
-import AuthModal from "@/components/auth/AuthModal";
+import { useAuthModal } from "@/components/auth/AuthModalProvider";
 
 const CarsBuy = () => {
+  const { openModal } = useAuthModal();
+
   return (
     <>
       <Helmet>
@@ -37,10 +39,9 @@ const CarsBuy = () => {
             </div> */}
           </div>
           
-          {/* Use CarGrid without providing cars - it will fetch them from the API */}
-          <CarGrid />
+          {/* Use CarGrid with status filter to show only active cars */}
+          <CarGrid statusFilter="active" />
         </section>
-        <AuthModal />
       </main>
       
       <Footer />

@@ -1,178 +1,129 @@
 
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useAuth } from "@/context/AuthContext";
 import Modal from "@/components/ui/modal";
-import { Mail, Key, Loader2, User } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import LoginForm from "./LoginForm";
+import SignUpForm from "./SignUpForm";
+import OTPLoginForm from "./OTPLoginForm";
+import ForgotPasswordForm from "./ForgotPasswordForm";
+import { motion, AnimatePresence } from "framer-motion";
 
-const AuthModal = () => {
-  const { isAuthModalOpen, closeAuthModal, login, register } = useAuth();
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [name, setName] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+interface AuthModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  defaultView?: "login" | "signup";
+}
 
-  const toggleAuthMode = () => {
-    setIsLogin(!isLogin);
-    setError("");
-    // Reset fields when toggling
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    setName("");
+const AuthModal: React.FC<AuthModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  defaultView = "login" 
+}) => {
+  const [activeTab, setActiveTab] = useState<"login" | "signup">(defaultView);
+  const [authView, setAuthView] = useState<"tabs" | "otp" | "forgot-password">("tabs");
+  
+  // Reset to default views when modal is closed
+  const handleClose = () => {
+    onClose();
+    // Reset with a slight delay to prevent visible UI changes during closing animation
+    setTimeout(() => {
+      setAuthView("tabs");
+      setActiveTab(defaultView);
+    }, 300);
   };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      if (!isLogin && password !== confirmPassword) {
-        setError("Passwords do not match");
-        setLoading(false);
-        return;
-      }
-
-      if (isLogin) {
-        console.log("Attempting login with:", { email, password });
-        await login(email, password);
-      } else {
-        console.log("Attempting registration with:", { name, email, password });
-        await register(name, email, password);
-      }
-      closeAuthModal();
-    } catch (err: any) {
-      console.error("Auth error:", err);
-      setError(err.response?.data?.error || err.message || "Authentication failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  
+  const handleComplete = () => {
+    handleClose();
+  };
+  
+  const getTitle = () => {
+    if (authView === "otp") return "Login with OTP";
+    if (authView === "forgot-password") return "Reset Password";
+    return activeTab === "login" ? "Login" : "Sign Up";
   };
 
   return (
-    <Modal isOpen={isAuthModalOpen} onClose={closeAuthModal} title={isLogin ? "Login" : "Sign Up"}>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {!isLogin && (
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name</Label>
-            <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4" />
-              <Input
-                id="name"
-                type="text"
-                placeholder="Enter your full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="pl-10"
-                required
+    <Modal 
+      isOpen={isOpen} 
+      onClose={handleClose} 
+      title={getTitle()}
+      size="md"
+    >
+      <div className="p-6">
+        <AnimatePresence mode="wait">
+          {authView === "tabs" && (
+            <motion.div
+              key="auth-tabs"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Tabs 
+                defaultValue={activeTab} 
+                onValueChange={(value) => setActiveTab(value as "login" | "signup")}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-2 mb-8">
+                  <TabsTrigger value="login">Login</TabsTrigger>
+                  <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="login">
+                  <LoginForm 
+                    onComplete={handleComplete} 
+                    onForgotPassword={() => setAuthView("forgot-password")}
+                    onOtpLogin={() => setAuthView("otp")}
+                  />
+                </TabsContent>
+                
+                <TabsContent value="signup">
+                  <SignUpForm 
+                    onComplete={handleComplete}
+                    onCancel={handleClose}
+                  />
+                </TabsContent>
+              </Tabs>
+            </motion.div>
+          )}
+          
+          {authView === "otp" && (
+            <motion.div
+              key="otp-login"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="mb-4">
+                <button 
+                  onClick={() => setAuthView("tabs")}
+                  className="text-sm text-primary hover:underline flex items-center"
+                >
+                  ← Back to login options
+                </button>
+              </div>
+              
+              <OTPLoginForm onComplete={handleComplete} />
+            </motion.div>
+          )}
+          
+          {authView === "forgot-password" && (
+            <motion.div
+              key="forgot-password"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              <ForgotPasswordForm 
+                onComplete={handleComplete}
+                onCancel={() => setAuthView("tabs")}
               />
-            </div>
-          </div>
-        )}
-        
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4" />
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="pl-10"
-              required
-            />
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <div className="relative">
-            <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4" />
-            <Input
-              id="password"
-              type="password"
-              placeholder="Enter your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pl-10"
-              required
-            />
-          </div>
-        </div>
-        
-        {!isLogin && (
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <div className="relative">
-              <Key className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4" />
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="pl-10"
-                required
-              />
-            </div>
-          </div>
-        )}
-        
-        {error && (
-          <div className="p-3 rounded bg-red-50 text-red-600 text-sm">
-            {error}
-          </div>
-        )}
-        
-        <div className="!mt-6">
-          <Button
-            type="submit"
-            className="w-full button-gradient text-white"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                {isLogin ? "Logging in..." : "Creating account..."}
-              </>
-            ) : (
-              isLogin ? "Login" : "Create Account"
-            )}
-          </Button>
-        </div>
-        
-        <div className="text-center text-sm">
-          {isLogin ? "Don't have an account? " : "Already have an account? "}
-          <button
-            type="button"
-            onClick={toggleAuthMode}
-            className="text-primary hover:underline focus:outline-none"
-          >
-            {isLogin ? "Sign up" : "Login"}
-          </button>
-        </div>
-      </form>
-      
-      {isLogin && (
-        <div className="text-center mt-4">
-          <button
-            type="button"
-            className="text-sm text-gray-600 hover:text-primary hover:underline focus:outline-none"
-          >
-            Forgot your password?
-          </button>
-        </div>
-      )}
-      
-      
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </Modal>
   );
 };
