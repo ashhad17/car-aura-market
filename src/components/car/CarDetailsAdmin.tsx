@@ -1,12 +1,11 @@
-
-import React, { useState, useEffect } from "react";
+import React from 'react';
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { 
-  ChevronDown, ChevronUp, FilePdf, FileImage, Clock, 
+  ChevronDown, ChevronUp, FileText, FileImage, Clock, 
   ArrowLeft, Check, X, AlertCircle
 } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
@@ -417,7 +416,7 @@ const CarDetailsAdmin: React.FC = () => {
                         {car.rcDocument?.url ? (
                           <div className="bg-gray-100 p-4 rounded-lg flex flex-col items-center justify-center">
                             {car.rcDocument.url.endsWith('.pdf') ? (
-                              <FilePdf className="h-10 w-10 text-red-500 mb-2" />
+                              <FileText className="h-10 w-10 text-red-500 mb-2" />
                             ) : (
                               <FileImage className="h-10 w-10 text-blue-500 mb-2" />
                             )}
@@ -444,7 +443,7 @@ const CarDetailsAdmin: React.FC = () => {
                         {car.insuranceDocument?.url ? (
                           <div className="bg-gray-100 p-4 rounded-lg flex flex-col items-center justify-center">
                             {car.insuranceDocument.url.endsWith('.pdf') ? (
-                              <FilePdf className="h-10 w-10 text-red-500 mb-2" />
+                              <FileText className="h-10 w-10 text-red-500 mb-2" />
                             ) : (
                               <FileImage className="h-10 w-10 text-blue-500 mb-2" />
                             )}
@@ -471,7 +470,7 @@ const CarDetailsAdmin: React.FC = () => {
                         {car.pucDocument?.url ? (
                           <div className="bg-gray-100 p-4 rounded-lg flex flex-col items-center justify-center">
                             {car.pucDocument.url.endsWith('.pdf') ? (
-                              <FilePdf className="h-10 w-10 text-red-500 mb-2" />
+                              <FileText className="h-10 w-10 text-red-500 mb-2" />
                             ) : (
                               <FileImage className="h-10 w-10 text-blue-500 mb-2" />
                             )}

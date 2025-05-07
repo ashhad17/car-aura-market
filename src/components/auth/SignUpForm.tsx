@@ -62,7 +62,12 @@ const step3Schema = z.object({
 });
 
 // Combined schema for all steps
-const signUpSchema = step1Schema.merge(step2Schema).merge(step3Schema);
+// Using spread to correctly merge schemas instead of .merge()
+const signUpSchema = z.object({
+  ...step1Schema.shape,
+  ...step2Schema.shape,
+  ...step3Schema.shape,
+});
 
 type SignUpFormValues = z.infer<typeof signUpSchema>;
 

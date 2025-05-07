@@ -26,21 +26,10 @@ const CarsBuy = () => {
               Browse our selection of quality vehicles from trusted sellers. Each car is verified 
               and comes with a detailed history report.
             </p>
-            
-            {/* <div className="flex justify-between items-center">
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  Save Search
-                </Button>
-                <Button variant="outline" size="sm">
-                  Compare
-                </Button>
-              </div>
-            </div> */}
           </div>
           
-          {/* Use CarGrid with status filter to show only active cars */}
-          <CarGrid statusFilter="active" />
+          {/* Update CarGrid to not pass statusFilter if it's not supported */}
+          <CarGrid />
         </section>
       </main>
       

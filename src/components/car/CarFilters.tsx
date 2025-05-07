@@ -1,203 +1,148 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Search } from "lucide-react";
-import { CarType } from "@/lib/data";
+import { Car } from "@/types";
 
 interface CarFiltersProps {
-  cars: CarType[];
-  onFilterChange: (filteredCars: CarType[]) => void;
+  cars: Car[];
+  onFilter: (filteredCars: Car[]) => void;
 }
 
-const CarFilters: React.FC<CarFiltersProps> = ({ cars, onFilterChange }) => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [priceRange, setPriceRange] = useState<number[]>([0, 100000]);
-  const [yearRange, setYearRange] = useState<number[]>([1990, new Date().getFullYear()]);
-  const [mileageRange, setMileageRange] = useState<number[]>([0, 200000]);
-  const [selectedMake, setSelectedMake] = useState<string>("all");
-  const [selectedCondition, setSelectedCondition] = useState<string>("all");
-  const [selectedTransmission, setSelectedTransmission] = useState<string>("all");
-  const [selectedFuelType, setSelectedFuelType] = useState<string>("all");
+const CarFilters: React.FC<CarFiltersProps> = ({ cars, onFilter }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedMake, setSelectedMake] = useState('');
+  const [selectedBodyType, setSelectedBodyType] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [minYear, setMinYear] = useState('');
+  const [maxYear, setMaxYear] = useState('');
 
-  // Get unique values for filters
-  const makes = Array.from(new Set(cars.map(car => car.make)));
-  const conditions = Array.from(new Set(cars.map(car => car.condition).filter(Boolean)));
-  const transmissions = Array.from(new Set(cars.map(car => car.transmission).filter(Boolean)));
-  const fuelTypes = Array.from(new Set(cars.map(car => car.fuelType).filter(Boolean)));
-
-  const applyFilters = () => {
+  useEffect(() => {
+    // Apply filters whenever filter criteria change
     const filteredCars = cars.filter(car => {
-      const matchesSearch = 
-        car.make.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        car.model.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        car.title?.toLowerCase().includes(searchQuery.toLowerCase());
-
-      // Convert price to number for comparison if it's a string
-      const carPrice = typeof car.price === 'string' ? parseFloat(car.price) : car.price;
-      const matchesPrice = 
-        !isNaN(carPrice) && carPrice >= priceRange[0] && carPrice <= priceRange[1];
-
-      const matchesYear = 
-        car.year >= yearRange[0] && car.year <= yearRange[1];
-
-      const matchesMileage = 
-        car.mileage >= mileageRange[0] && car.mileage <= mileageRange[1];
-
-      const matchesMake = 
-        selectedMake === "all" || car.make === selectedMake;
-
-      const matchesCondition = 
-        selectedCondition === "all" || car.condition === selectedCondition;
-
-      const matchesTransmission = 
-        selectedTransmission === "all" || car.transmission === selectedTransmission;
-
-      const matchesFuelType = 
-        selectedFuelType === "all" || car.fuelType === selectedFuelType;
-
-      return matchesSearch && matchesPrice && matchesYear && matchesMileage && 
-             matchesMake && matchesCondition && matchesTransmission && matchesFuelType;
+      // Match search term
+      const matchesSearch = car.make.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           car.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           car.description.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Match selected make if any
+      const matchesMake = selectedMake ? car.make === selectedMake : true;
+      
+      // Match selected body type if any
+      const matchesBodyType = selectedBodyType ? car.bodyType === selectedBodyType : true;
+      
+      // Match price range
+      const carPrice = Number(car.price);
+      const minPriceNum = minPrice ? Number(minPrice) : 0;
+      const maxPriceNum = maxPrice ? Number(maxPrice) : Infinity;
+      
+      const matchesMinPrice = !minPrice || carPrice >= minPriceNum;
+      const matchesMaxPrice = !maxPrice || carPrice <= maxPriceNum;
+      
+      // Match year range
+      const carYear = Number(car.year);
+      const minYearNum = minYear ? Number(minYear) : 0;
+      const maxYearNum = maxYear ? Number(maxYear) : Infinity;
+      
+      const matchesMinYear = !minYear || carYear >= minYearNum;
+      const matchesMaxYear = !maxYear || carYear <= maxYearNum;
+      
+      return matchesSearch && matchesMake && matchesBodyType && 
+             matchesMinPrice && matchesMaxPrice &&
+             matchesMinYear && matchesMaxYear;
     });
 
-    onFilterChange(filteredCars);
-  };
+    onFilter(filteredCars);
+  }, [cars, searchTerm, selectedMake, selectedBodyType, minPrice, maxPrice, minYear, maxYear, onFilter]);
 
-  const resetFilters = () => {
-    setSearchQuery("");
-    setPriceRange([0, 100000]);
-    setYearRange([1990, new Date().getFullYear()]);
-    setMileageRange([0, 200000]);
-    setSelectedMake("all");
-    setSelectedCondition("all");
-    setSelectedTransmission("all");
-    setSelectedFuelType("all");
-    onFilterChange(cars);
-  };
+  // Extract unique makes and body types from the cars array
+  const makes = [...new Set(cars.map(car => car.make))];
+  const bodyTypes = [...new Set(cars.map(car => car.bodyType))];
 
   return (
-    <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4" />
-          <Input
-            placeholder="Search cars..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {/* Search Filter */}
+      <div>
+        <Label htmlFor="search">Search</Label>
+        <Input
+          type="text"
+          id="search"
+          placeholder="Search by make, model, or keywords..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
-        {/* Make Filter */}
-        <Select value={selectedMake} onValueChange={setSelectedMake}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select Make" />
+      {/* Make Filter */}
+      <div>
+        <Label htmlFor="make">Make</Label>
+        <Select onValueChange={setSelectedMake}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="All Makes" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Makes</SelectItem>
+            <SelectItem value="">All Makes</SelectItem>
             {makes.map(make => (
               <SelectItem key={make} value={make}>{make}</SelectItem>
             ))}
           </SelectContent>
         </Select>
+      </div>
 
-        {/* Condition Filter */}
-        <Select value={selectedCondition} onValueChange={setSelectedCondition}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select Condition" />
+      {/* Body Type Filter */}
+      <div>
+        <Label htmlFor="bodyType">Body Type</Label>
+        <Select onValueChange={setSelectedBodyType}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="All Body Types" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Conditions</SelectItem>
-            {conditions.map(condition => (
-              <SelectItem key={condition} value={condition}>{condition}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Price Range */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Price Range</label>
-          <Slider
-            value={priceRange}
-            onValueChange={setPriceRange}
-            min={0}
-            max={100000}
-            step={1000}
-          />
-          <div className="flex justify-between text-sm text-gray-500">
-            <span>${priceRange[0].toLocaleString()}</span>
-            <span>${priceRange[1].toLocaleString()}</span>
-          </div>
-        </div>
-
-        {/* Year Range */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Year Range</label>
-          <Slider
-            value={yearRange}
-            onValueChange={setYearRange}
-            min={1990}
-            max={new Date().getFullYear()}
-            step={1}
-          />
-          <div className="flex justify-between text-sm text-gray-500">
-            <span>{yearRange[0]}</span>
-            <span>{yearRange[1]}</span>
-          </div>
-        </div>
-
-        {/* Mileage Range */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Mileage Range</label>
-          <Slider
-            value={mileageRange}
-            onValueChange={setMileageRange}
-            min={0}
-            max={200000}
-            step={1000}
-          />
-          <div className="flex justify-between text-sm text-gray-500">
-            <span>{mileageRange[0].toLocaleString()} mi</span>
-            <span>{mileageRange[1].toLocaleString()} mi</span>
-          </div>
-        </div>
-
-        {/* Transmission Filter */}
-        <Select value={selectedTransmission} onValueChange={setSelectedTransmission}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select Transmission" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Transmissions</SelectItem>
-            {transmissions.map(transmission => (
-              <SelectItem key={transmission} value={transmission}>{transmission}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        {/* Fuel Type Filter */}
-        <Select value={selectedFuelType} onValueChange={setSelectedFuelType}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select Fuel Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Fuel Types</SelectItem>
-            {fuelTypes.map(fuelType => (
-              <SelectItem key={fuelType} value={fuelType}>{fuelType}</SelectItem>
+            <SelectItem value="">All Body Types</SelectItem>
+            {bodyTypes.map(bodyType => (
+              <SelectItem key={bodyType} value={bodyType}>{bodyType}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div className="flex justify-end gap-4 mt-6">
-        <Button variant="outline" onClick={resetFilters}>
-          Reset Filters
-        </Button>
-        <Button onClick={applyFilters}>
-          Apply Filters
-        </Button>
+      {/* Price Range Filter */}
+      <div className="md:col-span-2 lg:col-span-1">
+        <Label>Price Range</Label>
+        <div className="flex gap-2">
+          <Input
+            type="number"
+            placeholder="Min Price"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+          />
+          <Input
+            type="number"
+            placeholder="Max Price"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Year Range Filter */}
+      <div className="lg:col-span-2">
+        <Label>Year Range</Label>
+        <div className="flex gap-2">
+          <Input
+            type="number"
+            placeholder="Min Year"
+            value={minYear}
+            onChange={(e) => setMinYear(e.target.value)}
+          />
+          <Input
+            type="number"
+            placeholder="Max Year"
+            value={maxYear}
+            onChange={(e) => setMaxYear(e.target.value)}
+          />
+        </div>
       </div>
     </div>
   );

@@ -6,12 +6,14 @@ interface AuthModalContextType {
   isOpen: boolean;
   openModal: () => void;
   closeModal: () => void;
+  defaultView?: "login" | "signup"; // Added defaultView to the context
 }
 
 const AuthModalContext = createContext<AuthModalContextType>({
   isOpen: false,
   openModal: () => {},
   closeModal: () => {},
+  defaultView: "login"
 });
 
 export const useAuthModal = () => useContext(AuthModalContext);
@@ -22,14 +24,19 @@ interface AuthModalProviderProps {
 
 export const AuthModalProvider: React.FC<AuthModalProviderProps> = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [defaultView, setDefaultView] = useState<"login" | "signup">("login");
 
-  const openModal = () => setIsOpen(true);
+  const openModal = (view: "login" | "signup" = "login") => {
+    setDefaultView(view);
+    setIsOpen(true);
+  };
+  
   const closeModal = () => setIsOpen(false);
 
   return (
-    <AuthModalContext.Provider value={{ isOpen, openModal, closeModal }}>
+    <AuthModalContext.Provider value={{ isOpen, openModal, closeModal, defaultView }}>
       {children}
-      <AuthModal isOpen={isOpen} onClose={closeModal} />
+      <AuthModal isOpen={isOpen} onClose={closeModal} defaultView={defaultView} />
     </AuthModalContext.Provider>
   );
 };

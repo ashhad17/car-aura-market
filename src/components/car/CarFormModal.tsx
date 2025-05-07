@@ -11,6 +11,14 @@ interface CarFormModalProps {
   carId?: string; // For edit mode
 }
 
+// Update the CarForm component interface to match expected props
+interface CarFormProps {
+  onSuccess: () => void;
+  onCancel: () => void;
+  carId?: string; 
+  initialData?: any; // Add initialData to the props interface
+}
+
 const CarFormModal: React.FC<CarFormModalProps> = ({
   isOpen,
   onClose,

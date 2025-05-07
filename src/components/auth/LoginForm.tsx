@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -13,18 +12,17 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Eye, EyeOff, PhoneCall } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/context/AuthContext';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
-const loginSchema = z.object({
+const formSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(1, 'Password is required'),
-  rememberMe: z.boolean().optional(),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type LoginFormValues = z.infer<typeof formSchema>;
 
 interface LoginFormProps {
   onComplete: () => void;
@@ -33,40 +31,50 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onComplete, onForgotPassword, onOtpLogin }) => {
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
-  const { login } = useAuth();
 
   const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       email: '',
       password: '',
-      rememberMe: false,
     },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    
+
     try {
-      console.info('Attempting login with:', data);
-      const success = await login(data.email, data.password);
-      
-      if (success) {
-        toast({
-          title: "Login successful",
-          description: "You have been successfully logged in.",
-        });
-        
-        onComplete();
-      }
-    } catch (error) {
-      console.error('Login error:', error);
+      // Simulate API request
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // In a real app, you would make an API call here to authenticate the user
+      // const response = await axios.post('/api/login', data);
+      // if (response.data.success) {
+      //   onComplete();
+      // } else {
+      //   toast({
+      //     title: "Error",
+      //     description: "Invalid credentials. Please try again.",
+      //     variant: "destructive",
+      //   });
+      // }
+
+      // For demo purposes, we'll just simulate a successful login
       toast({
-        title: "Login failed",
-        description: "Invalid email or password. Please try again.",
+        title: "Login Successful",
+        description: "You have successfully logged in.",
+      });
+
+      setTimeout(() => {
+        onComplete();
+      }, 1000);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Invalid credentials. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -75,9 +83,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onComplete, onForgotPassword, onO
   };
 
   return (
-    <div>
+    <div className="w-full max-w-md mx-auto">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
             name="email"
@@ -101,7 +109,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onComplete, onForgotPassword, onO
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="password"
@@ -134,70 +142,35 @@ const LoginForm: React.FC<LoginFormProps> = ({ onComplete, onForgotPassword, onO
               </FormItem>
             )}
           />
-          
-          <div className="flex items-center justify-between">
-            <FormField
-              control={form.control}
-              name="rememberMe"
-              render={({ field }) => (
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="remember"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                  <label
-                    htmlFor="remember"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Remember me
-                  </label>
-                </div>
-              )}
-            />
-            
-            <button
-              type="button"
-              className="text-sm text-primary hover:underline"
-              onClick={onForgotPassword}
-            >
+
+          <div className="flex justify-between">
+            <Button variant="link" onClick={onForgotPassword}>
               Forgot password?
-            </button>
+            </Button>
+            <Button variant="link" onClick={onOtpLogin}>
+              Login with OTP
+            </Button>
           </div>
-          
-          <Button type="submit" className="w-full" disabled={isLoading}>
+
+          <Button 
+            type="submit" 
+            className="w-full"
+            disabled={isLoading}
+          >
             {isLoading ? (
-              <div className="flex items-center">
+              <>
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
                 Logging in...
-              </div>
+              </>
             ) : (
-              "Login"
+              <>
+                <Lock className="mr-2 h-4 w-4" />
+                Login
+              </>
             )}
-          </Button>
-          
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-2 text-gray-500">
-                Or continue with
-              </span>
-            </div>
-          </div>
-          
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full"
-            onClick={onOtpLogin}
-          >
-            <PhoneCall className="mr-2 h-4 w-4" />
-            Login with OTP
           </Button>
         </form>
       </Form>
