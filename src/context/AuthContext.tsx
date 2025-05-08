@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +25,7 @@ type AuthContextType = {
   redirectToLogin: () => void;
   updateUser: (userData: Partial<User>) => void;
   handleVerifyOTP: (email: string, otp: string) => Promise<void>;
+  loginWithOtp: (phone: string, otp: string) => Promise<any>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -105,6 +105,52 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           description: response.data.error || "Invalid OTP",
           variant: "destructive",
         });
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "An error occurred during OTP verification.";
+      toast({
+        title: "Verification Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+  const loginWithOtp = async (phone: string, otp: string) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/verify-phone-otp`,
+        { phone, otp }
+      );
+      if (response.data.success) {
+        const { token, data: userData } = response.data;
+        localStorage.setItem('token', token);
+        const user = {
+          id: userData?._id || "unknown",
+          name: userData?.name || "Unknown User",
+          email: userData?.email || "",
+          role: (userData?.role as UserRole) || "user",
+          avatar: userData?.avatar,
+          phone: userData?.phone || phone,
+          joinedDate: userData?.createdAt
+            ? new Date(userData.createdAt).toISOString().split('T')[0]
+            : undefined,
+        };
+        setUser(user);
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!",
+        });
+        navigate('/');
+        return response.data;
+      } else {
+        toast({
+          title: "Verification Failed",
+          description: response.data.error || "Invalid OTP",
+          variant: "destructive",
+        });
+        throw new Error(response.data.error || "Invalid OTP");
       }
     } catch (error: any) {
       const errorMessage =
@@ -257,7 +303,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         register,
         logout,
         redirectToLogin,
-        updateUser,handleVerifyOTP
+        updateUser,
+        handleVerifyOTP,
+        loginWithOtp
       }}
     >
       {children}

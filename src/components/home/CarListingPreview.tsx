@@ -11,28 +11,31 @@ interface CarListingPreviewProps {
   cars: CarType[];
 }
 
-
-
 const CarListingPreview: React.FC<CarListingPreviewProps> = ({ cars }) => {
-  // Only show the first 3 cars in the preview
-  //get cars from backend
-  // const cars = await getCars(); // Assuming you have a function to fetch cars from the backend   
   const [carData, setCarData] = useState<CarType[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+  useEffect(() => {
     fetchCars();  
-    }, []);
+  }, []);
+  
   const fetchCars = async () => {
     setLoading(true);
     try {
       const response = await axios.get<{
         success: boolean;
-        data: CarType[];
+        data: any[];
       }>(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/cars`);
+      
       if (response.data.success) {
-        setCarData(response.data.data);
+        // Convert string values to numbers where necessary
+        const formattedData = response.data.data.map((car: any) => ({
+          ...car,
+          price: Number(car.price),
+          mileage: Number(car.mileage),
+        }));
+        setCarData(formattedData);
       } else {
         setError("Failed to fetch cars");
       }
@@ -43,6 +46,7 @@ const CarListingPreview: React.FC<CarListingPreviewProps> = ({ cars }) => {
       setLoading(false);
     }
   };
+  
   console.log(carData);
 
   const previewCars = carData.slice(0, 3);
@@ -53,7 +57,7 @@ const CarListingPreview: React.FC<CarListingPreviewProps> = ({ cars }) => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <div className="mb-4 md:mb-0 flex flex-col justify-center items-start">
             <h2 className="text-3xl md:text-4xl font-bold mb-2">Featured Vehicles</h2>
-            <p className="text-gray-600 max-w-2xl">
+            <p className="text-gray-600 dark:text-gray-300 max-w-2xl">
               Explore our handpicked selection of certified pre-owned vehicles
               with complete history and thorough inspections.
             </p>

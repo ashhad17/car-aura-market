@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +26,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
   minimized = false,
   onMinimize
 }) => {
-  const { isAuthenticated, openAuthModal, user } = useAuth();
+  const { isAuthenticated, redirectToLogin, user } = useAuth();
   const { toast } = useToast();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -74,7 +73,7 @@ const ChatSystem: React.FC<ChatSystemProps> = ({
     if (!currentMessage.trim()) return;
     
     if (!isAuthenticated) {
-      openAuthModal();
+      redirectToLogin();
       setCurrentMessage("");
       toast({
         title: "Authentication Required",

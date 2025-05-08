@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -52,10 +51,17 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
       try {
         const response = await axios.get<{
           success: boolean;
-          data: CarType[];
+          data: any[];
         }>(`${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/cars`);
+        
         if (response.data.success) {
-          setCarData(response.data.data);
+          // Convert string values to numbers where necessary
+          const formattedData = response.data.data.map((car: any) => ({
+            ...car,
+            price: Number(car.price),
+            mileage: Number(car.mileage),
+          }));
+          setCarData(formattedData);
         } else {
           setError("Failed to fetch cars");
         }
@@ -103,22 +109,19 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
     const modelMatch =
       !filters.model || car.model.toLowerCase().includes(filters.model.toLowerCase());
     const yearMatch = !filters.year || String(car.year).includes(filters.year);
-    const priceMatch = !filters.price || String(car.price).includes(String(filters.price));
+    const priceMatch = !filters.price || car.price >= filters.price;
     const mileageMatch =
       !filters.mileage || String(car.mileage).includes(filters.mileage);
-    // const bodyTypeMatch =
-    //   !filters.bodyType || car.bodyType.toLowerCase().includes(filters.bodyType.toLowerCase());
     const fuelTypeMatch =
-      !filters.fuelType || car.fuelType.toLowerCase().includes(filters.fuelType.toLowerCase());
+      !filters.fuelType || (car.fuelType && car.fuelType.toLowerCase().includes(filters.fuelType.toLowerCase()));
     const transmissionMatch =
-      !filters.transmission ||
-      car.transmission.toLowerCase().includes(filters.transmission.toLowerCase());
+      !filters.transmission || (car.transmission && car.transmission.toLowerCase().includes(filters.transmission.toLowerCase()));
     const searchTermMatch =
       !searchTerm ||
       car.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.model?.toLowerCase().includes(searchTerm.toLowerCase());
-      const statusMatch = car.status === "active"; // Only include cars with status "active"
+    const statusMatch = car.status === "active"; // Only include cars with status "active"
 
     return (
       makeMatch &&
@@ -126,7 +129,6 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
       yearMatch &&
       priceMatch &&
       mileageMatch &&
-      // bodyTypeMatch &&
       fuelTypeMatch &&
       transmissionMatch &&
       searchTermMatch &&
@@ -214,7 +216,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         <div className="md:w-1/4">
           {/* Create a simpler version of CarFilters integrated here */}
-          <div className="bg-white p-4 rounded-lg shadow-md">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
             <h3 className="text-lg font-medium mb-4">Filter Cars</h3>
             
             <div className="space-y-4">
@@ -252,7 +254,8 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
                 <Label htmlFor="price">Price</Label>
                 <Input
                   id="price"
-                  value={filters.price}
+                  type="number"
+                  value={filters.price || ''}
                   onChange={(e) => handleFilterChange(e, "price")}
                   placeholder="Enter price..."
                 />
@@ -302,11 +305,6 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {carsToDisplay.length > 0 ? (
               carsToDisplay.map((car) => (
-                // Use the CarCard component to display each car
-                // Pass the car data as a prop to CarCard
-                // You can also pass a prop to determine if it's in compact mode
-                //fix the error below
-                // <CarCard key={car._id} car={car} isCompact={false} />
                 <CarCard key={car._id} car={car} isCompact={false} />
               ))
             ) : (
