@@ -4,6 +4,7 @@ import axios from "axios";
 import { CarType } from "@/lib/data";
 import CarCard from "./CarCard";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/context/ThemeContext";
 import {
   Select,
   SelectContent,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { motion } from "framer-motion";
 
 interface CarGridProps {
   cars?: CarType[]; // Make this optional so it can fetch cars internally if not provided
@@ -36,6 +38,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
   const [sortBy, setSortBy] = useState<string>("price");
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const { isDark } = useTheme();
   const carsPerPage = 6;
 
   useEffect(() => {
@@ -77,12 +80,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
     fetchCars();
   }, [initialCars]);
 
-  // Define the filter handler interface
-  interface FilterChangeHandler {
-    (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>, filterKey: string): void;
-  }
-
-  const handleFilterChange: FilterChangeHandler = (e, filterKey) => {
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>, filterKey: string) => {
     const value = e.target.value;
     setFilters((prevFilters) => ({
       ...prevFilters,
@@ -102,6 +100,12 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1); // Reset to the first page when search term changes
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    // Scroll to top of grid when changing pages
+    document.getElementById('cars-grid')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const filteredCars = carData.filter((car) => {
@@ -158,66 +162,49 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
 
   const totalPages = Math.ceil(filteredCars.length / carsPerPage);
 
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-
-  // const generateMockData = (count: number): CarType[] => {
-  //   const makes = ["Toyota", "Honda", "Ford", "BMW", "Mercedes"];
-  //   const colors = ["Red", "Blue", "Silver", "Black", "White"];
-  //   const engines = ["2.0L I4", "3.5L V6", "5.0L V8"];
-  //   const transmissions = ["Automatic", "Manual"];
-  //   const bodyTypes = ["Sedan", "SUV", "Truck", "Hatchback"];
-  //   const fuelTypes = ["Gasoline", "Diesel", "Electric"];
-  //   const locations = ["New York, NY", "Los Angeles, CA", "Chicago, IL"];
-  //   const conditions = ["Excellent", "Good", "Fair"];
-  //   const statuses = ["Available", "Sold", "Pending"];
-  //   const sellerTypes = ["Dealer", "Private"];
-
-  //   const mockCars: CarType[] = Array(count).fill(0).map((_, index) => ({
-  //     id: `mock-${index}`,
-  //     make: makes[Math.floor(Math.random() * makes.length)],
-  //     model: `Model ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
-  //     year: 2015 + Math.floor(Math.random() * 9),
-  //     price: 15000 + Math.floor(Math.random() * 35000),
-  //     mileage: 10000 + Math.floor(Math.random() * 90000),
-  //     color: colors[Math.floor(Math.random() * colors.length)],
-  //     engine: engines[Math.floor(Math.random() * engines.length)],
-  //     transmission: transmissions[Math.floor(Math.random() * transmissions.length)],
-  //     bodyType: bodyTypes[Math.floor(Math.random() * bodyTypes.length)],
-  //     fuelType: fuelTypes[Math.floor(Math.random() * fuelTypes.length)],
-  //     location: locations[Math.floor(Math.random() * locations.length)],
-  //     images: [
-  //       `https://images.unsplash.com/photo-${1550000000 + index}?auto=format&fit=crop&w=300&q=80`,
-  //     ],
-  //     description: "This is a sample car description.",
-  //     features: ["Feature 1", "Feature 2", "Feature 3"],
-  //     isFeatured: Math.random() > 0.7,
-  //     isAvailable: true,
-  //     // Add the optional fields being used
-  //     title: `${makes[Math.floor(Math.random() * makes.length)]} ${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`,
-  //     condition: conditions[Math.floor(Math.random() * conditions.length)],
-  //     status: statuses[Math.floor(Math.random() * statuses.length)],
-  //     sellerType: sellerTypes[Math.floor(Math.random() * sellerTypes.length)],
-  //   }));
-
-  //   return mockCars;
-  // };
-
   if (loading) {
-    return <div className="text-center">Loading cars...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-[400px]">
+        <div className="animate-glow-pulse h-16 w-16 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center text-red-500">Error: {error}</div>;
+    return (
+      <div className="text-center text-red-500 p-8 bg-red-50 dark:bg-red-900/20 rounded-lg">
+        <h3 className="text-xl font-bold mb-2">Error</h3>
+        <p>{error}</p>
+      </div>
+    );
   }
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.4 } }
+  };
 
   return (
     <div className="container mx-auto px-4">
       <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="md:w-1/4">
+        <motion.div 
+          className="md:w-1/4"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
           {/* Create a simpler version of CarFilters integrated here */}
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
+          <div className={`p-4 rounded-lg shadow-md transition-colors duration-300 ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
             <h3 className="text-lg font-medium mb-4">Filter Cars</h3>
             
             <div className="space-y-4">
@@ -228,6 +215,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
                   value={filters.make}
                   onChange={(e) => handleFilterChange(e, "make")}
                   placeholder="Enter make..."
+                  className="mt-1"
                 />
               </div>
               
@@ -238,6 +226,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
                   value={filters.model}
                   onChange={(e) => handleFilterChange(e, "model")}
                   placeholder="Enter model..."
+                  className="mt-1"
                 />
               </div>
               
@@ -248,6 +237,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
                   value={filters.year}
                   onChange={(e) => handleFilterChange(e, "year")}
                   placeholder="Enter year..."
+                  className="mt-1"
                 />
               </div>
               
@@ -259,19 +249,27 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
                   value={filters.price || ''}
                   onChange={(e) => handleFilterChange(e, "price")}
                   placeholder="Enter price..."
+                  className="mt-1"
                 />
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
+
         <div className="md:w-3/4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+          <motion.div 
+            className="flex flex-col md:flex-row md:items-center justify-between mb-4"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
             <div className="w-full md:w-1/2 mb-2 md:mb-0">
               <Input
                 type="text"
                 placeholder="Search cars..."
                 value={searchTerm}
                 onChange={handleSearchChange}
+                className="shadow-sm"
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -301,27 +299,41 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
                 </Select>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <motion.div 
+            id="cars-grid"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {carsToDisplay.length > 0 ? (
               carsToDisplay.map((car) => (
-                <CarCard key={car._id} car={car} />
+                <motion.div key={car._id} variants={itemVariants}>
+                  <CarCard car={car} />
+                </motion.div>
               ))
             ) : (
               <div className="col-span-3 text-center py-10">
                 <p className="text-gray-500">No cars found matching your criteria</p>
               </div>
             )}
-          </div>
+          </motion.div>
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex justify-center mt-8">
+            <motion.div 
+              className="flex justify-center mt-8"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
               <Button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
                 className="mr-2"
+                variant="glow"
               >
                 Previous
               </Button>
@@ -330,7 +342,8 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
                   <Button
                     key={page}
                     onClick={() => handlePageChange(page)}
-                    variant={currentPage === page ? "default" : "outline"}
+                    variant={currentPage === page ? "glow" : "outline"}
+                    className={`mx-1 ${currentPage === page ? 'animate-glow-pulse' : ''}`}
                   >
                     {page}
                   </Button>
@@ -340,10 +353,11 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
                 className="ml-2"
+                variant="glow"
               >
                 Next
               </Button>
-            </div>
+            </motion.div>
           )}
         </div>
       </div>

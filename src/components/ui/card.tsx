@@ -1,15 +1,21 @@
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  glowEffect?: boolean;
+}
+
 const Card = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
+  CardProps
+>(({ className, glowEffect = false, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
+      "rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300",
+      glowEffect && "glow-card",
       className
     )}
     {...props}

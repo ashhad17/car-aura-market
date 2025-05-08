@@ -1,8 +1,8 @@
-
 import React, { useState, useEffect } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { Navigate, Link } from "react-router-dom";
 import { 
   Car, 
@@ -12,7 +12,9 @@ import {
   LogOut, 
   Home, 
   Menu,
-  Bell
+  Bell,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +23,9 @@ import AdminNotifications from "@/components/admin/AdminNotifications";
 import UserManagement from "@/components/admin/UserManagement";
 import ServiceProviderManagement from "@/components/admin/ServiceProviderManagement";
 import CarListingManagement from "@/components/admin/CarListingManagement";
-import { Input } from "@/components/ui/input"; // Adding this import
+import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
+import { Card } from "@/components/ui/card";
 import axios from "axios";
 
 // Dashboard stats interface
@@ -34,6 +38,7 @@ interface DashboardStats {
 
 const AdminDashboard = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const { theme, toggleTheme, isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<"dashboard" | "users" | "listings" | "providers" | "settings" | "notifications">("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const { toast } = useToast();
@@ -127,16 +132,53 @@ const AdminDashboard = () => {
     });
   };
 
+  const pageContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        when: "beforeChildren"
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 }
+    }
+  };
+
+  const statCardVariants = {
+    hidden: { scale: 0.9, opacity: 0 },
+    visible: {
+      scale: 1,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 }
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex-grow pt-16 bg-gray-50">
+      <motion.div 
+        className={`flex-grow pt-16 ${isDark ? 'bg-gray-900' : 'bg-gray-50'} transition-colors duration-300`}
+        variants={pageContainerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <div className="flex">
           {/* Sidebar */}
-          <div 
+          <motion.div 
             className={`fixed top-16 left-0 bottom-0 z-30 transition-all duration-300 ${
               sidebarOpen ? "w-64" : "w-0"
-            } bg-white shadow-lg overflow-hidden`}
+            } ${isDark ? 'bg-gray-800 border-r border-gray-700' : 'bg-white shadow-lg'}`}
+            initial={{ x: -100, opacity: 0 }}
+            animate={{ x: sidebarOpen ? 0 : -100, opacity: sidebarOpen ? 1 : 0 }}
+            transition={{ type: "spring", stiffness: 100 }}
           >
             <div className="p-4">
               <div className="flex items-center gap-3 mb-8">
@@ -154,8 +196,8 @@ const AdminDashboard = () => {
                   onClick={() => setActiveTab("dashboard")}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     activeTab === "dashboard"
-                      ? "bg-primary text-white"
-                      : "hover:bg-gray-100"
+                      ? "bg-primary text-white glow-btn"
+                      : `hover:bg-gray-100 ${isDark ? 'hover:bg-gray-700' : ''}`
                   }`}
                 >
                   <Home className="h-5 w-5" />
@@ -165,8 +207,8 @@ const AdminDashboard = () => {
                   onClick={() => setActiveTab("users")}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     activeTab === "users"
-                      ? "bg-primary text-white"
-                      : "hover:bg-gray-100"
+                      ? "bg-primary text-white glow-btn"
+                      : `hover:bg-gray-100 ${isDark ? 'hover:bg-gray-700' : ''}`
                   }`}
                 >
                   <Users className="h-5 w-5" />
@@ -176,8 +218,8 @@ const AdminDashboard = () => {
                   onClick={() => setActiveTab("listings")}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     activeTab === "listings"
-                      ? "bg-primary text-white"
-                      : "hover:bg-gray-100"
+                      ? "bg-primary text-white glow-btn"
+                      : `hover:bg-gray-100 ${isDark ? 'hover:bg-gray-700' : ''}`
                   }`}
                 >
                   <Car className="h-5 w-5" />
@@ -187,8 +229,8 @@ const AdminDashboard = () => {
                   onClick={() => setActiveTab("providers")}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     activeTab === "providers"
-                      ? "bg-primary text-white"
-                      : "hover:bg-gray-100"
+                      ? "bg-primary text-white glow-btn"
+                      : `hover:bg-gray-100 ${isDark ? 'hover:bg-gray-700' : ''}`
                   }`}
                 >
                   <Settings className="h-5 w-5" />
@@ -198,8 +240,8 @@ const AdminDashboard = () => {
                   onClick={() => setActiveTab("notifications")}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     activeTab === "notifications"
-                      ? "bg-primary text-white"
-                      : "hover:bg-gray-100"
+                      ? "bg-primary text-white glow-btn"
+                      : `hover:bg-gray-100 ${isDark ? 'hover:bg-gray-700' : ''}`
                   }`}
                 >
                   <Bell className="h-5 w-5" />
@@ -210,23 +252,32 @@ const AdminDashboard = () => {
                   onClick={() => setActiveTab("settings")}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                     activeTab === "settings"
-                      ? "bg-primary text-white"
-                      : "hover:bg-gray-100"
+                      ? "bg-primary text-white glow-btn"
+                      : `hover:bg-gray-100 ${isDark ? 'hover:bg-gray-700' : ''}`
                   }`}
                 >
                   <Settings className="h-5 w-5" />
                   Settings
                 </button>
+
+                <button
+                  onClick={toggleTheme}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-gray-100 ${isDark ? 'hover:bg-gray-700' : ''}`}
+                >
+                  {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                  {isDark ? 'Light Mode' : 'Dark Mode'}
+                </button>
+                
                 <button
                   onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors mt-4"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors mt-4"
                 >
                   <LogOut className="h-5 w-5" />
                   Logout
                 </button>
               </nav>
             </div>
-          </div>
+          </motion.div>
 
           {/* Main Content */}
           <div 
@@ -235,10 +286,13 @@ const AdminDashboard = () => {
             } flex-1`}
           >
             <div className="p-6">
-              <div className="flex items-center mb-6">
+              <motion.div 
+                className="flex items-center mb-6"
+                variants={itemVariants}
+              >
                 <button 
                   onClick={toggleSidebar}
-                  className="mr-4 p-2 rounded-lg hover:bg-gray-200"
+                  className={`mr-4 p-2 rounded-lg hover:bg-gray-200 ${isDark ? 'hover:bg-gray-700' : ''} transition-colors`}
                 >
                   <Menu className="h-5 w-5" />
                 </button>
@@ -250,7 +304,7 @@ const AdminDashboard = () => {
                   {activeTab === "settings" && "Settings"}
                   {activeTab === "notifications" && "Notifications"}
                 </h1>
-              </div>
+              </motion.div>
 
               {/* Dashboard Content */}
               {activeTab === "dashboard" && (
@@ -261,155 +315,209 @@ const AdminDashboard = () => {
                       <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-gray-500 text-sm">Total Users</p>
-                            <p className="text-2xl font-bold">{stats.userCount}</p>
+                    <motion.div 
+                      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                      variants={itemVariants}
+                    >
+                      <motion.div variants={statCardVariants}>
+                        <Card glowEffect className="dashboard-card">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-gray-500 dark:text-gray-300 text-sm">Total Users</p>
+                              <p className="text-2xl font-bold">{stats.userCount}</p>
+                            </div>
+                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                              <Users className="h-5 w-5 text-primary" />
+                            </div>
                           </div>
-                          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            <Users className="h-5 w-5 text-primary" />
+                          <p className="mt-2 text-xs text-green-600 dark:text-green-400">
+                            <span className="font-medium">↑ 12%</span> since last month
+                          </p>
+                        </Card>
+                      </motion.div>
+                      
+                      <motion.div variants={statCardVariants}>
+                        <Card glowEffect className="dashboard-card">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-gray-500 dark:text-gray-300 text-sm">Active Listings</p>
+                              <p className="text-2xl font-bold">{stats.carListingsCount}</p>
+                            </div>
+                            <div className="h-10 w-10 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                              <Car className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
                           </div>
-                        </div>
-                        <p className="mt-2 text-xs text-green-600">
-                          <span className="font-medium">↑ 12%</span> since last month
-                        </p>
-                      </div>
-                      <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-gray-500 text-sm">Active Listings</p>
-                            <p className="text-2xl font-bold">{stats.carListingsCount}</p>
+                          <p className="mt-2 text-xs text-green-600 dark:text-green-400">
+                            <span className="font-medium">↑ 5%</span> since last week
+                          </p>
+                        </Card>
+                      </motion.div>
+                      
+                      <motion.div variants={statCardVariants}>
+                        <Card glowEffect className="dashboard-card">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-gray-500 dark:text-gray-300 text-sm">Service Providers</p>
+                              <p className="text-2xl font-bold">{stats.serviceProvidersCount}</p>
+                            </div>
+                            <div className="h-10 w-10 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                              <Settings className="h-5 w-5 text-green-600 dark:text-green-400" />
+                            </div>
                           </div>
-                          <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
-                            <Car className="h-5 w-5 text-blue-600" />
+                          <p className="mt-2 text-xs text-green-600 dark:text-green-400">
+                            <span className="font-medium">↑ 8%</span> since last month
+                          </p>
+                        </Card>
+                      </motion.div>
+                      
+                      <motion.div variants={statCardVariants}>
+                        <Card glowEffect className="dashboard-card">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-gray-500 dark:text-gray-300 text-sm">Total Revenue</p>
+                              <p className="text-2xl font-bold">${stats.totalRevenue.toLocaleString()}</p>
+                            </div>
+                            <div className="h-10 w-10 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
+                              <svg className="h-5 w-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                              </svg>
+                            </div>
                           </div>
-                        </div>
-                        <p className="mt-2 text-xs text-green-600">
-                          <span className="font-medium">↑ 5%</span> since last week
-                        </p>
-                      </div>
-                      <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-gray-500 text-sm">Service Providers</p>
-                            <p className="text-2xl font-bold">{stats.serviceProvidersCount}</p>
-                          </div>
-                          <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center">
-                            <Settings className="h-5 w-5 text-green-600" />
-                          </div>
-                        </div>
-                        <p className="mt-2 text-xs text-green-600">
-                          <span className="font-medium">↑ 8%</span> since last month
-                        </p>
-                      </div>
-                      <div className="bg-white p-6 rounded-lg shadow">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-gray-500 text-sm">Total Revenue</p>
-                            <p className="text-2xl font-bold">${stats.totalRevenue.toLocaleString()}</p>
-                          </div>
-                          <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center">
-                            <svg className="h-5 w-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                          </div>
-                        </div>
-                        <p className="mt-2 text-xs text-green-600">
-                          <span className="font-medium">↑ 15%</span> since last month
-                        </p>
-                      </div>
-                    </div>
+                          <p className="mt-2 text-xs text-green-600 dark:text-green-400">
+                            <span className="font-medium">↑ 15%</span> since last month
+                          </p>
+                        </Card>
+                      </motion.div>
+                    </motion.div>
                   )}
 
                   {/* Recent Activity */}
-                  <div className="bg-white rounded-lg shadow">
-                    <div className="px-6 py-4 border-b">
+                  <motion.div 
+                    variants={itemVariants}
+                    className="dashboard-card rounded-lg overflow-hidden"
+                  >
+                    <div className="px-6 py-4 border-b dark:border-gray-700">
                       <h3 className="text-lg font-medium">Recent Activity</h3>
                     </div>
                     <div className="px-6 py-4">
                       <div className="space-y-4">
-                        <div className="flex items-center">
-                          <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                            <User className="h-4 w-4 text-blue-600" />
+                        <motion.div 
+                          className="flex items-center"
+                          initial={{ x: -10, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.1 }}
+                        >
+                          <div className="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mr-3">
+                            <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                           </div>
                           <div>
                             <p className="text-sm">
                               <span className="font-medium">Michael Chen</span> registered a new account
                             </p>
-                            <p className="text-xs text-gray-500">2 hours ago</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">2 hours ago</p>
                           </div>
-                        </div>
-                        <div className="flex items-center">
-                          <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                            <Car className="h-4 w-4 text-green-600" />
+                        </motion.div>
+
+                        <motion.div 
+                          className="flex items-center"
+                          initial={{ x: -10, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.2 }}
+                        >
+                          <div className="h-8 w-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mr-3">
+                            <Car className="h-4 w-4 text-green-600 dark:text-green-400" />
                           </div>
                           <div>
                             <p className="text-sm">
                               <span className="font-medium">Sarah Johnson</span> added a new car listing
                             </p>
-                            <p className="text-xs text-gray-500">5 hours ago</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">5 hours ago</p>
                           </div>
-                        </div>
-                        <div className="flex items-center">
-                          <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center mr-3">
-                            <Settings className="h-4 w-4 text-purple-600" />
+                        </motion.div>
+
+                        <motion.div 
+                          className="flex items-center"
+                          initial={{ x: -10, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.3 }}
+                        >
+                          <div className="h-8 w-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mr-3">
+                            <Settings className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                           </div>
                           <div>
                             <p className="text-sm">
                               <span className="font-medium">AutoCare Express</span> joined as a service provider
                             </p>
-                            <p className="text-xs text-gray-500">Yesterday</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Yesterday</p>
                           </div>
-                        </div>
-                        <div className="flex items-center">
-                          <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center mr-3">
-                            <Bell className="h-4 w-4 text-yellow-600" />
+                        </motion.div>
+
+                        <motion.div 
+                          className="flex items-center"
+                          initial={{ x: -10, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.4 }}
+                        >
+                          <div className="h-8 w-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mr-3">
+                            <Bell className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
                           </div>
                           <div>
                             <p className="text-sm">
                               <span className="font-medium">Jessica Rodriguez</span> left a new review
                             </p>
-                            <p className="text-xs text-gray-500">Yesterday</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">Yesterday</p>
                           </div>
-                        </div>
+                        </motion.div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               )}
 
               {/* Users Tab */}
               {activeTab === "users" && (
-                <div className="bg-white rounded-lg shadow p-6">
+                <motion.div 
+                  className={`rounded-lg shadow p-6 dashboard-card`}
+                  variants={itemVariants}
+                >
                   <UserManagement />
-                </div>
+                </motion.div>
               )}
 
               {/* Car Listings Tab */}
               {activeTab === "listings" && (
-                <div className="bg-white rounded-lg shadow p-6">
+                <motion.div 
+                  className={`rounded-lg shadow p-6 dashboard-card`}
+                  variants={itemVariants}
+                >
                   <CarListingManagement />
-                </div>
+                </motion.div>
               )}
 
               {/* Service Providers Tab */}
               {activeTab === "providers" && (
-                <div className="bg-white rounded-lg shadow p-6">
+                <motion.div 
+                  className={`rounded-lg shadow p-6 dashboard-card`}
+                  variants={itemVariants}
+                >
                   <ServiceProviderManagement />
-                </div>
+                </motion.div>
               )}
 
               {/* Notifications Tab */}
               {activeTab === "notifications" && (
-                <AdminNotifications />
+                <motion.div variants={itemVariants}>
+                  <AdminNotifications />
+                </motion.div>
               )}
 
               {/* Settings Tab */}
               {activeTab === "settings" && (
-                <div className="bg-white rounded-lg shadow overflow-hidden">
-                  <div className="px-6 py-4 border-b">
+                <motion.div 
+                  className={`rounded-lg shadow overflow-hidden dashboard-card`}
+                  variants={itemVariants}
+                >
+                  <div className="px-6 py-4 border-b dark:border-gray-700">
                     <h3 className="text-lg font-medium">Platform Settings</h3>
                   </div>
                   <div className="p-6 space-y-6">
@@ -417,7 +525,7 @@ const AdminDashboard = () => {
                       <h4 className="text-md font-medium mb-4">General Settings</h4>
                       <div className="space-y-4">
                         <div>
-                          <label htmlFor="siteName" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="siteName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Site Name
                           </label>
                           <Input
@@ -428,19 +536,19 @@ const AdminDashboard = () => {
                           />
                         </div>
                         <div>
-                          <label htmlFor="siteDescription" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="siteDescription" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Site Description
                           </label>
                           <textarea
                             id="siteDescription"
                             name="siteDescription"
                             rows={3}
-                            className="max-w-md w-full rounded-md border border-gray-300 shadow-sm p-3 focus:outline-none focus:ring-primary focus:border-primary"
+                            className="max-w-md w-full rounded-md border dark:border-gray-700 shadow-sm p-3 focus:outline-none focus:ring-primary focus:border-primary bg-background"
                             defaultValue="Your trusted platform for buying, selling, and servicing vehicles with complete transparency."
                           />
                         </div>
                         <div>
-                          <label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Contact Email
                           </label>
                           <Input
@@ -462,15 +570,15 @@ const AdminDashboard = () => {
                               id="twoFactor"
                               name="twoFactor"
                               type="checkbox"
-                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                              className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
                               defaultChecked
                             />
                           </div>
                           <div className="ml-3 text-sm">
-                            <label htmlFor="twoFactor" className="font-medium text-gray-700">
+                            <label htmlFor="twoFactor" className="font-medium text-gray-700 dark:text-gray-300">
                               Enable Two-Factor Authentication
                             </label>
-                            <p className="text-gray-500">
+                            <p className="text-gray-500 dark:text-gray-400">
                               Increase security by requiring a second authentication method.
                             </p>
                           </div>
@@ -481,34 +589,37 @@ const AdminDashboard = () => {
                               id="loginNotifications"
                               name="loginNotifications"
                               type="checkbox"
-                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                              className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
                               defaultChecked
                             />
                           </div>
                           <div className="ml-3 text-sm">
-                            <label htmlFor="loginNotifications" className="font-medium text-gray-700">
+                            <label htmlFor="loginNotifications" className="font-medium text-gray-700 dark:text-gray-300">
                               Email Notifications for New Logins
                             </label>
-                            <p className="text-gray-500">
+                            <p className="text-gray-500 dark:text-gray-400">
                               Receive email notifications when a new login is detected.
                             </p>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <div className="pt-4 border-t">
-                      <Button onClick={() => toast({ title: "Settings Saved", description: "Your settings have been saved successfully." })}>
+                    <div className="pt-4 border-t dark:border-gray-700">
+                      <Button 
+                        variant="glow" 
+                        onClick={() => toast({ title: "Settings Saved", description: "Your settings have been saved successfully." })}
+                        className="pulse-animation"
+                      >
                         Save Settings
                       </Button>
                     </div>
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
           </div>
         </div>
-      </div>
-      {/* <Footer /> */}
+      </motion.div>
     </div>
   );
 };
