@@ -21,6 +21,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import OtpLogin from "./pages/OtpLogin";
 import ForgotPassword from "./pages/ForgotPassword";
+import Contact from "./pages/Contact";
 
 import ResetPasswordForm from "./components/auth/ResetPasswordForm";
 import PrivateRoute from "./components/auth/PrivateRoute";
@@ -47,6 +48,7 @@ const App = () => {
           <Route path="/services/:id" element={<ServiceDetails />} />
           <Route path="/find-your-car" element={<FindYourCar />} />
           <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/email-verification/:token" element={<EmailVerification />} />
           
           {/* Auth Routes */}

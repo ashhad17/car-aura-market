@@ -5,17 +5,19 @@ import { cn } from "@/lib/utils"
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   glowEffect?: boolean;
+  hoverAnimation?: boolean;
 }
 
 const Card = React.forwardRef<
   HTMLDivElement,
   CardProps
->(({ className, glowEffect = false, ...props }, ref) => (
+>(({ className, glowEffect = false, hoverAnimation = false, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
       "rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300",
       glowEffect && "glow-card",
+      hoverAnimation && "hover-scale",
       className
     )}
     {...props}

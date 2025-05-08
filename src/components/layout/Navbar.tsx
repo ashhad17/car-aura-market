@@ -19,7 +19,7 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { Menu, X, Bell, User, LogOut, Settings, Car, Sun, Moon } from "lucide-react";
+import { Menu, X, Bell, User, LogOut, Settings, Car, Sun, Moon, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 
@@ -44,6 +44,17 @@ const Navbar = () => {
     navigate('/');
   };
 
+  // Function to check if a route is active (exact match or sub-route)
+  const isRouteActive = (route: string) => {
+    if (route === "/cars/buy") {
+      return pathname === "/cars/buy" || pathname.startsWith("/cars/details");
+    }
+    if (route === "/cars/sell") {
+      return pathname === "/cars/sell";
+    }
+    return pathname === route;
+  };
+
   return (
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
@@ -65,7 +76,7 @@ const Navbar = () => {
               <Link
                 to="/cars/buy"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname.includes("/cars") ? "text-primary" : "text-foreground"
+                  isRouteActive("/cars/buy") ? "text-primary" : "text-foreground"
                 }`}
               >
                 Buy Cars
@@ -73,7 +84,7 @@ const Navbar = () => {
               <Link
                 to="/cars/sell"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname.includes("/sell") ? "text-primary" : "text-foreground"
+                  isRouteActive("/cars/sell") ? "text-primary" : "text-foreground"
                 }`}
               >
                 Sell Car
@@ -81,7 +92,7 @@ const Navbar = () => {
               <Link
                 to="/services"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === "/services" ? "text-primary" : "text-foreground"
+                  isRouteActive("/services") ? "text-primary" : "text-foreground"
                 }`}
               >
                 Services
@@ -89,7 +100,7 @@ const Navbar = () => {
               <Link
                 to="/service-providers"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === "/service-providers" ? "text-primary" : "text-foreground"
+                  isRouteActive("/service-providers") ? "text-primary" : "text-foreground"
                 }`}
               >
                 Service Providers
@@ -97,7 +108,7 @@ const Navbar = () => {
               <Link
                 to="/find-your-car"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === "/find-your-car" ? "text-primary" : "text-foreground"
+                  isRouteActive("/find-your-car") ? "text-primary" : "text-foreground"
                 }`}
               >
                 Find Your Car
@@ -105,10 +116,18 @@ const Navbar = () => {
               <Link
                 to="/about"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === "/about" ? "text-primary" : "text-foreground"
+                  isRouteActive("/about") ? "text-primary" : "text-foreground"
                 }`}
               >
                 About
+              </Link>
+              <Link
+                to="/contact"
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  isRouteActive("/contact") ? "text-primary" : "text-foreground"
+                }`}
+              >
+                Contact Us
               </Link>
             </nav>
           </div>
@@ -182,6 +201,14 @@ const Navbar = () => {
                       className="text-foreground hover:text-primary py-2 px-3 rounded-md hover:bg-muted transition-colors"
                     >
                       About
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link
+                      to="/contact"
+                      className="text-foreground hover:text-primary py-2 px-3 rounded-md hover:bg-muted transition-colors"
+                    >
+                      Contact Us
                     </Link>
                   </SheetClose>
                   
@@ -272,7 +299,7 @@ const Navbar = () => {
               variant="ghost"
               size="icon"
               onClick={toggleTheme}
-              className="rounded-full"
+              className="rounded-full glow-btn"
               aria-label="Toggle theme"
             >
               {theme === 'dark' ? (
@@ -337,12 +364,14 @@ const Navbar = () => {
                 <Button
                   variant="ghost"
                   onClick={handleLogin}
-                  className="transition-colors"
+                  className="transition-colors hover-scale"
                 >
                   Login
                 </Button>
                 <Button
                   onClick={handleSignUp}
+                  variant="glow"
+                  className="hover-scale"
                 >
                   Sign Up
                 </Button>
