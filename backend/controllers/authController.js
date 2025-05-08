@@ -173,7 +173,7 @@ exports.verifyOtp = asyncHandler(async (req, res, next) => {
   user.otpExpiry = undefined;
   await user.save();
 
-  setTokenResponse(user, 200, res);
+  sendTokenResponse(user, 200, res);
 });
 // @desc    Login user
 // @route   POST /api/v1/auth/login
@@ -272,29 +272,29 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
 // @access  Public
 exports.forgotPassword = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
-
+const email=req.body.email;
   if (!user) {
     return next(new ErrorResponse('There is no user with that email', 404));
   }
 
   // Get reset token
-  const resetToken = user.getResetPasswordToken();
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+  user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // Token valid for 10 minutes
+  await user.save();
 
-  await user.save({ validateBeforeSave: false });
 
   // Create reset url
-  const resetUrl = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1/auth/resetpassword/${resetToken}`;
+  const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:8080'}/reset-password/${resetToken}`;
 
   const message = `You are receiving this email because you (or someone else) has requested the reset of a password. Please make a PUT request to: \n\n ${resetUrl}`;
 
   try {
-    await sendEmail({
-      email: user.email,
-      subject: 'Password reset token',
-      message
-    });
+    await sendMail(
+      email,
+      'Password Reset Request',
+      `You are receiving this email because you (or someone else) requested a password reset. Click the link below to reset your password:\n\n<a href="${resetUrl}">${resetUrl}</a>`
+    );
 
     res.status(200).json({ success: true, data: 'Email sent' });
   } catch (err) {
@@ -313,25 +313,36 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 // @access  Public
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   // Get hashed token
-  const resetPasswordToken = bcrypt
-    .createHash('sha256')
-    .update(req.params.resettoken)
-    .digest('hex');
+  // const resetPasswordToken = crypto
+  //   .createHash('sha256') // Use crypto.createHash
+  //   .update(req.params.resettoken)
+  //   .digest('hex');
 
-  const user = await User.findOne({
-    resetPasswordToken,
-    resetPasswordExpire: { $gt: Date.now() }
-  });
+  // const user = await User.findOne({
+  //   resetPasswordToken,
+  //   resetPasswordExpire: { $gt: Date.now() }
+  // });
 
-  if (!user) {
-    return next(new ErrorResponse('Invalid token', 400));
-  }
+  // if (!user) {
+  //   return next(new ErrorResponse('Invalid token', 400));
+  // }
 
-  // Set new password
-  user.password = req.body.password;
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpire = undefined;
+  // // Set new password
+  // user.password = req.body.password;
+  // user.resetPasswordToken = undefined;
+  // user.resetPasswordExpire = undefined;
+  // await user.save();
+  const { token } = req.params;
+  const { password } = req.body;
+
+  const user = await User.findOne({ resetToken: token, resetTokenExpiry: { $gt: Date.now() } });
+  if (!user) return res.status(400).json({ message: 'Token expired or invalid' });
+
+  user.password = await bcrypt.hash(password, 10);
+  user.resetToken = undefined;
+  user.resetTokenExpiry = undefined;
   await user.save();
+
 
   sendTokenResponse(user, 200, res);
 });

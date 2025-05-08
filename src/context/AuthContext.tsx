@@ -25,6 +25,7 @@ type AuthContextType = {
   logout: () => void;
   redirectToLogin: () => void;
   updateUser: (userData: Partial<User>) => void;
+  handleVerifyOTP: (email: string, otp: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -72,7 +73,50 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem('token');
     }
   };
-
+  const handleVerifyOTP = async (email: string, otp: string) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/verify-otp`,
+        { email, otp }
+      );
+      if (response.data.success) {
+        const { token, data: userData } = response.data;
+        localStorage.setItem('token', token);
+        const user = {
+          id: userData?._id || "unknown",
+          name: userData?.name || "Unknown User",
+          email: userData?.email || email,
+          role: (userData?.role as UserRole) || "user",
+          avatar: userData?.avatar,
+          phone: userData?.phone,
+          joinedDate: userData?.createdAt
+            ? new Date(userData.createdAt).toISOString().split('T')[0]
+            : undefined,
+        };
+        setUser(user);
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!",
+        });
+        navigate('/');
+      } else {
+        toast({
+          title: "Verification Failed",
+          description: response.data.error || "Invalid OTP",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "An error occurred during OTP verification.";
+      toast({
+        title: "Verification Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
   const login = async (email: string, password: string) => {
     try {
       const response = await axios.post(
@@ -213,7 +257,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         register,
         logout,
         redirectToLogin,
-        updateUser,
+        updateUser,handleVerifyOTP
       }}
     >
       {children}

@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
-
+import { UserRole } from '@/context/AuthContext';
+import { useAuth } from "@/context/AuthContext";
 const OTPLoginForm = ({ onComplete }: { onComplete: () => void }) => {
   const [step, setStep] = useState<'email' | 'otp'>('email');
   const [email, setEmail] = useState('');
@@ -13,6 +14,7 @@ const OTPLoginForm = ({ onComplete }: { onComplete: () => void }) => {
   const [timeLeft, setTimeLeft] = useState(0);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const { toast } = useToast();
+  const { handleVerifyOTP } = useAuth();
 
   // Timer for resending OTP
   useEffect(() => {
@@ -91,42 +93,13 @@ const OTPLoginForm = ({ onComplete }: { onComplete: () => void }) => {
     }
   };
 
-  const handleVerifyOTP = async () => {
-    const otpValue = otp.join('');
-
-    if (otpValue.length !== 6) {
-      toast({
-        title: 'Invalid OTP',
-        description: 'Please enter the complete 6-digit verification code',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsLoading(true);
+  const handleSubmit = async () => {
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/verify-otp`,
-        { email, otp: otpValue }
-      );
-
-      toast({
-        title: 'OTP Verified',
-        description: response.data.message || 'You have been successfully logged in',
-      });
-
-      setTimeout(() => {
-        onComplete();
-      }, 1000);
-    } catch (error: any) {
-      toast({
-        title: 'Verification Failed',
-        description: error.response?.data?.message || 'Invalid OTP. Please try again',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
+      await handleVerifyOTP(email, otp.join(''));
+      console.log("OTP Login Successful");
+    } catch (error) {
+      console.error("OTP Login Failed:", error);
     }
   };
 
@@ -232,7 +205,7 @@ const OTPLoginForm = ({ onComplete }: { onComplete: () => void }) => {
 
             <Button
               type="button"
-              onClick={handleVerifyOTP}
+              onClick={handleSubmit}
               className="w-full"
               disabled={isLoading || otp.join('').length !== 6}
             >

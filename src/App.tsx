@@ -11,6 +11,7 @@ import CarsBuy from "./pages/CarsBuy";
 import CarsSell from "./pages/CarsSell";
 import CarDetails from "./pages/CarDetails";
 import ServiceProviders from "./pages/ServiceProviders";
+// import ResetPasswordForm from "./"
 // import ServiceProviderDetails from "./pages/ServiceDetails";
 import Services from "./pages/Services";
 import ServiceDetails from "./pages/ServiceDetails";
@@ -24,6 +25,8 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import OtpLogin from "./pages/OtpLogin";
 import ForgotPassword from "./pages/ForgotPassword";
+
+import ResetPasswordForm from "./components/auth/ResetPasswordForm";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import FindYourCar from "./pages/FindYourCar";
 import EmailVerification from "./components/auth/EmailVerification";
@@ -61,7 +64,9 @@ const App = () => {
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/otp-login" element={<OtpLogin />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password/:token" element={<ResetPasswordForm />} />
                 
+                {/* Redirects */}
                 {/* Protected Routes */}
                 <Route element={<PrivateRoute />}>
                   <Route path="/cars/sell" element={<CarsSell />} />

@@ -99,26 +99,24 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ onCancel, onCom
   const onEmailSubmit = async (data: EmailFormValues) => {
     setIsLoading(true);
     setEmail(data.email);
-
+  
     try {
-      // Simulate API request
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // In a real app, the API would send an email with a reset link/token
-      // For demo purposes, we'll simulate receiving a token
-      setResetToken('simulated-reset-token');
-
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/forgot-password`,
+        { email: data.email }
+      );
+  
       toast({
         title: "Reset Link Sent",
-        description: "If an account exists with this email, you will receive password reset instructions.",
+        description: response.data.message || "If an account exists with this email, you will receive password reset instructions.",
       });
-
+  
       // Move to the reset password step
       setStep('reset');
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to send password reset link. Please try again later.",
+        description: error.response?.data?.message || "Failed to send password reset link. Please try again later.",
         variant: "destructive",
       });
     } finally {

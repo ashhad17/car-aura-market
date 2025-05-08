@@ -64,7 +64,7 @@ router.put('/updatepassword', protect, updatePassword);
 // @route   POST /api/v1/auth/forgotpassword
 // @desc    Forgot password
 // @access  Public
-router.post('/forgotpassword', forgotPassword);
+router.post('/forgot-password', forgotPassword);
 
 
 
