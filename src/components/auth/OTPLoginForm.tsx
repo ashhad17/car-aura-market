@@ -1,72 +1,91 @@
-import React, { useState, useRef, useEffect } from 'react';
+
+import React, { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import axios from 'axios';
-import { motion, AnimatePresence } from 'framer-motion';
-import { UserRole } from '@/context/AuthContext';
-import { useAuth } from "@/context/AuthContext";
-const OTPLoginForm = ({ onComplete }: { onComplete: () => void }) => {
-  const [step, setStep] = useState<'email' | 'otp'>('email');
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+import { useAuth } from '@/context/AuthContext';
+
+interface OTPLoginFormProps {
+  onComplete: () => void;
+}
+
+const phoneRegex = /^(\+\d{1,3}[- ]?)?\d{10}$/;
+
+const otpStep1Schema = z.object({
+  phone: z.string()
+    .refine(value => phoneRegex.test(value), {
+      message: 'Please enter a valid phone number',
+    }),
+});
+
+const otpStep2Schema = z.object({
+  otp: z.string()
+    .length(6, 'OTP must be exactly 6 digits')
+    .regex(/^\d+$/, 'OTP can only contain numbers'),
+});
+
+type OTPStep1Values = z.infer<typeof otpStep1Schema>;
+type OTPStep2Values = z.infer<typeof otpStep2Schema>;
+
+const OTPLoginForm: React.FC<OTPLoginFormProps> = ({
+  onComplete,
+}) => {
+  const [step, setStep] = useState<1 | 2>(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [phone, setPhone] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const { handleVerifyOTP } = useAuth();
+  const { loginWithOtp } = useAuth();
 
-  // Timer for resending OTP
-  useEffect(() => {
-    if (timeLeft <= 0) return;
+  const step1Form = useForm<OTPStep1Values>({
+    resolver: zodResolver(otpStep1Schema),
+    defaultValues: {
+      phone: '',
+    },
+  });
 
-    const timerId = setInterval(() => {
-      setTimeLeft((prevTime) => prevTime - 1);
-    }, 1000);
+  const step2Form = useForm<OTPStep2Values>({
+    resolver: zodResolver(otpStep2Schema),
+    defaultValues: {
+      otp: '',
+    },
+  });
 
-    return () => clearInterval(timerId);
-  }, [timeLeft]);
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-  };
-
-  const handleSendOTP = async () => {
-    if (!email) {
-      toast({
-        title: 'Invalid Email',
-        description: 'Please enter a valid email address',
-        variant: 'destructive',
-      });
-      return;
-    }
-
+  const handleStep1Submit = async (data: OTPStep1Values) => {
     setIsLoading(true);
+    setError(null);
+    setPhone(data.phone);
 
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/request-otp`,
-        { email }
+      await axios.post(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/send-otp`,
+        { phone: data.phone }
       );
 
       toast({
         title: 'OTP Sent',
-        description: response.data.message || 'A 6-digit verification code has been sent to your email',
+        description: 'A verification code has been sent to your phone',
       });
-
-      setTimeLeft(60); // 60-second cooldown
-      setStep('otp');
-
-      // Focus the first OTP input when we move to the OTP step
-      setTimeout(() => {
-        if (otpInputRefs.current[0]) {
-          otpInputRefs.current[0].focus();
-        }
-      }, 100);
+      
+      setStep(2);
     } catch (error: any) {
+      setError(error?.response?.data?.message || 'Failed to send OTP. Please try again.');
       toast({
-        title: 'Failed to send OTP',
-        description: error.response?.data?.message || 'Please try again later',
+        title: 'Error',
+        description: error?.response?.data?.message || 'Failed to send OTP',
         variant: 'destructive',
       });
     } finally {
@@ -74,147 +93,158 @@ const OTPLoginForm = ({ onComplete }: { onComplete: () => void }) => {
     }
   };
 
-  const handleOTPChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-    const { value } = e.target;
-
-    // Allow only one digit per input
-    if (value && !/^\d$/.test(value)) {
-      return;
-    }
-
-    // Update the OTP array
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    // Auto-focus next input if current input is filled
-    if (value && index < 5 && otpInputRefs.current[index + 1]) {
-      otpInputRefs.current[index + 1].focus();
-    }
-  };
-
-  const handleSubmit = async () => {
+  const handleStep2Submit = async (data: OTPStep2Values) => {
+    setIsLoading(true);
+    setError(null);
 
     try {
-      await handleVerifyOTP(email, otp.join(''));
-      console.log("OTP Login Successful");
-    } catch (error) {
-      console.error("OTP Login Failed:", error);
+      // In a real app, we'd verify the OTP with the backend
+      const response = await loginWithOtp(phone, data.otp);
+      
+      toast({
+        title: 'Success',
+        description: 'You have successfully logged in',
+      });
+      
+      onComplete();
+    } catch (error: any) {
+      setError(error?.response?.data?.message || 'Invalid OTP. Please try again.');
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Invalid OTP',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleResendOTP = () => {
-    if (timeLeft > 0) return;
-    handleSendOTP();
-  };
-
-  const formatTimeLeft = () => {
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    return `${minutes.toString().padStart(1, '0')}:${seconds.toString().padStart(2, '0')}`;
+  const resendOTP = async () => {
+    setIsLoading(true);
+    
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/resend-otp`,
+        { phone }
+      );
+      
+      toast({
+        title: 'OTP Resent',
+        description: 'A new verification code has been sent to your phone',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error?.response?.data?.message || 'Failed to resend OTP',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <AnimatePresence mode="wait">
-        {step === 'email' ? (
-          <motion.div
-            key="email-step"
-            className="space-y-6"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="text-center">
-              <h3 className="text-xl font-bold mb-2">Login with Email</h3>
-              <p className="text-sm text-gray-500">
-                Enter your email address to receive a one-time verification code
-              </p>
-            </div>
-
-            <div className="relative">
-              <label className="absolute left-3 -top-2.5 bg-white px-1 text-xs text-gray-500">
-                Email Address
-              </label>
+    <Card className="w-full border-none shadow-md">
+      <CardHeader>
+        <CardTitle className="text-2xl text-center">
+          {step === 1 ? 'Login with Phone' : 'Enter Verification Code'}
+        </CardTitle>
+        <CardDescription className="text-center">
+          {step === 1 
+            ? 'Enter your phone number to receive a verification code' 
+            : `A 6-digit code has been sent to ${phone}`
+          }
+        </CardDescription>
+      </CardHeader>
+      
+      <CardContent>
+        {error && (
+          <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md mb-4">
+            {error}
+          </div>
+        )}
+        
+        {step === 1 ? (
+          <form onSubmit={step1Form.handleSubmit(handleStep1Submit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number</Label>
               <Input
-                type="email"
-                placeholder="example@example.com"
-                value={email}
-                onChange={handleEmailChange}
-                className="pt-4 h-14 border-gray-300"
-                disabled={isLoading}
+                id="phone"
+                placeholder="+1 (555) 123-4567"
+                {...step1Form.register('phone')}
+                className="w-full"
               />
+              {step1Form.formState.errors.phone && (
+                <p className="text-sm text-destructive">
+                  {step1Form.formState.errors.phone.message}
+                </p>
+              )}
             </div>
-
+            
             <Button
-              type="button"
-              onClick={handleSendOTP}
+              type="submit"
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? 'Sending OTP...' : 'Send OTP'}
+              {isLoading ? 'Sending...' : 'Send Code'}
             </Button>
-          </motion.div>
+          </form>
         ) : (
-          <motion.div
-            key="otp-step"
-            className="space-y-6"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="text-center">
-              <h3 className="text-xl font-bold mb-2">Verify Email</h3>
-              <p className="text-sm text-gray-500">
-                Enter the 6-digit code sent to {email}
-              </p>
-            </div>
-
-            <div className="flex justify-center space-x-2">
-              {otp.map((digit, index) => (
+          <form onSubmit={step2Form.handleSubmit(handleStep2Submit)} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="otp">Verification Code</Label>
+              <div className="flex justify-center">
                 <Input
-                  key={index}
-                  ref={(el) => (otpInputRefs.current[index] = el)}
-                  type="text"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOTPChange(e, index)}
-                  className="w-12 h-12 text-xl text-center font-bold"
-                  disabled={isLoading}
+                  id="otp"
+                  placeholder="Enter 6-digit code"
+                  {...step2Form.register('otp')}
+                  className="w-full text-center tracking-widest font-mono text-lg"
+                  maxLength={6}
                 />
-              ))}
-            </div>
-
-            <div className="flex flex-col items-center justify-center text-sm">
-              <div className="flex items-center text-gray-500">
-                {timeLeft > 0 ? (
-                  <span>Resend OTP in {formatTimeLeft()}</span>
-                ) : (
-                  <button
-                    className="text-primary hover:underline"
-                    onClick={handleResendOTP}
-                    disabled={isLoading}
-                  >
-                    Resend OTP
-                  </button>
-                )}
               </div>
+              {step2Form.formState.errors.otp && (
+                <p className="text-sm text-destructive text-center">
+                  {step2Form.formState.errors.otp.message}
+                </p>
+              )}
             </div>
-
+            
             <Button
-              type="button"
-              onClick={handleSubmit}
+              type="submit"
               className="w-full"
-              disabled={isLoading || otp.join('').length !== 6}
+              disabled={isLoading}
             >
-              {isLoading ? 'Verifying...' : 'Verify & Login'}
+              {isLoading ? 'Verifying...' : 'Verify'}
             </Button>
-          </motion.div>
+            
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground mb-2">
+                Didn't receive a code?
+              </p>
+              <Button
+                type="button"
+                variant="link"
+                onClick={resendOTP}
+                disabled={isLoading}
+                className="h-auto p-0"
+              >
+                Resend Code
+              </Button>
+            </div>
+          </form>
         )}
-      </AnimatePresence>
-    </div>
+      </CardContent>
+      
+      <CardFooter className="flex justify-center">
+        <Button
+          variant="ghost"
+          onClick={() => setStep(1)}
+          className={step === 1 ? 'hidden' : ''}
+        >
+          Change Phone Number
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 

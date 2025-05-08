@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useScrollPosition } from "@/hooks/use-mobile";
+import { useScrollPosition, useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -11,20 +11,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, X, Bell, User, LogOut, Settings, Car } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
+import { Menu, X, Bell, User, LogOut, Settings, Car, Sun, Moon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 
 const Navbar = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const scrolled = useScrollPosition(50);
+  const isMobile = useIsMobile();
   const { pathname } = useLocation();
   const { isAuthenticated, user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
-
-  // Close the mobile menu when route changes
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
 
   const handleLogin = () => {
     navigate('/login');
@@ -43,8 +48,8 @@ const Navbar = () => {
     <header
       className={`fixed top-0 w-full z-50 transition-all duration-300 ${
         scrolled
-          ? "bg-white border-b shadow-sm"
-          : "bg-transparent"
+          ? "bg-background border-b shadow-sm"
+          : "bg-background"
       }`}
     >
       <div className="container mx-auto px-4">
@@ -60,7 +65,7 @@ const Navbar = () => {
               <Link
                 to="/cars/buy"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname.includes("/cars") ? "text-primary" : "text-gray-600"
+                  pathname.includes("/cars") ? "text-primary" : "text-foreground"
                 }`}
               >
                 Buy Cars
@@ -68,7 +73,7 @@ const Navbar = () => {
               <Link
                 to="/cars/sell"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname.includes("/cars") ? "text-primary" : "text-gray-600"
+                  pathname.includes("/sell") ? "text-primary" : "text-foreground"
                 }`}
               >
                 Sell Car
@@ -76,7 +81,7 @@ const Navbar = () => {
               <Link
                 to="/services"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === "/services" ? "text-primary" : "text-gray-600"
+                  pathname === "/services" ? "text-primary" : "text-foreground"
                 }`}
               >
                 Services
@@ -84,7 +89,7 @@ const Navbar = () => {
               <Link
                 to="/service-providers"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === "/service-providers" ? "text-primary" : "text-gray-600"
+                  pathname === "/service-providers" ? "text-primary" : "text-foreground"
                 }`}
               >
                 Service Providers
@@ -92,7 +97,7 @@ const Navbar = () => {
               <Link
                 to="/find-your-car"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === "/find-your-car" ? "text-primary" : "text-gray-600"
+                  pathname === "/find-your-car" ? "text-primary" : "text-foreground"
                 }`}
               >
                 Find Your Car
@@ -100,7 +105,7 @@ const Navbar = () => {
               <Link
                 to="/about"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
-                  pathname === "/about" ? "text-primary" : "text-gray-600"
+                  pathname === "/about" ? "text-primary" : "text-foreground"
                 }`}
               >
                 About
@@ -108,28 +113,179 @@ const Navbar = () => {
             </nav>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - Now using Sheet component for sidebar */}
           <div className="flex md:hidden">
-            <button
-              type="button"
-              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              <span className="sr-only">Toggle main menu</span>
-              {mobileMenuOpen ? (
-                <X className="h-6 w-6" aria-hidden="true" />
-              ) : (
-                <Menu className="h-6 w-6" aria-hidden="true" />
-              )}
-            </button>
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="h-10 w-10 p-2"
+                  aria-label="Toggle menu"
+                >
+                  <Menu className="h-5 w-5" aria-hidden="true" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[80%] sm:w-[350px]">
+                <SheetHeader className="mb-5">
+                  <SheetTitle className="text-left">
+                    <Link to="/" className="flex items-center">
+                      <span className="text-xl font-bold text-primary">
+                        Wheels<span className="text-secondary">Trust</span>
+                      </span>
+                    </Link>
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col space-y-3">
+                  <SheetClose asChild>
+                    <Link
+                      to="/cars/buy"
+                      className="text-foreground hover:text-primary py-2 px-3 rounded-md hover:bg-muted transition-colors"
+                    >
+                      Buy Cars
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link
+                      to="/cars/sell"
+                      className="text-foreground hover:text-primary py-2 px-3 rounded-md hover:bg-muted transition-colors"
+                    >
+                      Sell Car
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link
+                      to="/services"
+                      className="text-foreground hover:text-primary py-2 px-3 rounded-md hover:bg-muted transition-colors"
+                    >
+                      Services
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link
+                      to="/service-providers"
+                      className="text-foreground hover:text-primary py-2 px-3 rounded-md hover:bg-muted transition-colors"
+                    >
+                      Service Providers
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link
+                      to="/find-your-car"
+                      className="text-foreground hover:text-primary py-2 px-3 rounded-md hover:bg-muted transition-colors"
+                    >
+                      Find Your Car
+                    </Link>
+                  </SheetClose>
+                  <SheetClose asChild>
+                    <Link
+                      to="/about"
+                      className="text-foreground hover:text-primary py-2 px-3 rounded-md hover:bg-muted transition-colors"
+                    >
+                      About
+                    </Link>
+                  </SheetClose>
+                  
+                  <div className="border-t pt-4 mt-4">
+                    {isAuthenticated ? (
+                      <>
+                        <SheetClose asChild>
+                          <Link 
+                            to="/profile" 
+                            className="flex items-center py-2 px-3 rounded-md hover:bg-muted transition-colors"
+                          >
+                            <User className="h-4 w-4 mr-2" />
+                            Profile
+                          </Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Link 
+                            to="/notifications" 
+                            className="flex items-center py-2 px-3 rounded-md hover:bg-muted transition-colors"
+                          >
+                            <Bell className="h-4 w-4 mr-2" />
+                            Notifications
+                          </Link>
+                        </SheetClose>
+                        {user?.role === 'admin' && (
+                          <SheetClose asChild>
+                            <Link 
+                              to="/admin-dashboard" 
+                              className="flex items-center py-2 px-3 rounded-md hover:bg-muted transition-colors"
+                            >
+                              <Settings className="h-4 w-4 mr-2" />
+                              Admin Dashboard
+                            </Link>
+                          </SheetClose>
+                        )}
+                        {user?.role === 'service_provider' && (
+                          <SheetClose asChild>
+                            <Link 
+                              to="/service-provider-dashboard" 
+                              className="flex items-center py-2 px-3 rounded-md hover:bg-muted transition-colors"
+                            >
+                              <Settings className="h-4 w-4 mr-2" />
+                              Provider Dashboard
+                            </Link>
+                          </SheetClose>
+                        )}
+                        <SheetClose asChild>
+                          <button
+                            onClick={handleLogout}
+                            className="flex w-full items-center py-2 px-3 rounded-md hover:bg-muted transition-colors"
+                          >
+                            <LogOut className="h-4 w-4 mr-2" />
+                            Logout
+                          </button>
+                        </SheetClose>
+                      </>
+                    ) : (
+                      <div className="space-y-2">
+                        <SheetClose asChild>
+                          <Button 
+                            onClick={handleLogin}
+                            variant="outline"
+                            className="w-full"
+                          >
+                            Login
+                          </Button>
+                        </SheetClose>
+                        <SheetClose asChild>
+                          <Button 
+                            onClick={handleSignUp}
+                            className="w-full"
+                          >
+                            Sign Up
+                          </Button>
+                        </SheetClose>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-full"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
+
             {isAuthenticated ? (
               <>
                 <Link to="/notifications" className="relative">
-                  <Bell className="h-5 w-5 text-gray-600 hover:text-primary transition-colors" />
+                  <Bell className="h-5 w-5 text-foreground hover:text-primary transition-colors" />
                   <span className="absolute -top-1 -right-1 h-4 w-4 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
                     3
                   </span>
@@ -142,13 +298,13 @@ const Navbar = () => {
                           src={user?.avatar || ""}
                           alt={user?.name || "User avatar"}
                         />
-                        <AvatarFallback className="bg-primary text-white">
+                        <AvatarFallback className="bg-primary text-primary-foreground">
                           {user?.name?.charAt(0) || "U"}
                         </AvatarFallback>
                       </Avatar>
                     </div>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuItem onClick={() => navigate('/profile')}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
@@ -187,107 +343,10 @@ const Navbar = () => {
                 </Button>
                 <Button
                   onClick={handleSignUp}
-                  className="bg-primary hover:bg-primary/90 text-white"
                 >
                   Sign Up
                 </Button>
               </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      <div
-        className={`md:hidden ${
-          mobileMenuOpen ? "block" : "hidden"
-        } border-t`}
-      >
-        <div className="space-y-1 px-4 py-3">
-          <Link
-            to="/cars/buy"
-            className="block py-2 text-base font-medium text-gray-700 hover:text-primary"
-          >
-            Buy Cars
-          </Link>
-          <Link
-            to="/services"
-            className="block py-2 text-base font-medium text-gray-700 hover:text-primary"
-          >
-            Services
-          </Link>
-          <Link
-            to="/service-providers"
-            className="block py-2 text-base font-medium text-gray-700 hover:text-primary"
-          >
-            Service Providers
-          </Link>
-          <Link
-            to="/find-your-car"
-            className="block py-2 text-base font-medium text-gray-700 hover:text-primary"
-          >
-            Find Your Car
-          </Link>
-          <Link
-            to="/about"
-            className="block py-2 text-base font-medium text-gray-700 hover:text-primary"
-          >
-            About
-          </Link>
-          <div className="py-2">
-            {isAuthenticated ? (
-              <>
-                <Link
-                  to="/profile"
-                  className="block py-2 text-base font-medium text-gray-700 hover:text-primary"
-                >
-                  Profile
-                </Link>
-                <Link
-                  to="/notifications"
-                  className="block py-2 text-base font-medium text-gray-700 hover:text-primary"
-                >
-                  Notifications
-                </Link>
-                {user?.role === 'admin' && (
-                  <Link
-                    to="/admin-dashboard"
-                    className="block py-2 text-base font-medium text-gray-700 hover:text-primary"
-                  >
-                    Admin Dashboard
-                  </Link>
-                )}
-                {user?.role === 'service_provider' && (
-                  <Link
-                    to="/service-provider-dashboard"
-                    className="block py-2 text-base font-medium text-gray-700 hover:text-primary"
-                  >
-                    Provider Dashboard
-                  </Link>
-                )}
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left py-2 text-base font-medium text-gray-700 hover:text-primary"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <div className="pt-4 pb-2 space-y-2">
-                <Button
-                  onClick={handleLogin}
-                  variant="outline"
-                  className="w-full"
-                >
-                  Login
-                </Button>
-                <Button 
-                  onClick={handleSignUp} 
-                  className="w-full bg-primary hover:bg-primary/90 text-white"
-                >
-                  Sign Up
-                </Button>
-              </div>
             )}
           </div>
         </div>

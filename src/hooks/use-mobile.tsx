@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768
@@ -17,6 +18,7 @@ export function useIsMobile() {
 
   return !!isMobile
 }
+
 export function useScrollPosition(offset: number = 0) {
   const [scrolled, setScrolled] = React.useState(false);
 

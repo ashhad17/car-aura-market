@@ -107,6 +107,7 @@ export default {
 				"accordion-down": "accordion-down 0.2s ease-out",
 				"accordion-up": "accordion-up 0.2s ease-out",
 				"fade-in": "fade-in 0.3s ease-out",
+				"fade-out": "fade-out 0.3s ease-out",
 				"scale-in": "scale-in 0.2s ease-out",
 				"slide-in-right": "slide-in-right 0.3s ease-out",
 				"slide-in-bottom": "slide-in-bottom 0.4s ease-out",
@@ -114,6 +115,10 @@ export default {
 			fontFamily: {
 				sans: ['Inter', 'sans-serif'],
 			},
+			transitionProperty: {
+        'height': 'height',
+        'spacing': 'margin, padding',
+      }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
