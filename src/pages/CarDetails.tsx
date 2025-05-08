@@ -20,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import axios from "axios";
 
 // Sample car data
 const carData = {
@@ -69,7 +70,29 @@ const carData = {
   location: "Springfield, IL",
   listedDate: "2023-07-15"
 };
-
+interface CarListing {
+  _id: string;
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  mileage: number;
+  condition: "new" | "used" | "certified";
+  status: "active" | "sold" | "pending" | "draft";
+  images:
+  {
+    url: string;
+    publicId:string;
+  };
+  description: string;
+  features: string[];
+  seller: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  createdAt: string;
+}
 const CarDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -77,29 +100,42 @@ const CarDetails = () => {
   const { toast } = useToast();
   
   const [isLoading, setIsLoading] = useState(true);
-  const [carDetails, setCarDetails] = useState<typeof carData | null>(null);
+  const [carDetails, setCarDetails] = useState(null);
   const [selectedImage, setSelectedImage] = useState<string>("");
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string>("");
   
   useEffect(() => {
-    // In a real app, fetch car details from API
     const fetchCarDetails = async () => {
       setIsLoading(true);
       try {
-        // Simulate API call
-        setTimeout(() => {
-          setCarDetails(carData);
-          setSelectedImage(carData.images[0]);
-          setIsLoading(false);
-        }, 800);
+        const response = await axios.get<{ success: boolean; data: CarListing }>(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/cars/${id}`
+        );
+    
+        if (response.data.success) {
+          setCarDetails(response.data.data);
+          setSelectedImage(response.data.data.images[0].url); // Set the first image as the default
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to fetch car details",
+            variant: "destructive",
+          });
+        }
       } catch (error) {
         console.error("Error fetching car details:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load car details. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
         setIsLoading(false);
       }
     };
-    
+  
     fetchCarDetails();
   }, [id]);
   
@@ -245,12 +281,12 @@ const CarDetails = () => {
                 {carDetails.images.map((image, index) => (
                   <img 
                     key={index}
-                    src={image}
+                    src={image.url}
                     alt={`${carDetails.title} - image ${index+1}`}
                     className={`h-20 w-full object-cover rounded-md cursor-pointer transition-all ${
-                      selectedImage === image ? 'ring-2 ring-primary' : 'opacity-80 hover:opacity-100'
+                      selectedImage === image.url ? 'ring-2 ring-primary' : 'opacity-80 hover:opacity-100'
                     }`}
-                    onClick={() => setSelectedImage(image)}
+                    onClick={() => setSelectedImage(image.url)}
                   />
                 ))}
               </div>
