@@ -8,7 +8,12 @@ const {
   forgotPassword,
   resetPassword,
   updateDetails,
-  updatePassword
+  updatePassword,
+  requestOtp,
+  verifyOtp,
+  verifyEmail,
+  requestPasswordReset
+
 } = require('../controllers/authController');
 
 const { protect } = require('../middleware/auth');
@@ -27,6 +32,19 @@ router.post('/login', login);
 // @desc    Logout user
 // @access  Private
 router.get('/logout', protect, logout);
+
+// @route   POST /api/v1/auth/request-otp
+// const auth = require('../controllers/auth.controller');
+
+
+router.get('/verify-email/:token',verifyEmail);
+
+
+router.post('/request-reset', requestPasswordReset);
+router.post('/reset-password/:token', resetPassword);
+
+router.post('/request-otp', requestOtp);
+router.post('/verify-otp', verifyOtp);
 
 // @route   GET /api/v1/auth/me
 // @desc    Get current user
@@ -48,9 +66,6 @@ router.put('/updatepassword', protect, updatePassword);
 // @access  Public
 router.post('/forgotpassword', forgotPassword);
 
-// @route   PUT /api/v1/auth/resetpassword/:resettoken
-// @desc    Reset password
-// @access  Public
-router.put('/resetpassword/:resettoken', resetPassword);
+
 
 module.exports = router; 

@@ -194,10 +194,10 @@ const SignUpForm = ({ onComplete, onCancel }: { onComplete: () => void; onCancel
         userData
       );
 
-      if (response.data.success) {
+      if (response.data?.message) {
         toast({
           title: 'Registration successful!',
-          description: 'Your account has been created successfully.',
+          description: 'Your account has been created successfully.Please Verify your Email to continue using the account.',
         });
         
         // Wait for the toast to be visible before proceeding
@@ -206,7 +206,7 @@ const SignUpForm = ({ onComplete, onCancel }: { onComplete: () => void; onCancel
         }, 1000);
       }
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || 'An error occurred during registration';
+      const errorMessage = error.response?.data?.error?.message || 'An error occurred during registration';
       toast({
         title: 'Registration failed',
         description: errorMessage,

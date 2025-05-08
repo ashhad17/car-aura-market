@@ -105,7 +105,7 @@ const ServiceGrid: React.FC<ServiceGridProps> = ({ isPreview = false }) => {
   };
 
   const handleViewDetails = (providerId: string) => {
-    navigate(`/services/${providerId}`);
+    navigate(`/service-providers/${providerId}`);
   };
 
   if (isLoading) {

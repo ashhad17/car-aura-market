@@ -11,7 +11,7 @@ import CarsBuy from "./pages/CarsBuy";
 import CarsSell from "./pages/CarsSell";
 import CarDetails from "./pages/CarDetails";
 import ServiceProviders from "./pages/ServiceProviders";
-import ServiceProviderDetails from "./pages/ServiceDetails";
+// import ServiceProviderDetails from "./pages/ServiceDetails";
 import Services from "./pages/Services";
 import ServiceDetails from "./pages/ServiceDetails";
 import About from "./pages/About";
@@ -26,7 +26,9 @@ import OtpLogin from "./pages/OtpLogin";
 import ForgotPassword from "./pages/ForgotPassword";
 import PrivateRoute from "./components/auth/PrivateRoute";
 import FindYourCar from "./pages/FindYourCar";
+import EmailVerification from "./components/auth/EmailVerification";
 import CarDetailsAdmin from "./components/car/CarDetailsAdmin";
+import ServiceProviderDetails from "./pages/ServiceProviderDetails";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -50,6 +52,9 @@ const App = () => {
                 <Route path="/services/:id" element={<ServiceDetails />} />
                 <Route path="/find-your-car" element={<FindYourCar />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/email-verification/:token" element={<EmailVerification />} />
+                
+                {/* 404 Not Found */}
                 
                 {/* Auth Routes */}
                 <Route path="/login" element={<Login />} />

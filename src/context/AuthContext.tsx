@@ -31,6 +31,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [responseData, setResponseData] = useState<any>(null);  
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -52,7 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
         }
       );
-      
+      setResponseData(response); // Store the response data for debugging
       if (response.data.success) {
         const userData = response.data.data;
         setUser({
@@ -78,7 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/login`, 
         { email, password }
       );
-      
+      setResponseData(response); // Store the response data for debugging
       if (response.data.success) {
         console.log("Login response:", response.data);
         
@@ -106,31 +107,43 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           title: "Login Successful",
           description: "Welcome back!"
         });
+      } else {
+        console.error("Login failed:", response.data.error);
+        toast({
+          title: "Login Failed",
+          description: response.data.error || "Invalid credentials",
+          variant: "destructive"
+        });
       }
     } catch (error: any) {
       console.error("Login error:", error);
+  
+      // Extract error message from backend response
+      const errorMessage = error.response?.data?.error?.message || "An error occurred during login.";
+  
+      // Display the error message in the toast
       toast({
         title: "Login Failed",
-        description: error.response?.data?.error || "Invalid credentials",
+        description: errorMessage,
         variant: "destructive"
       });
+  
       throw error;
     }
   };
-
   const register = async (name: string, email: string, password: string) => {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/register`, 
         { name, email, password }
       );
-      
+  
       if (response.data.success) {
         const { token, data: userData } = response.data;
-        
+  
         // Save token to localStorage
         localStorage.setItem('token', token);
-        
+  
         // Safely handle potentially missing data
         const user = {
           id: userData?._id || "unknown",
@@ -139,21 +152,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           role: (userData?.role as UserRole) || "user",
           joinedDate: userData?.createdAt ? new Date(userData.createdAt).toISOString().split('T')[0] : undefined
         };
-        
+  
         setUser(user);
-        
+  
         toast({
           title: "Registration Successful",
-          description: "Welcome to WheelsTrust!"
+          description: "Welcome to WheelsTrust! \n"+response.data.message
+        });
+      } else {
+        console.error("Registration failed:", response.data.error);
+        toast({
+          title: "Registration Failed",
+          description: response.data.error || "Could not create account",
+          variant: "destructive"
         });
       }
     } catch (error: any) {
       console.error("Registration error:", error);
+  
+      // Correctly extract the error message from the backend response
+      // const errorMessage = error || "An error occurred during registration.";
+  const errorMessage=error;
+      // Display the error message in the toast
       toast({
         title: "Registration Failed",
-        description: error.response?.data?.error || "Could not create account",
+        description: errorMessage,
         variant: "destructive"
       });
+  
       throw error;
     }
   };

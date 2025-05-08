@@ -48,15 +48,26 @@ exports.getUser = asyncHandler(async (req, res, next) => {
 // @route   POST /api/v1/users
 // @access  Private/Admin
 exports.createUser = asyncHandler(async (req, res, next) => {
+  const { name, email, password, phone, address, avatar, role, status } = req.body;
+
   // Check if email already exists
-  const existingUser = await User.findOne({ email: req.body.email });
+  const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return next(
-      new ErrorResponse(`User with email ${req.body.email} already exists`, 400)
-    );
+    return next(new ErrorResponse(`User with email ${email} already exists`, 400));
   }
 
-  const user = await User.create(req.body);
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const user = await User.create({
+    name,
+    email,
+    password: hashedPassword,
+    phone,
+    address,
+    avatar,
+    role,
+    status,
+  });
 
   // Remove password from response
   const response = { ...user._doc };
@@ -64,7 +75,7 @@ exports.createUser = asyncHandler(async (req, res, next) => {
 
   res.status(201).json({
     success: true,
-    data: response
+    data: response,
   });
 });
 
@@ -74,11 +85,63 @@ exports.createUser = asyncHandler(async (req, res, next) => {
 // @desc    Update user
 // @route   PUT /api/v1/users/:id
 // @access  Private
+// exports.updateUser = asyncHandler(async (req, res, next) => {
+//   if (req.body.password) {
+//     delete req.body.password;
+//   }
+
+//   let user = await User.findById(req.params.id);
+//   if (!user) {
+//     return next(
+//       new ErrorResponse(`User not found with id of ${req.params.id}`, 404)
+//     );
+//   }
+
+//   if (user._id.toString() !== req.user.id && req.user.role !== 'admin') {
+//     return next(
+//       new ErrorResponse(`Not authorized to update this user`, 403)
+//     );
+//   }
+
+//   // Check for email change
+//   if (req.body.email && req.body.email !== user.email) {
+//     const existingUser = await User.findOne({ email: req.body.email });
+//     if (existingUser) {
+//       return next(
+//         new ErrorResponse(`User with email ${req.body.email} already exists`, 400)
+//       );
+//     }
+//   }
+
+//   // If avatarPublicId and avatar are being updated, optionally delete the old image here
+//   if (req.body.avatar && req.body.avatarPublicId && user.avatarPublicId) {
+//     try {
+//       await cloudinary.uploader.destroy(user.avatarPublicId);
+//     } catch (err) {
+//       console.error("Cloudinary delete error:", err);
+//     }
+//   }
+//   // Update user
+//   user = await User.findByIdAndUpdate(req.params.id, {
+//     ...req.body
+//   }, {
+//     new: true,
+//     runValidators: true
+//   }).select('-password');
+
+//   res.status(200).json({
+//     success: true,
+//     data: user
+//   });
+// });
+
 exports.updateUser = asyncHandler(async (req, res, next) => {
+  // Prevent password updates through this route
   if (req.body.password) {
     delete req.body.password;
   }
 
+  // Find the user by ID
   let user = await User.findById(req.params.id);
   if (!user) {
     return next(
@@ -86,13 +149,14 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     );
   }
 
+  // Ensure the user is authorized to update this resource
   if (user._id.toString() !== req.user.id && req.user.role !== 'admin') {
     return next(
       new ErrorResponse(`Not authorized to update this user`, 403)
     );
   }
 
-  // Check for email change
+  // Check for email change and ensure the new email is not already in use
   if (req.body.email && req.body.email !== user.email) {
     const existingUser = await User.findOne({ email: req.body.email });
     if (existingUser) {
@@ -102,7 +166,7 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
     }
   }
 
-  // If avatarPublicId and avatar are being updated, optionally delete the old image here
+  // Handle avatar updates: delete the old avatar from Cloudinary if a new one is provided
   if (req.body.avatar && req.body.avatarPublicId && user.avatarPublicId) {
     try {
       await cloudinary.uploader.destroy(user.avatarPublicId);
@@ -110,17 +174,22 @@ exports.updateUser = asyncHandler(async (req, res, next) => {
       console.error("Cloudinary delete error:", err);
     }
   }
-  // Update user
-  user = await User.findByIdAndUpdate(req.params.id, {
-    ...req.body
-  }, {
-    new: true,
-    runValidators: true
-  }).select('-password');
+
+  // Update the user with the new data
+  user = await User.findByIdAndUpdate(
+    req.params.id,
+    {
+      ...req.body, // Spread the updated fields
+    },
+    {
+      new: true, // Return the updated document
+      runValidators: true, // Ensure validation rules are applied
+    }
+  ).select('-password'); // Exclude the password from the response
 
   res.status(200).json({
     success: true,
-    data: user
+    data: user,
   });
 });
 

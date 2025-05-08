@@ -260,7 +260,7 @@ const CarDetails = () => {
     <div className="min-h-screen flex flex-col">
       <Helmet>
         <title>{carDetails.title} | WheelsTrust</title>
-        <meta name="description" content={`${carDetails.year} ${carDetails.title} - ${carDetails.mileage.toLocaleString()} miles - $${carDetails.price.toLocaleString()}`} />
+        <meta name="description" content={`${carDetails.year} ${carDetails.title} - ${carDetails.mileage.toLocaleString()} miles - ₹${carDetails.price.toLocaleString()}`} />
       </Helmet>
       <Navbar />
       
@@ -321,7 +321,7 @@ const CarDetails = () => {
                 </div>
                 
                 <div className="text-3xl font-bold text-primary mb-6">
-                  ${carDetails.price.toLocaleString()}
+                ₹{carDetails.price.toLocaleString()}
                 </div>
                 
                 <div className="grid grid-cols-2 gap-y-3 mb-6">
