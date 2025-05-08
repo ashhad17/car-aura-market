@@ -4,9 +4,9 @@ export interface Car {
   title: string;
   make: string;
   model: string;
-  year: number | string;
-  price: number | string;
-  mileage: number | string;
+  year: number; // Changed from number | string to number
+  price: number; // Changed from number | string to number
+  mileage: number; // Changed from number | string to number
   condition: string;
   bodyType: string;
   description: string;

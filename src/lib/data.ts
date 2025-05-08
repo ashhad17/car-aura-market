@@ -5,9 +5,9 @@ export interface CarType {
   title: string;
   make: string;
   model: string;
-  year: string | number;
-  price: number; // Changed from string to number
-  mileage: number; // Changed from string to number
+  year: number; // Changed from string | number to number
+  price: number;
+  mileage: number;
   condition: string;
   location: string;
   description: string;
@@ -127,7 +127,7 @@ export const features = [
 //     location: 'New York, NY',
 //     images: [
 //       'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=300&q=80',
-//       'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&w=300&q=80',
+//       'https://images.unsplash.com/photo-1583121274602-3e2820c69889?auto=format&fit=crop&w=300&q=80',
 //       'https://images.unsplash.com/photo-1605559424843-9e4c228d88c0?auto=format&fit=crop&w=300&q=80'
 //     ],
 //     description: 'Reliable and fuel-efficient sedan. Perfect for daily commute.',

@@ -34,6 +34,7 @@ const CarListingPreview: React.FC<CarListingPreviewProps> = ({ cars }) => {
           ...car,
           price: Number(car.price),
           mileage: Number(car.mileage),
+          year: Number(car.year), // Ensure year is converted to a number
         }));
         setCarData(formattedData);
       } else {

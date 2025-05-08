@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -60,6 +61,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
             ...car,
             price: Number(car.price),
             mileage: Number(car.mileage),
+            year: Number(car.year), // Ensure year is converted to a number
           }));
           setCarData(formattedData);
         } else {
