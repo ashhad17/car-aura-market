@@ -18,6 +18,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTheme } from "@/context/ThemeContext";
+import ServiceReviews from "@/components/review/ServiceReviews";
+import { motion } from "framer-motion";
 
 // Dummy service data
 const serviceDetails = {
@@ -104,6 +107,7 @@ const ServiceDetails = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const { isDark } = useTheme();
   
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -151,9 +155,9 @@ const ServiceDetails = () => {
       </Helmet>
       <Navbar />
       
-      <main className="flex-grow pt-24 pb-16 bg-gray-50">
+      <main className={`flex-grow pt-24 pb-16 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
         <div className="container mx-auto px-4">
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-md overflow-hidden`}>
             {/* Hero Section */}
             <div className="relative h-72 md:h-96">
               <img 
@@ -199,43 +203,55 @@ const ServiceDetails = () => {
                 <div className="flex-1">
                   <div className="flex items-start justify-between mb-6">
                     <div>
-                      <h2 className="text-2xl font-semibold mb-1">
+                      <h2 className={`text-2xl font-semibold mb-1 ${isDark ? 'text-white' : ''}`}>
                         ${serviceDetails.price.toFixed(2)}
                       </h2>
-                      <p className="text-gray-600">Provided by {serviceDetails.provider.name}</p>
+                      <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                        Provided by {serviceDetails.provider.name}
+                      </p>
                     </div>
-                    <Button size="lg" onClick={handleBookNow}>
+                    <Button size="lg" onClick={handleBookNow} variant="glow" animation="scale">
                       Book Now
                     </Button>
                   </div>
                   
                   <div className="mb-8">
-                    <h3 className="text-lg font-medium mb-3">Description</h3>
-                    <p className="text-gray-700">{serviceDetails.description}</p>
+                    <h3 className={`text-lg font-medium mb-3 ${isDark ? 'text-white' : ''}`}>Description</h3>
+                    <p className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{serviceDetails.description}</p>
                   </div>
                   
                   <div className="mb-8">
-                    <h3 className="text-lg font-medium mb-3">Service Includes</h3>
+                    <h3 className={`text-lg font-medium mb-3 ${isDark ? 'text-white' : ''}`}>Service Includes</h3>
                     <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {serviceDetails.includesDetails.map((item, index) => (
-                        <li key={index} className="flex items-center">
+                        <motion.li 
+                          key={index} 
+                          className="flex items-center"
+                          initial={{ opacity: 0, x: -5 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                        >
                           <CheckCircle className="h-4 w-4 text-green-500 mr-2" />
-                          <span className="text-gray-700">{item}</span>
-                        </li>
+                          <span className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{item}</span>
+                        </motion.li>
                       ))}
                     </ul>
                   </div>
                   
                   <div className="mb-8">
-                    <h3 className="text-lg font-medium mb-3">Gallery</h3>
+                    <h3 className={`text-lg font-medium mb-3 ${isDark ? 'text-white' : ''}`}>Gallery</h3>
                     <div className="grid grid-cols-3 gap-4">
                       {serviceDetails.gallery.map((image, index) => (
-                        <img 
+                        <motion.img 
                           key={index}
                           src={image}
                           alt={`${serviceDetails.name} - image ${index+1}`}
                           className={`w-full h-24 object-cover rounded-md cursor-pointer transition-all ${selectedImage === image ? 'ring-2 ring-primary' : 'opacity-90 hover:opacity-100'}`}
                           onClick={() => setSelectedImage(image)}
+                          whileHover={{ scale: 1.05 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: index * 0.1 }}
                         />
                       ))}
                     </div>
@@ -252,22 +268,34 @@ const ServiceDetails = () => {
                       <TabsContent value="faq">
                         <div className="space-y-4">
                           {serviceDetails.faqs.map((faq, index) => (
-                            <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                              <h4 className="font-medium mb-2">{faq.question}</h4>
-                              <p className="text-gray-600 text-sm">{faq.answer}</p>
-                            </div>
+                            <motion.div 
+                              key={index} 
+                              className={`p-4 ${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg`}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                            >
+                              <h4 className={`font-medium mb-2 ${isDark ? 'text-white' : ''}`}>{faq.question}</h4>
+                              <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm`}>{faq.answer}</p>
+                            </motion.div>
                           ))}
                         </div>
                       </TabsContent>
                       
                       <TabsContent value="reviews">
                         <div className="space-y-4">
-                          {serviceDetails.reviews.map((review) => (
-                            <div key={review.id} className="p-4 bg-gray-50 rounded-lg">
+                          {serviceDetails.reviews.map((review, index) => (
+                            <motion.div 
+                              key={review.id} 
+                              className={`p-4 ${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg`}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: index * 0.1 }}
+                            >
                               <div className="flex justify-between items-start mb-2">
                                 <div>
-                                  <div className="font-medium">{review.author}</div>
-                                  <div className="text-sm text-gray-500">{review.date}</div>
+                                  <div className={`font-medium ${isDark ? 'text-white' : ''}`}>{review.author}</div>
+                                  <div className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{review.date}</div>
                                 </div>
                                 <div className="flex items-center text-yellow-500">
                                   {Array.from({ length: 5 }).map((_, i) => (
@@ -278,19 +306,19 @@ const ServiceDetails = () => {
                                   ))}
                                 </div>
                               </div>
-                              <p className="text-gray-600 text-sm">{review.comment}</p>
-                            </div>
+                              <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm`}>{review.comment}</p>
+                            </motion.div>
                           ))}
                         </div>
                       </TabsContent>
                       
                       <TabsContent value="location">
-                        <div className="p-4 bg-gray-50 rounded-lg">
+                        <div className={`p-4 ${isDark ? 'bg-gray-700' : 'bg-gray-50'} rounded-lg`}>
                           <div className="flex items-start gap-3 mb-3">
-                            <MapPin className="h-5 w-5 text-gray-500 mt-0.5" />
+                            <MapPin className={`h-5 w-5 ${isDark ? 'text-gray-300' : 'text-gray-500'} mt-0.5`} />
                             <div>
-                              <h4 className="font-medium">{serviceDetails.provider.name}</h4>
-                              <p className="text-gray-600">{serviceDetails.provider.address}</p>
+                              <h4 className={`font-medium ${isDark ? 'text-white' : ''}`}>{serviceDetails.provider.name}</h4>
+                              <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{serviceDetails.provider.address}</p>
                             </div>
                           </div>
                           <div className="aspect-video bg-gray-200 rounded-lg mb-3">
@@ -300,34 +328,43 @@ const ServiceDetails = () => {
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
-                            <Button variant="outline" size="sm">Get Directions</Button>
-                            <Button variant="outline" size="sm">Contact Provider</Button>
+                            <Button variant="outline" size="sm" animation="scale">Get Directions</Button>
+                            <Button variant="outline" size="sm" animation="scale">Contact Provider</Button>
                           </div>
                         </div>
                       </TabsContent>
                     </Tabs>
                   </div>
+
+                  {/* Reviews Section */}
+                  <div className="mt-12">
+                    <ServiceReviews 
+                      serviceProviderId={serviceDetails.id} 
+                      rating={serviceDetails.provider.rating}
+                      reviewCount={serviceDetails.provider.totalReviews}
+                    />
+                  </div>
                 </div>
                 
                 {/* Right Column - Booking Card (Desktop) */}
                 <div className="hidden md:block w-72 lg:w-80">
-                  <div className="bg-gray-50 rounded-xl p-5 sticky top-24 shadow-sm">
-                    <h3 className="text-lg font-semibold mb-4">Book This Service</h3>
+                  <div className={`${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-50'} rounded-xl p-5 sticky top-24 shadow-sm border glow-card`}>
+                    <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : ''}`}>Book This Service</h3>
                     
                     <div className="space-y-4">
                       <div>
-                        <Label>Select Date</Label>
+                        <Label className={isDark ? 'text-white' : ''}>Select Date</Label>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
                               variant="outline"
-                              className="w-full justify-start text-left font-normal mt-1"
+                              className={`w-full justify-start text-left font-normal mt-1 ${isDark ? 'bg-gray-800 border-gray-600 text-gray-200' : ''}`}
                             >
                               <CalendarIcon className="mr-2 h-4 w-4" />
                               {selectedDate ? format(selectedDate, 'PPP') : <span>Pick a date</span>}
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
+                          <PopoverContent className={`w-auto p-0 ${isDark ? 'bg-gray-800 border-gray-600' : ''}`}>
                             <Calendar
                               mode="single"
                               selected={selectedDate}
@@ -337,18 +374,19 @@ const ServiceDetails = () => {
                                 date < new Date(new Date().setHours(0, 0, 0, 0)) ||
                                 date > new Date(new Date().setMonth(new Date().getMonth() + 2))
                               }
+                              className={isDark ? 'bg-gray-800 text-white' : ''}
                             />
                           </PopoverContent>
                         </Popover>
                       </div>
                       
                       <div>
-                        <Label>Select Time</Label>
+                        <Label className={isDark ? 'text-white' : ''}>Select Time</Label>
                         <Select onValueChange={setSelectedTime}>
-                          <SelectTrigger className="w-full mt-1">
+                          <SelectTrigger className={`w-full mt-1 ${isDark ? 'bg-gray-800 border-gray-600 text-gray-200' : ''}`}>
                             <SelectValue placeholder="Select time" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className={isDark ? 'bg-gray-800 border-gray-600' : ''}>
                             {availableTimes.map((time) => (
                               <SelectItem key={time} value={time}>
                                 {time}
@@ -359,12 +397,12 @@ const ServiceDetails = () => {
                       </div>
                       
                       <div>
-                        <Label>Vehicle Info</Label>
+                        <Label className={isDark ? 'text-white' : ''}>Vehicle Info</Label>
                         <Select>
-                          <SelectTrigger className="w-full mt-1">
+                          <SelectTrigger className={`w-full mt-1 ${isDark ? 'bg-gray-800 border-gray-600 text-gray-200' : ''}`}>
                             <SelectValue placeholder="Select vehicle" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className={isDark ? 'bg-gray-800 border-gray-600' : ''}>
                             <SelectItem value="add-new">+ Add New Vehicle</SelectItem>
                             <SelectItem value="toyota-camry">Toyota Camry (2020)</SelectItem>
                             <SelectItem value="honda-accord">Honda Accord (2018)</SelectItem>
@@ -372,22 +410,22 @@ const ServiceDetails = () => {
                         </Select>
                       </div>
                       
-                      <div className="pt-4 border-t">
+                      <div className={`pt-4 border-t ${isDark ? 'border-gray-600' : ''}`}>
                         <div className="flex justify-between mb-2">
-                          <span className="text-gray-600">Service Price</span>
-                          <span>${serviceDetails.price.toFixed(2)}</span>
+                          <span className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Service Price</span>
+                          <span className={isDark ? 'text-white' : ''}>${serviceDetails.price.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between font-medium">
-                          <span>Total</span>
-                          <span>${serviceDetails.price.toFixed(2)}</span>
+                          <span className={isDark ? 'text-white' : ''}>Total</span>
+                          <span className={isDark ? 'text-white' : ''}>${serviceDetails.price.toFixed(2)}</span>
                         </div>
                       </div>
                       
-                      <Button className="w-full" onClick={handleBookNow}>
+                      <Button className="w-full" onClick={handleBookNow} variant="glow" animation="scale">
                         Book Now
                       </Button>
                       
-                      <div className="text-xs text-gray-500 text-center">
+                      <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'} text-center`}>
                         <AlertCircle className="h-3 w-3 inline-block mr-1" />
                         You won't be charged until after the service is completed
                       </div>
@@ -402,29 +440,29 @@ const ServiceDetails = () => {
       
       {/* Booking Dialog */}
       <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className={`sm:max-w-[500px] ${isDark ? 'bg-gray-800 text-white border-gray-700' : ''}`}>
           <DialogHeader>
-            <DialogTitle>Book {serviceDetails.name}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className={isDark ? 'text-white' : ''}>Book {serviceDetails.name}</DialogTitle>
+            <DialogDescription className={isDark ? 'text-gray-300' : ''}>
               Select your preferred date and time for this service
             </DialogDescription>
           </DialogHeader>
           
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date" className={isDark ? 'text-white' : ''}>Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
                     id="date"
                     variant="outline"
-                    className="w-full justify-start text-left font-normal"
+                    className={`w-full justify-start text-left font-normal ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : ''}`}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {selectedDate ? format(selectedDate, 'PPP') : <span>Pick a date</span>}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
+                <PopoverContent className={`w-auto p-0 ${isDark ? 'bg-gray-700 border-gray-600' : ''}`}>
                   <Calendar
                     mode="single"
                     selected={selectedDate}
@@ -434,18 +472,19 @@ const ServiceDetails = () => {
                       date < new Date(new Date().setHours(0, 0, 0, 0)) ||
                       date > new Date(new Date().setMonth(new Date().getMonth() + 2))
                     }
+                    className={isDark ? 'bg-gray-700 text-white' : ''}
                   />
                 </PopoverContent>
               </Popover>
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="time">Time</Label>
+              <Label htmlFor="time" className={isDark ? 'text-white' : ''}>Time</Label>
               <Select onValueChange={setSelectedTime}>
-                <SelectTrigger id="time">
+                <SelectTrigger id="time" className={isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : ''}>
                   <SelectValue placeholder="Select time" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={isDark ? 'bg-gray-700 border-gray-600' : ''}>
                   {availableTimes.map((time) => (
                     <SelectItem key={time} value={time}>
                       {time}
@@ -456,12 +495,12 @@ const ServiceDetails = () => {
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="vehicle">Vehicle</Label>
+              <Label htmlFor="vehicle" className={isDark ? 'text-white' : ''}>Vehicle</Label>
               <Select>
-                <SelectTrigger id="vehicle">
+                <SelectTrigger id="vehicle" className={isDark ? 'bg-gray-700 border-gray-600 text-gray-200' : ''}>
                   <SelectValue placeholder="Select vehicle" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className={isDark ? 'bg-gray-700 border-gray-600' : ''}>
                   <SelectItem value="add-new">+ Add New Vehicle</SelectItem>
                   <SelectItem value="toyota-camry">Toyota Camry (2020)</SelectItem>
                   <SelectItem value="honda-accord">Honda Accord (2018)</SelectItem>
@@ -470,20 +509,24 @@ const ServiceDetails = () => {
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="notes">Special Requests (optional)</Label>
+              <Label htmlFor="notes" className={isDark ? 'text-white' : ''}>Special Requests (optional)</Label>
               <Textarea
                 id="notes"
                 placeholder="Any special instructions or requests..."
-                className="resize-none"
+                className={`resize-none ${isDark ? 'bg-gray-700 border-gray-600 text-gray-200 placeholder:text-gray-400' : ''}`}
               />
             </div>
           </div>
           
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsBookingDialogOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsBookingDialogOpen(false)}
+              className={isDark ? 'bg-gray-700 border-gray-600 text-gray-200 hover:bg-gray-600' : ''}
+            >
               Cancel
             </Button>
-            <Button onClick={handleBookingSubmit}>
+            <Button onClick={handleBookingSubmit} variant="glow" animation="scale">
               Confirm Booking
             </Button>
           </DialogFooter>

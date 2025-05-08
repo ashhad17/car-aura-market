@@ -4,16 +4,14 @@ import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import ServicesList from "@/components/services/ServicesList";
 import ServiceFilters from "@/components/services/ServiceFilters";
+import { useTheme } from "@/context/ThemeContext";
+import { motion } from "framer-motion";
 
 const Services = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const [activeCategory, setActiveCategory] = React.useState("all");
+  const { isDark } = useTheme();
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -22,17 +20,22 @@ const Services = () => {
         <meta name="description" content="Browse our comprehensive automotive services including maintenance, repairs, detailing, and inspections." />
       </Helmet>
       <Navbar />
-      <main className="flex-grow pt-24 pb-16 bg-gray-50">
+      <main className={`flex-grow pt-24 pb-16 ${isDark ? 'bg-gray-900 text-gray-100' : 'bg-gray-50'}`}>
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
+          <motion.div 
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <h1 className="text-3xl md:text-5xl font-bold mb-4">
               Automotive <span className="text-primary">Services</span>
             </h1>
-            <p className="text-gray-600 max-w-3xl mx-auto">
+            <p className={`max-w-3xl mx-auto ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
               Explore our comprehensive range of automotive services designed to keep your vehicle in optimal condition. 
               From routine maintenance to specialized repairs, our skilled professionals have got you covered.
             </p>
-          </div>
+          </motion.div>
           
           <div className="grid md:grid-cols-4 gap-6 mb-6">
             <div className="md:col-span-1">
@@ -41,7 +44,7 @@ const Services = () => {
             
             <div className="md:col-span-3">
               <Tabs defaultValue="all" className="w-full" onValueChange={setActiveCategory} value={activeCategory}>
-                <TabsList className="grid grid-cols-5 mb-8">
+                <TabsList className={`grid grid-cols-5 mb-8 ${isDark ? 'bg-gray-800' : ''}`}>
                   <TabsTrigger value="all">All</TabsTrigger>
                   <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
                   <TabsTrigger value="repair">Repair</TabsTrigger>

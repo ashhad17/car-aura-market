@@ -26,7 +26,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
       transition={{ duration: 0.4 }}
       whileHover={{ scale: 1.03 }}
     >
-      <Card glowEffect className="overflow-hidden transition-all hover:shadow-lg">
+      <Card glowEffect hoverAnimation className="overflow-hidden transition-all hover:shadow-lg">
         <div className="relative h-48 w-full overflow-hidden">
           <img
             src={serviceImage}
@@ -39,7 +39,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
         </div>
         <CardContent className="p-5">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="text-lg font-bold truncate">{service.name}</h3>
+            <h3 className={`text-lg font-bold truncate ${isDark ? 'text-white' : ''}`}>{service.name}</h3>
             <Badge variant={service.available ? "default" : "outline"} className={service.available ? "animate-glow-pulse" : ""}>
               {service.available ? "Available" : "Unavailable"}
             </Badge>
@@ -61,7 +61,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
           
           {service.provider && (
             <div className="flex items-center gap-2 mb-3">
-              <div className="h-8 w-8 rounded-full bg-gray-100 dark:bg-gray-700 overflow-hidden">
+              <div className={`h-8 w-8 rounded-full ${isDark ? 'bg-gray-700' : 'bg-gray-100'} overflow-hidden`}>
                 {service.provider.image ? (
                   <img 
                     src={service.provider.image} 
@@ -75,7 +75,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
                 )}
               </div>
               <div>
-                <p className="text-sm font-medium flex items-center gap-1">
+                <p className={`text-sm font-medium flex items-center gap-1 ${isDark ? 'text-white' : ''}`}>
                   {service.provider.name}
                   {service.provider.verified && (
                     <CheckCircle className="h-3 w-3 text-blue-500" />
@@ -92,8 +92,8 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
           )}
           
           <div className="flex justify-between items-center mt-4">
-            <p className="font-bold text-xl">₹{service.price}</p>
-            <Button variant="glow" asChild>
+            <p className={`font-bold text-xl ${isDark ? 'text-white' : ''}`}>₹{service.price}</p>
+            <Button variant="glow" animation="scale" asChild>
               <Link to={`/services/${service.id}`}>View Details</Link>
             </Button>
           </div>
