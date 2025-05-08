@@ -90,7 +90,12 @@ interface CarListing {
     _id: string;
     name: string;
     email: string;
+    phone: string;
+    location: string;
+
+
   };
+  totalDriven:string;
   createdAt: string;
 }
 const CarDetails = () => {
@@ -139,7 +144,7 @@ const CarDetails = () => {
     fetchCarDetails();
   }, [id]);
   
-  const handleTestDrive = () => {
+  const handleBookNow = () => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -151,7 +156,7 @@ const CarDetails = () => {
     });
   };
 
-  const handleBookNow = () => {
+  const handleTestDrive = () => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
@@ -160,7 +165,7 @@ const CarDetails = () => {
     setIsBookingDialogOpen(true);
   };
   
-  const handleBookingSubmit = () => {
+  const handleTestDriveSubmit = () => {
     if (!selectedDate || !selectedTime) {
       toast({
         title: "Missing information",
@@ -301,14 +306,14 @@ const CarDetails = () => {
                     <p className="text-gray-600">{carDetails.condition}</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button 
+                    {/* <Button 
                       size="icon" 
                       variant="outline"
                       onClick={handleAddToFavorites}
                       title="Add to favorites"
                     >
                       <Heart className="h-5 w-5" />
-                    </Button>
+                    </Button> */}
                     <Button 
                       size="icon" 
                       variant="outline"
@@ -346,6 +351,7 @@ const CarDetails = () => {
                 <div className="flex gap-3 mb-6">
                   <Button 
                     className="flex-1"
+                    
                     onClick={handleBookNow}
                   >
                     Book Now
@@ -361,8 +367,8 @@ const CarDetails = () => {
                 </div>
                 
                 <div className="flex items-center justify-between text-sm text-gray-500">
-                  <div>Listed on {new Date(carDetails.listedDate).toLocaleDateString()}</div>
-                  <div>ID: {carDetails.id}</div>
+                  <div>Listed on {new Date(carDetails.createdAt).toLocaleDateString()}</div>
+                  {/* <div>ID: {carDetails.id}</div> */}
                 </div>
               </div>
               
@@ -393,7 +399,7 @@ const CarDetails = () => {
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 text-gray-500 mr-2" />
-                    <span className="text-gray-600">{carDetails.seller.location}</span>
+                    <span className="text-gray-600">{carDetails.location}</span>
                   </div>
                   <div className="flex items-center">
                     <Phone className="h-4 w-4 text-gray-500 mr-2" />
@@ -401,9 +407,9 @@ const CarDetails = () => {
                   </div>
                 </div>
                 
-                <Button variant="outline" className="w-full">
+                {/* <Button variant="outline" className="w-full">
                   View Seller Profile
-                </Button>
+                </Button> */}
               </div>
             </div>
           </div>
@@ -411,11 +417,11 @@ const CarDetails = () => {
           {/* Tabs Section */}
           <div className="mt-8">
             <Tabs defaultValue="details">
-              <TabsList className="grid grid-cols-4 mb-6">
+              <TabsList className="grid grid-cols-3 mb-6">
                 <TabsTrigger value="details">Details</TabsTrigger>
                 <TabsTrigger value="features">Features</TabsTrigger>
                 <TabsTrigger value="history">Vehicle History</TabsTrigger>
-                <TabsTrigger value="similar">Similar Cars</TabsTrigger>
+                {/* <TabsTrigger value="similar">Similar Cars</TabsTrigger> */}
               </TabsList>
               
               <TabsContent value="details" className="bg-white rounded-lg shadow-sm p-6">
@@ -454,17 +460,17 @@ const CarDetails = () => {
                     <span className="font-medium">{carDetails.transmission}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Drivetrain</span>
-                    <span className="font-medium">{carDetails.drivetrain}</span>
+                    <span className="text-gray-600">Kms Driven</span>
+                    <span className="font-medium">{carDetails.totalDriven}</span>
                   </div>
-                  <div className="flex justify-between">
+                  {/* <div className="flex justify-between">
                     <span className="text-gray-600">Engine</span>
                     <span className="font-medium">{carDetails.engine}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">VIN</span>
                     <span className="font-medium">{carDetails.vin}</span>
-                  </div>
+                  </div> */}
                 </div>
                 
                 <h3 className="text-lg font-semibold mb-3">Description</h3>
@@ -539,22 +545,20 @@ const CarDetails = () => {
                 
                 <Separator className="my-6" />
                 
-                <Button variant="outline" className="w-full">
-                  View Full History Report
-                </Button>
+                
               </TabsContent>
               
-              <TabsContent value="similar" className="bg-white rounded-lg shadow-sm p-6">
+              {/* <TabsContent value="similar" className="bg-white rounded-lg shadow-sm p-6">
                 <h2 className="text-xl font-semibold mb-4">Similar Vehicles</h2>
                 <p className="text-gray-600 mb-4">Here are some similar vehicles you might be interested in:</p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Similar car cards would go here */}
+                
                   <div className="text-center py-8 text-gray-500">
                     Similar vehicles feature coming soon
                   </div>
                 </div>
-              </TabsContent>
+              </TabsContent> */}
             </Tabs>
           </div>
         </div>
@@ -629,7 +633,7 @@ const CarDetails = () => {
             <Button variant="outline" onClick={() => setIsBookingDialogOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleBookingSubmit}>
+            <Button onClick={handleTestDriveSubmit}>
               Confirm Booking
             </Button>
           </DialogFooter>

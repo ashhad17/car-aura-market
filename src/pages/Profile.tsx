@@ -161,7 +161,7 @@ const Profile = () => {
 
     try {
       // Replace with your actual API endpoint
-      await axios.put('/api/users/password', {
+      await axios.put('http://localhost:5000/api/v1/auth/updatepassword', {
         currentPassword,
         newPassword
       }, {

@@ -26,6 +26,11 @@ const carSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  totalDriven: {
+    type: String,
+    required: true
+  },
+  
   description: {
     type: String,
     required: true
@@ -42,7 +47,7 @@ const carSchema = new mongoose.Schema({
   status: {
     type: String,
     enum: ['active', 'sold', 'pending', 'draft'],
-    default: 'active'
+    default: 'pending'
   },
   features: [String],
   images: [

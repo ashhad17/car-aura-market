@@ -16,7 +16,11 @@ interface CarCardProps {
     year: number;
     mileage: number;
     location: string;
-    imageUrl: string;
+    images: {
+      url:string,
+      publicId:string
+    }[];
+    
     condition: string;
     fuel?: string;
     transmission?: string;
@@ -60,7 +64,7 @@ const CarCard: React.FC<CarCardProps> = ({ car, variant = "full" }) => {
       <div className="relative">
         <Link to={`/cars/details/${car._id}`}>
           <img
-            src={car.imageUrl}
+            src={car.images[0].url}
             alt={car.title}
             className={`w-full ${isCompact ? "h-36" : "h-48 md:h-60"} object-cover`}
           />

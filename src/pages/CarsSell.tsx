@@ -70,6 +70,7 @@ const CarsSell = () => {
     contactPhone: "",
     contactEmail: "",
     location: "",
+    totalDriven:"",
     rcDocument: null as File | null,
     insuranceDocument: null as File | null,
     pucDocument: null as File | null,
@@ -174,11 +175,12 @@ const CarsSell = () => {
         contactName: formData.contactName,
         contactPhone: formData.contactPhone,
         contactEmail: formData.contactEmail,
+        totalDriven:formData.totalDriven,
         location: formData.location,
         rcDocument: uploadedDocuments.find(doc => doc?.type === 'rcDocument') || null,
         insuranceDocument: uploadedDocuments.find(doc => doc?.type === 'insuranceDocument') || null,
         pucDocument: uploadedDocuments.find(doc => doc?.type === 'pucDocument') || null,
-        status: 'active',
+        status: 'pending',
       };
 console.log("Car Data "+carData);
       // Send to your backend API
@@ -317,7 +319,15 @@ console.log("Car Data "+carData);
                   placeholder="e.g. Black"
                 />
               </div>
-              
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Kms Driven</label>
+                <Input
+                  name="totalDriven"
+                  value={formData.totalDriven}
+                  onChange={handleChange}
+                  placeholder="e.g 15000 kms"
+                />
+              </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Fuel Type</label>
                 <Select 

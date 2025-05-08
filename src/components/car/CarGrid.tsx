@@ -27,7 +27,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
     make: "",
     model: "",
     year: "",
-    price: "",
+    price: 0,
     mileage: "",
     bodyType: "",
     fuelType: "",
@@ -103,7 +103,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
     const modelMatch =
       !filters.model || car.model.toLowerCase().includes(filters.model.toLowerCase());
     const yearMatch = !filters.year || String(car.year).includes(filters.year);
-    const priceMatch = !filters.price || String(car.price).includes(filters.price);
+    const priceMatch = !filters.price || String(car.price).includes(String(filters.price));
     const mileageMatch =
       !filters.mileage || String(car.mileage).includes(filters.mileage);
     // const bodyTypeMatch =
@@ -118,6 +118,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
       car.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.make?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.model?.toLowerCase().includes(searchTerm.toLowerCase());
+      const statusMatch = car.status === "active"; // Only include cars with status "active"
 
     return (
       makeMatch &&
@@ -128,7 +129,8 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
       // bodyTypeMatch &&
       fuelTypeMatch &&
       transmissionMatch &&
-      searchTermMatch
+      searchTermMatch &&
+      statusMatch
     );
   });
 
@@ -300,7 +302,12 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {carsToDisplay.length > 0 ? (
               carsToDisplay.map((car) => (
-                <CarCard key={car._id} car={car} />
+                // Use the CarCard component to display each car
+                // Pass the car data as a prop to CarCard
+                // You can also pass a prop to determine if it's in compact mode
+                //fix the error below
+                // <CarCard key={car._id} car={car} isCompact={false} />
+                <CarCard key={car._id} car={car} isCompact={false} />
               ))
             ) : (
               <div className="col-span-3 text-center py-10">

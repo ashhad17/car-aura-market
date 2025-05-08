@@ -261,7 +261,7 @@ exports.updatePassword = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse('Password is incorrect', 401));
   }
 
-  user.password = req.body.newPassword;
+  user.password =await bcrypt.hash(req.body.newPassword, 10) ;
   await user.save();
 
   sendTokenResponse(user, 200, res);
@@ -279,8 +279,8 @@ const email=req.body.email;
 
   // Get reset token
   const resetToken = crypto.randomBytes(32).toString('hex');
-  user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-  user.resetPasswordExpire = Date.now() + 10 * 60 * 1000; // Token valid for 10 minutes
+  user.resetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+  user.resetTokenExpiry = Date.now() + 10 * 60 * 1000; // Token valid for 10 minutes
   await user.save();
 
 
@@ -299,8 +299,8 @@ const email=req.body.email;
     res.status(200).json({ success: true, data: 'Email sent' });
   } catch (err) {
     console.log(err);
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
+    user.resetToken = undefined;
+    user.resetTokenExpiry = undefined;
 
     await user.save({ validateBeforeSave: false });
 
@@ -312,36 +312,28 @@ const email=req.body.email;
 // @route   PUT /api/v1/auth/resetpassword/:resettoken
 // @access  Public
 exports.resetPassword = asyncHandler(async (req, res, next) => {
-  // Get hashed token
-  // const resetPasswordToken = crypto
-  //   .createHash('sha256') // Use crypto.createHash
-  //   .update(req.params.resettoken)
-  //   .digest('hex');
-
-  // const user = await User.findOne({
-  //   resetPasswordToken,
-  //   resetPasswordExpire: { $gt: Date.now() }
-  // });
-
-  // if (!user) {
-  //   return next(new ErrorResponse('Invalid token', 400));
-  // }
-
-  // // Set new password
-  // user.password = req.body.password;
-  // user.resetPasswordToken = undefined;
-  // user.resetPasswordExpire = undefined;
-  // await user.save();
-  const { token } = req.params;
+  const { token } = req.params; // Plain token from the request
   const { password } = req.body;
 
-  const user = await User.findOne({ resetToken: token, resetTokenExpiry: { $gt: Date.now() } });
-  if (!user) return res.status(400).json({ message: 'Token expired or invalid' });
+  // Hash the token from the request
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
+  // Find the user with the hashed token and check if the token is still valid
+  const user = await User.findOne({
+    resetToken: hashedToken,
+    resetTokenExpiry: { $gt: Date.now() }, // Ensure the token has not expired
+  });
+
+  if (!user) {
+    return next(new ErrorResponse('Token expired or invalid', 400));
+  }
+
+  // Set the new password
   user.password = await bcrypt.hash(password, 10);
-  user.resetToken = undefined;
-  user.resetTokenExpiry = undefined;
+  user.resetToken = undefined; // Clear the reset token
+  user.resetTokenExpiry = undefined; // Clear the token expiry
   await user.save();
+
 
 
   sendTokenResponse(user, 200, res);
