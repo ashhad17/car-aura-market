@@ -66,6 +66,14 @@ const Navbar = () => {
                 Buy Cars
               </Link>
               <Link
+                to="/cars/sell"
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  pathname.includes("/cars") ? "text-primary" : "text-gray-600"
+                }`}
+              >
+                Sell Car
+              </Link>
+              <Link
                 to="/services"
                 className={`text-sm font-medium transition-colors hover:text-primary ${
                   pathname === "/services" ? "text-primary" : "text-gray-600"
