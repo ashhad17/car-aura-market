@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -307,7 +306,7 @@ const CarGrid: React.FC<CarGridProps> = ({ cars: initialCars }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {carsToDisplay.length > 0 ? (
               carsToDisplay.map((car) => (
-                <CarCard key={car._id} car={car} isCompact={false} />
+                <CarCard key={car._id} car={car} />
               ))
             ) : (
               <div className="col-span-3 text-center py-10">
