@@ -46,9 +46,9 @@ const ServiceCard: React.FC<ServiceProps> = ({ service }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      whileHover={{ scale: 1.02 }}
+      whileHover={{ scale: 1.03 }}
     >
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 glow-card">
+      <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 ${isDark ? 'bg-gray-800 border-gray-700 hover:shadow-glow-dark' : 'hover:shadow-glow-light glow-card'}`}>
         <div className="relative h-48">
           <img 
             src={service.image} 
@@ -56,7 +56,7 @@ const ServiceCard: React.FC<ServiceProps> = ({ service }) => {
             className="w-full h-full object-cover"
           />
           <Badge 
-            className="absolute top-3 right-3 bg-primary text-white"
+            className="absolute top-3 right-3 bg-primary text-white animate-pulse"
             variant="secondary"
           >
             {service.category.charAt(0).toUpperCase() + service.category.slice(1)}
@@ -97,10 +97,17 @@ const ServiceCard: React.FC<ServiceProps> = ({ service }) => {
         </CardContent>
         
         <CardFooter className="flex justify-between items-center pt-2">
-          <div className="text-xl font-bold text-primary">
+          <div className={`text-xl font-bold ${isDark ? 'text-primary' : 'text-primary'}`}>
             ${service.price.toFixed(2)}
           </div>
-          <Button onClick={handleBookNow} variant="glow" animation="scale">Book Now</Button>
+          <Button 
+            onClick={handleBookNow} 
+            variant="glow" 
+            animation="scale"
+            className="hover:scale-105 transition-all duration-300 hover:shadow-glow"
+          >
+            Book Now
+          </Button>
         </CardFooter>
       </Card>
     </motion.div>

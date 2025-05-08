@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
@@ -20,6 +19,8 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import axios from "axios";
+import { useTheme } from "@/context/ThemeContext";
+import { motion } from "framer-motion";
 
 interface Question {
   id: string;
@@ -169,6 +170,7 @@ const FindYourCar = () => {
   const { toast } = useToast();
   const [cars, setCars] = useState<CarRecommendation[]>([]); // Initialize as an empty array
   const navigate = useNavigate();
+  const { isDark } = useTheme();
   
   const currentQuestion = questions[currentQuestionIndex];
   const progress = ((currentQuestionIndex) / questions.length) * 100;
@@ -307,8 +309,14 @@ const FindYourCar = () => {
           >
             {currentQuestion.options?.map((option) => (
               <div key={option.id} className="flex items-center space-x-2">
-                <RadioGroupItem value={option.value} id={option.id} />
-                <Label htmlFor={option.id}>{option.label}</Label>
+                <RadioGroupItem 
+                  value={option.value} 
+                  id={option.id}
+                  className={isDark ? 'border-gray-500 text-white' : ''}
+                />
+                <Label htmlFor={option.id} className={isDark ? 'text-white' : ''}>
+                  {option.label}
+                </Label>
               </div>
             ))}
           </RadioGroup>
@@ -338,9 +346,11 @@ const FindYourCar = () => {
                       );
                     }
                   }}
-                  className="h-4 w-4 rounded border-gray-300"
+                  className={`h-4 w-4 rounded ${isDark ? 'border-gray-500 bg-gray-700 checked:bg-primary' : 'border-gray-300'}`}
                 />
-                <Label htmlFor={option.id}>{option.label}</Label>
+                <Label htmlFor={option.id} className={isDark ? 'text-white' : ''}>
+                  {option.label}
+                </Label>
               </div>
             ))}
           </div>
@@ -355,11 +365,18 @@ const FindYourCar = () => {
               min={currentQuestion.min}
               step={currentQuestion.step}
               onValueChange={(value) => handleAnswerChange(currentQuestion.id, value[0])}
+              className={isDark ? 'bg-gray-700' : ''}
             />
             <div className="flex justify-between items-center">
-              <span>${currentQuestion.min?.toLocaleString()}</span>
-              <span className="font-medium">${(answers[currentQuestion.id] || currentQuestion.min || 0).toLocaleString()}</span>
-              <span>${currentQuestion.max?.toLocaleString()}</span>
+              <span className={isDark ? 'text-gray-300' : ''}>
+                ${currentQuestion.min?.toLocaleString()}
+              </span>
+              <span className={`font-medium ${isDark ? 'text-white' : ''}`}>
+                ${(answers[currentQuestion.id] || currentQuestion.min || 0).toLocaleString()}
+              </span>
+              <span className={isDark ? 'text-gray-300' : ''}>
+                ${currentQuestion.max?.toLocaleString()}
+              </span>
             </div>
           </div>
         );
@@ -370,111 +387,160 @@ const FindYourCar = () => {
   };
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900 text-white' : ''}`}>
       <Helmet>
         <title>Find Your Perfect Car | WheelsTrust</title>
         <meta name="description" content="Answer a few questions and we'll help you find the perfect car that matches your needs and preferences." />
       </Helmet>
       <Navbar />
       
-      <main className="flex-grow pt-24 pb-16 bg-gradient-to-b from-blue-50 to-white">
+      <main className={`flex-grow pt-24 pb-16 ${
+        isDark 
+          ? 'bg-gradient-to-b from-gray-900 to-gray-800' 
+          : 'bg-gradient-to-b from-blue-50 to-white'
+      }`}>
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
             {!showResults ? (
-              <Card className="border shadow-lg">
-                <CardHeader className="text-center">
-                  <CardTitle className="text-2xl md:text-3xl">Find Your Perfect Car</CardTitle>
-                  <CardDescription>
-                    Answer a few questions to get personalized car recommendations
-                  </CardDescription>
-                  <Progress value={progress} className="mt-4" />
-                </CardHeader>
-                
-                <CardContent className="pt-6">
-                  <div className="mb-6">
-                    <h2 className="text-xl font-semibold mb-4">
-                      {currentQuestionIndex + 1}. {currentQuestion.question}
-                    </h2>
-                    {renderQuestion()}
-                  </div>
-                </CardContent>
-                
-                <CardFooter className="flex justify-between">
-                  <Button 
-                    variant="outline" 
-                    onClick={handlePrevious}
-                    disabled={currentQuestionIndex === 0}
-                  >
-                    Previous
-                  </Button>
-                  <Button onClick={handleNext}>
-                    {currentQuestionIndex === questions.length - 1 ? "Get Results" : "Next"}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </CardFooter>
-              </Card>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <Card className={`border shadow-lg ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}>
+                  <CardHeader className="text-center">
+                    <CardTitle className={`text-2xl md:text-3xl ${isDark ? 'text-white' : ''}`}>
+                      Find Your Perfect Car
+                    </CardTitle>
+                    <CardDescription className={isDark ? 'text-gray-300' : ''}>
+                      Answer a few questions to get personalized car recommendations
+                    </CardDescription>
+                    <Progress value={progress} className={`mt-4 ${isDark ? 'bg-gray-700' : ''}`} />
+                  </CardHeader>
+                  
+                  <CardContent className="pt-6">
+                    <div className="mb-6">
+                      <h2 className={`text-xl font-semibold mb-4 ${isDark ? 'text-white' : ''}`}>
+                        {currentQuestionIndex + 1}. {currentQuestion.question}
+                      </h2>
+                      {renderQuestion()}
+                    </div>
+                  </CardContent>
+                  
+                  <CardFooter className="flex justify-between">
+                    <Button 
+                      variant="outline" 
+                      onClick={handlePrevious}
+                      disabled={currentQuestionIndex === 0}
+                      className={isDark ? 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600' : ''}
+                    >
+                      Previous
+                    </Button>
+                    <Button 
+                      onClick={handleNext}
+                      className="hover:scale-105 transition-all duration-300 hover:shadow-glow"
+                    >
+                      {currentQuestionIndex === questions.length - 1 ? "Get Results" : "Next"}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </motion.div>
             ) : (
               <div className="space-y-6">
-                <div className="text-center mb-8">
-                  <h1 className="text-2xl md:text-3xl font-bold mb-2">Your Car Recommendations</h1>
-                  <p className="text-gray-600">
+                <motion.div 
+                  className="text-center mb-8"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <h1 className={`text-2xl md:text-3xl font-bold mb-2 ${isDark ? 'text-white' : ''}`}>Your Car Recommendations</h1>
+                  <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>
                     Based on your preferences, here are the cars we think would be perfect for you
                   </p>
-                </div>
+                </motion.div>
                 
                 <div className="space-y-6">
   {recommendations.length > 0 ? (
-    recommendations.map((car) => (
-      <Card key={car._id} className="overflow-hidden border-0 shadow-lg transition-shadow hover:shadow-xl">
-        <div className="md:flex">
-          <div className="md:w-2/5">
-            <img
-              src={car.images?.[0] || "/placeholder.jpg"}
-              alt={car.make+" "+car.model}
-              className="h-full w-full object-cover"
-            />
-          </div>
-          <div className="p-6 md:w-3/5">
-            <div className="flex justify-between items-start">
-              <div>
-                <h2 className="text-2xl font-bold mb-1">{car.make+" "+car.model}</h2>
-                <p className="text-lg font-medium text-primary mb-2">${car.price.toLocaleString()}</p>
-              </div>
-              <div className="bg-primary/10 text-primary rounded-full px-3 py-1 font-semibold">
-                {car.match || 0}% Match
-              </div>
+    recommendations.map((car, index) => (
+      <motion.div
+        key={car._id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: index * 0.1 }}
+      >
+        <Card 
+          className={`overflow-hidden border-0 shadow-lg transition-shadow hover:shadow-xl ${
+            isDark 
+              ? 'bg-gray-800 hover:shadow-glow-dark' 
+              : 'hover:shadow-glow-light'
+          }`}
+        >
+          <div className="md:flex">
+            <div className="md:w-2/5">
+              <img
+                src={car.images?.[0] || "/placeholder.jpg"}
+                alt={car.make+" "+car.model}
+                className="h-full w-full object-cover"
+              />
             </div>
-            <p className="text-gray-600 mb-4">{car.description}</p>
-            <div className="grid grid-cols-2 gap-2 mb-6">
-              {car.features.map((feature, index) => (
-                <div key={index} className="flex items-center">
-                  <Check className="h-4 w-4 text-green-500 mr-2" />
-                  <span className="text-gray-700 text-sm">{feature}</span>
+            <div className="p-6 md:w-3/5">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-white' : ''}`}>{car.make+" "+car.model}</h2>
+                  <p className="text-lg font-medium text-primary mb-2">${car.price.toLocaleString()}</p>
                 </div>
-              ))}
-            </div>
-            <div className="flex space-x-3">
-              <Button onClick={() => handleViewCarDetails(car._id)} className="flex-1">
-                View Details
-              </Button>
-              <Button variant="outline" className="flex-1" onClick={() => handleTestDrive(car.make+" "+car.model)}>
-                <Car className="h-4 w-4 mr-2" />
-                Test Drive
-              </Button>
+                <div className="bg-primary/10 text-primary rounded-full px-3 py-1 font-semibold animate-pulse">
+                  {car.match || 0}% Match
+                </div>
+              </div>
+              <p className={`mb-4 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{car.description}</p>
+              <div className="grid grid-cols-2 gap-2 mb-6">
+                {car.features.map((feature, index) => (
+                  <div key={index} className="flex items-center">
+                    <Check className="h-4 w-4 text-green-500 mr-2" />
+                    <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>{feature}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex space-x-3">
+                <Button 
+                  onClick={() => handleViewCarDetails(car._id)} 
+                  className="flex-1 hover:scale-105 transition-all duration-300 hover:shadow-glow"
+                >
+                  View Details
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className={`flex-1 hover:scale-105 transition-all duration-300 ${
+                    isDark ? 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600' : ''
+                  }`} 
+                  onClick={() => handleTestDrive(car.make+" "+car.model)}
+                >
+                  <Car className="h-4 w-4 mr-2" />
+                  Test Drive
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+      </motion.div>
     ))
   ) : (
-    <div className="text-center py-10">
-      <p className="text-gray-500">No cars found matching your criteria</p>
+    <div className={`text-center py-10 ${isDark ? 'bg-gray-800' : 'bg-gray-50'} rounded-lg`}>
+      <p className={isDark ? 'text-gray-300' : 'text-gray-500'}>No cars found matching your criteria</p>
     </div>
   )}
 </div>
                 
                 <div className="flex justify-center pt-6">
-                  <Button variant="outline" onClick={handleRestart}>
+                  <Button 
+                    variant="outline" 
+                    onClick={handleRestart}
+                    className={`hover:scale-105 transition-all duration-300 ${
+                      isDark ? 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600' : ''
+                    }`}
+                  >
                     Start Over
                   </Button>
                 </div>

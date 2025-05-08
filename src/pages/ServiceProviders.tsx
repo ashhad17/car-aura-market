@@ -48,7 +48,7 @@ const ServiceProviders = () => {
               </p>
             </div>
             <Button 
-              className="mt-4 md:mt-0"
+              className="mt-4 md:mt-0 hover:scale-105 hover:shadow-glow transition-all duration-300"
               variant="glow"
               animation="scale"
               onClick={handlePartnerClick}

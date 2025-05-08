@@ -26,7 +26,13 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
       transition={{ duration: 0.4 }}
       whileHover={{ scale: 1.03 }}
     >
-      <Card glowEffect hoverAnimation className="overflow-hidden transition-all hover:shadow-lg">
+      <Card 
+        glowEffect 
+        hoverAnimation 
+        className={`overflow-hidden transition-all hover:shadow-lg ${
+          isDark ? 'bg-gray-800 border-gray-700 hover:shadow-glow-dark' : 'hover:shadow-glow-light'
+        }`}
+      >
         <div className="relative h-48 w-full overflow-hidden">
           <img
             src={serviceImage}
@@ -40,7 +46,12 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
         <CardContent className="p-5">
           <div className="flex items-center justify-between mb-2">
             <h3 className={`text-lg font-bold truncate ${isDark ? 'text-white' : ''}`}>{service.name}</h3>
-            <Badge variant={service.available ? "default" : "outline"} className={service.available ? "animate-glow-pulse" : ""}>
+            <Badge 
+              variant={service.available ? "default" : "outline"} 
+              className={`${service.available ? "animate-glow-pulse" : ""} ${
+                isDark && !service.available ? "border-gray-600 text-gray-400" : ""
+              }`}
+            >
               {service.available ? "Available" : "Unavailable"}
             </Badge>
           </div>
@@ -69,7 +80,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
                     className="h-full w-full object-cover" 
                   />
                 ) : (
-                  <div className="h-full w-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                  <div className={`h-full w-full ${isDark ? 'bg-primary/20' : 'bg-primary/10'} flex items-center justify-center text-primary font-bold`}>
                     {service.provider.name.charAt(0)}
                   </div>
                 )}
@@ -93,7 +104,12 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
           
           <div className="flex justify-between items-center mt-4">
             <p className={`font-bold text-xl ${isDark ? 'text-white' : ''}`}>₹{service.price}</p>
-            <Button variant="glow" animation="scale" asChild>
+            <Button 
+              variant="glow" 
+              animation="scale" 
+              asChild
+              className="hover:scale-105 transition-all duration-300 hover:shadow-glow"
+            >
               <Link to={`/services/${service.id}`}>View Details</Link>
             </Button>
           </div>

@@ -45,11 +45,26 @@ const Services = () => {
             <div className="md:col-span-3">
               <Tabs defaultValue="all" className="w-full" onValueChange={setActiveCategory} value={activeCategory}>
                 <TabsList className={`grid grid-cols-5 mb-8 ${isDark ? 'bg-gray-800' : ''}`}>
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
-                  <TabsTrigger value="repair">Repair</TabsTrigger>
-                  <TabsTrigger value="inspection">Inspection</TabsTrigger>
-                  <TabsTrigger value="detailing">Detailing</TabsTrigger>
+                  <TabsTrigger 
+                    value="all"
+                    className={isDark ? 'data-[state=active]:bg-gray-700' : ''}
+                  >All</TabsTrigger>
+                  <TabsTrigger 
+                    value="maintenance"
+                    className={isDark ? 'data-[state=active]:bg-gray-700' : ''}
+                  >Maintenance</TabsTrigger>
+                  <TabsTrigger 
+                    value="repair"
+                    className={isDark ? 'data-[state=active]:bg-gray-700' : ''}
+                  >Repair</TabsTrigger>
+                  <TabsTrigger 
+                    value="inspection"
+                    className={isDark ? 'data-[state=active]:bg-gray-700' : ''}
+                  >Inspection</TabsTrigger>
+                  <TabsTrigger 
+                    value="detailing"
+                    className={isDark ? 'data-[state=active]:bg-gray-700' : ''}
+                  >Detailing</TabsTrigger>
                 </TabsList>
                 <TabsContent value="all">
                   <ServicesList category={null} />

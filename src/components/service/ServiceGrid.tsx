@@ -8,6 +8,8 @@ import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/context/ThemeContext";
+import { motion } from "framer-motion";
 
 interface Service {
   _id: string;
@@ -47,6 +49,7 @@ const ServiceGrid: React.FC<ServiceGridProps> = ({ isPreview = false }) => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isDark } = useTheme();
 
   useEffect(() => {
     if (!isPreview) {
@@ -113,7 +116,7 @@ const ServiceGrid: React.FC<ServiceGridProps> = ({ isPreview = false }) => {
       <div className="flex justify-center items-center py-20">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading service providers...</p>
+          <p className={`${isDark ? 'text-gray-300' : 'text-muted-foreground'}`}>Loading service providers...</p>
         </div>
       </div>
     );
@@ -121,9 +124,9 @@ const ServiceGrid: React.FC<ServiceGridProps> = ({ isPreview = false }) => {
 
   if (error) {
     return (
-      <div className="text-center py-10 bg-gray-50 rounded-lg">
+      <div className={`text-center py-10 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}>
         <h3 className="text-lg font-medium mb-2 text-destructive">{error}</h3>
-        <p className="text-gray-600 mb-4">Please try again later</p>
+        <p className={`mb-4 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Please try again later</p>
         <button 
           onClick={fetchServiceProviders}
           className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
@@ -140,9 +143,17 @@ const ServiceGrid: React.FC<ServiceGridProps> = ({ isPreview = false }) => {
       
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProviders.map((provider) => (
-          <div 
+          <motion.div 
             key={provider._id}
-            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            whileHover={{ scale: 1.03 }}
+            className={`rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 ${
+              isDark 
+                ? 'bg-gray-800 hover:shadow-glow-dark' 
+                : 'bg-white hover:shadow-glow-light'
+            }`}
           >
             <img 
               src={provider.image} 
@@ -150,41 +161,46 @@ const ServiceGrid: React.FC<ServiceGridProps> = ({ isPreview = false }) => {
               className="w-full h-48 object-cover"
             />
             <div className="p-4">
-              <h3 className="text-lg font-semibold mb-2">{provider.name}</h3>
-              <p className="text-gray-600 text-sm mb-2">{provider.description}</p>
+              <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : ''}`}>{provider.name}</h3>
+              <p className={`text-sm mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{provider.description}</p>
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-yellow-500">★</span>
-                <span>{provider.rating.toFixed(1)}</span>
-                <span className="text-gray-500">({provider.reviewCount} reviews)</span>
+                <span className={isDark ? 'text-gray-200' : ''}>{provider.rating.toFixed(1)}</span>
+                <span className={isDark ? 'text-gray-400' : 'text-gray-500'}>({provider.reviewCount} reviews)</span>
               </div>
               <div className="flex flex-wrap gap-2 mb-4">
                 {provider.specialties.map((specialty, index) => (
                   <span 
                     key={index}
-                    className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded"
+                    className={`text-xs px-2 py-1 rounded ${
+                      isDark ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-800'
+                    }`}
                   >
                     {specialty}
                   </span>
                 ))}
               </div>
-              <div className="mt-2 text-sm text-gray-600 mb-4">
+              <div className={`mt-2 text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 <p>{provider.location.city}, {provider.location.state}</p>
               </div>
               <Button 
                 onClick={() => handleViewDetails(provider._id)}
-                className="w-full"
+                className={`w-full hover:scale-105 transition-all duration-300 ${
+                  isDark ? 'hover:shadow-glow-dark' : 'hover:shadow-glow-light'
+                }`}
+                variant="glow"
               >
                 View Details
               </Button>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
       
       {filteredProviders.length === 0 && (
-        <div className="text-center py-10 bg-gray-50 rounded-lg">
-          <h3 className="text-lg font-medium mb-2">No service providers found</h3>
-          <p className="text-gray-600">
+        <div className={`text-center py-10 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}>
+          <h3 className={`text-lg font-medium mb-2 ${isDark ? 'text-white' : ''}`}>No service providers found</h3>
+          <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>
             Try adjusting your search criteria or filters
           </p>
         </div>
