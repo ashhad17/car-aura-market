@@ -2,6 +2,7 @@
 import React from 'react';
 import Modal from "@/components/ui/modal";
 import ReviewForm from './ReviewForm';
+import { useToast } from '@/hooks/use-toast';
 
 interface ReviewModalProps {
   isOpen: boolean;
@@ -14,9 +15,28 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
   onClose,
   serviceProviderId
 }) => {
-  const handleSuccess = () => {
-    onClose();
-    // You might want to refresh the reviews list here
+  const { toast } = useToast();
+
+  const handleSubmit = async (data: { rating: number; comment: string }) => {
+    try {
+      // Here you would typically make an API call to submit the review
+      console.log('Submitting review:', { serviceProviderId, ...data });
+      
+      // Mock success for now
+      toast({
+        title: "Review Submitted",
+        description: "Thank you for sharing your experience!",
+      });
+      
+      onClose();
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      toast({
+        title: "Error",
+        description: "There was a problem submitting your review. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -32,7 +52,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({
         </p>
         <ReviewForm
           serviceProviderId={serviceProviderId}
-          onSuccess={handleSuccess}
+          onSubmit={handleSubmit}
           onCancel={onClose}
         />
       </div>

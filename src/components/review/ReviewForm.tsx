@@ -18,11 +18,12 @@ const reviewSchema = z.object({
 type ReviewFormValues = z.infer<typeof reviewSchema>;
 
 interface ReviewFormProps {
+  serviceProviderId: string;
   onSubmit: (data: ReviewFormValues) => void;
   onCancel: () => void;
 }
 
-const ReviewForm: React.FC<ReviewFormProps> = ({ onSubmit, onCancel }) => {
+const ReviewForm: React.FC<ReviewFormProps> = ({ serviceProviderId, onSubmit, onCancel }) => {
   const [rating, setRating] = useState<number>(0);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const { toast } = useToast();

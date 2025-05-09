@@ -38,7 +38,7 @@ const CarsBuy = () => {
             <div className="mt-6">
               <Button 
                 className="hover:scale-105 transition-all duration-300 hover:shadow-glow mr-4"
-                onClick={() => openModal("signup")}
+                onClick={() => openModal()}
               >
                 Register to Save Favorites
               </Button>

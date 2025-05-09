@@ -4,7 +4,7 @@ import AuthModal from './AuthModal';
 
 interface AuthModalContextType {
   isOpen: boolean;
-  openModal: () => void;
+  openModal: (view?: "login" | "signup") => void;
   closeModal: () => void;
   defaultView?: "login" | "signup"; // Added defaultView to the context
 }

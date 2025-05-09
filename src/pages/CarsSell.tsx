@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
@@ -14,6 +15,7 @@ import { Car, ChevronDown, Plus, Upload, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import axios from 'axios';
 import AuthModal from "@/components/auth/AuthModal";
 const makes = ["Toyota", "Honda", "Ford", "Chevrolet", "BMW", "Mercedes-Benz", "Audi", "Nissan", "Hyundai", "Kia"];
@@ -45,11 +47,12 @@ const uploadToCloudinary = async (file: File): Promise<{ url: string; publicId: 
 
 
 const CarsSell = () => {
-  const navigate =useNavigate();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("sell-form");
   const [currentStep, setCurrentStep] = useState(1);
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
+  const { isDark } = useTheme();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     make: "",
