@@ -1,17 +1,19 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { testimonials } from "@/lib/data";
+import { useTheme } from "@/context/ThemeContext";
 
 const Testimonials = () => {
+  const { isDark } = useTheme(); // Access dark mode state
+
   return (
-    <section className="section-padding bg-white">
+    <section className={`section-padding ${isDark ? 'bg-gray-900 text-white' : 'bg-white'}`}>
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             What Our Users Say
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} max-w-2xl mx-auto`}>
             Don't just take our word for it. Here's what car owners and dealers
             have experienced using our platform.
           </p>
@@ -21,7 +23,9 @@ const Testimonials = () => {
           {testimonials.map((testimonial, index) => (
             <Card
               key={index}
-              className="border-none shadow-lg hover-scale transition-all duration-300"
+              className={`border-none shadow-lg hover-scale transition-all duration-300 ${
+                isDark ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-800'
+              }`}
             >
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
@@ -30,8 +34,10 @@ const Testimonials = () => {
                       key={i}
                       className={`h-5 w-5 ${
                         i < testimonial.rating
-                          ? "text-yellow-500"
-                          : "text-gray-300"
+                          ? 'text-yellow-500'
+                          : isDark
+                          ? 'text-gray-600'
+                          : 'text-gray-300'
                       }`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
@@ -41,7 +47,9 @@ const Testimonials = () => {
                   ))}
                 </div>
 
-                <p className="text-gray-600 mb-6">"{testimonial.quote}"</p>
+                <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} mb-6`}>
+                  "{testimonial.quote}"
+                </p>
 
                 <div className="flex items-center">
                   <img
@@ -50,10 +58,12 @@ const Testimonials = () => {
                     className="h-10 w-10 rounded-full object-cover mr-3"
                   />
                   <div>
-                    <h4 className="font-medium text-gray-900">
+                    <h4 className={`${isDark ? 'text-gray-100' : 'text-gray-900'} font-medium`}>
                       {testimonial.name}
                     </h4>
-                    <p className="text-sm text-gray-500">{testimonial.title}</p>
+                    <p className={`${isDark ? 'text-gray-400' : 'text-gray-500'} text-sm`}>
+                      {testimonial.title}
+                    </p>
                   </div>
                 </div>
               </CardContent>

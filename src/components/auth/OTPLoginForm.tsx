@@ -1,209 +1,220 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { useTheme } from '@/context/ThemeContext';
-import { motion } from 'framer-motion';
-import { Mail, AlertCircle } from 'lucide-react';
-import { 
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot
-} from '@/components/ui/input-otp';
-
-interface OTPLoginFormProps {
-  onComplete?: () => void;
-}
-
-const OTPLoginForm: React.FC<OTPLoginFormProps> = ({ onComplete }) => {
+import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+import { UserRole } from '@/context/AuthContext';
+import { useAuth } from "@/context/AuthContext";
+const OTPLoginForm = ({ onComplete }: { onComplete: () => void }) => {
   const [step, setStep] = useState<'email' | 'otp'>('email');
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [countdown, setCountdown] = useState(0);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [isLoading, setIsLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const { toast } = useToast();
-  const { isDark } = useTheme();
+  const { handleVerifyOTP } = useAuth();
 
-  const startCountdown = () => {
-    setCountdown(30);
-    const interval = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
-        return prev - 1;
-      });
+  // Timer for resending OTP
+  useEffect(() => {
+    if (timeLeft <= 0) return;
+
+    const timerId = setInterval(() => {
+      setTimeLeft((prevTime) => prevTime - 1);
     }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [timeLeft]);
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
   };
 
-  const handleSendOTP = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !email.includes('@')) {
+  const handleSendOTP = async () => {
+    if (!email) {
       toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address",
-        variant: "destructive",
+        title: 'Invalid Email',
+        description: 'Please enter a valid email address',
+        variant: 'destructive',
       });
       return;
     }
 
-    setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
+    setIsLoading(true);
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/request-otp`,
+        { email }
+      );
+
+      toast({
+        title: 'OTP Sent',
+        description: response.data.message || 'A 6-digit verification code has been sent to your email',
+      });
+
+      setTimeLeft(60); // 60-second cooldown
       setStep('otp');
-      startCountdown();
+
+      // Focus the first OTP input when we move to the OTP step
+      setTimeout(() => {
+        if (otpInputRefs.current[0]) {
+          otpInputRefs.current[0].focus();
+        }
+      }, 100);
+    } catch (error: any) {
       toast({
-        title: "OTP Sent!",
-        description: `A verification code has been sent to ${email}`,
+        title: 'Failed to send OTP',
+        description: error.response?.data?.message || 'Please try again later',
+        variant: 'destructive',
       });
-    }, 1500);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleVerifyOTP = () => {
-    if (otp.length !== 6) {
-      toast({
-        title: "Invalid OTP",
-        description: "Please enter the complete 6-digit verification code",
-        variant: "destructive",
-      });
+  const handleOTPChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const { value } = e.target;
+
+    // Allow only one digit per input
+    if (value && !/^\d$/.test(value)) {
       return;
     }
 
-    setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      toast({
-        title: "Login Successful",
-        description: "You have been logged in successfully",
-      });
-      if (onComplete) onComplete();
-    }, 1500);
+    // Update the OTP array
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    // Auto-focus next input if current input is filled
+    if (value && index < 5 && otpInputRefs.current[index + 1]) {
+      otpInputRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleSubmit = async () => {
+
+    try {
+      await handleVerifyOTP(email, otp.join(''));
+      console.log("OTP Login Successful");
+    } catch (error) {
+      console.error("OTP Login Failed:", error);
+    }
   };
 
   const handleResendOTP = () => {
-    setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      startCountdown();
-      toast({
-        title: "OTP Resent!",
-        description: `A new verification code has been sent to ${email}`,
-      });
-    }, 1500);
+    if (timeLeft > 0) return;
+    handleSendOTP();
+  };
+
+  const formatTimeLeft = () => {
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    return `${minutes.toString().padStart(1, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      {step === 'email' ? (
-        <form onSubmit={handleSendOTP} className="space-y-6">
-          <div className="space-y-2">
+    <div className="w-full max-w-md mx-auto">
+      <AnimatePresence mode="wait">
+        {step === 'email' ? (
+          <motion.div
+            key="email-step"
+            className="space-y-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="text-center">
+              <h3 className="text-xl font-bold mb-2">Login with Email</h3>
+              <p className="text-sm text-gray-500">
+                Enter your email address to receive a one-time verification code
+              </p>
+            </div>
+
             <div className="relative">
-              <label htmlFor="email" className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : ''}`}>Email Address</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <Mail className={`h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
-                </div>
+              <label className="absolute left-3 -top-2.5 bg-white px-1 text-xs text-gray-500">
+                Email Address
+              </label>
+              <Input
+                type="email"
+                placeholder="example@example.com"
+                value={email}
+                onChange={handleEmailChange}
+                className="pt-4 h-14 border-gray-300"
+                disabled={isLoading}
+              />
+            </div>
+
+            <Button
+              type="button"
+              onClick={handleSendOTP}
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Sending OTP...' : 'Send OTP'}
+            </Button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="otp-step"
+            className="space-y-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+          >
+            <div className="text-center">
+              <h3 className="text-xl font-bold mb-2">Verify Email</h3>
+              <p className="text-sm text-gray-500">
+                Enter the 6-digit code sent to {email}
+              </p>
+            </div>
+
+            <div className="flex justify-center space-x-2">
+              {otp.map((digit, index) => (
                 <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={`pl-10 ${isDark ? 'bg-gray-800 border-gray-700 text-white' : ''}`}
-                  placeholder="your.email@example.com"
-                  required
+                  key={index}
+                  ref={(el) => (otpInputRefs.current[index] = el)}
+                  type="text"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOTPChange(e, index)}
+                  className="w-12 h-12 text-xl text-center font-bold"
+                  disabled={isLoading}
                 />
+              ))}
+            </div>
+
+            <div className="flex flex-col items-center justify-center text-sm">
+              <div className="flex items-center text-gray-500">
+                {timeLeft > 0 ? (
+                  <span>Resend OTP in {formatTimeLeft()}</span>
+                ) : (
+                  <button
+                    className="text-primary hover:underline"
+                    onClick={handleResendOTP}
+                    disabled={isLoading}
+                  >
+                    Resend OTP
+                  </button>
+                )}
               </div>
             </div>
-          </div>
 
-          <div className={`p-3 rounded-md flex items-start gap-3 ${isDark ? 'bg-gray-700' : 'bg-blue-50'}`}>
-            <AlertCircle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
-            <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-blue-700'}`}>
-              We'll send a verification code to your email address to confirm it's you.
-            </p>
-          </div>
-
-          <Button 
-            type="submit" 
-            disabled={loading} 
-            className="w-full hover:scale-105 transition-all duration-300 hover:shadow-glow"
-          >
-            {loading ? 'Sending...' : 'Send Verification Code'}
-          </Button>
-        </form>
-      ) : (
-        <div className="space-y-6">
-          <div>
-            <p className={`mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-              Enter the 6-digit code sent to <span className="font-medium">{email}</span>
-            </p>
-            
-            <div className="flex justify-center my-6">
-              <InputOTP
-                value={otp}
-                onChange={(value) => setOtp(value)}
-                maxLength={6}
-                containerClassName="gap-2 sm:gap-4"
-              >
-                <InputOTPGroup>
-                  <InputOTPSlot index={0} className={isDark ? 'bg-gray-800 border-gray-700 text-white' : ''} />
-                  <InputOTPSlot index={1} className={isDark ? 'bg-gray-800 border-gray-700 text-white' : ''} />
-                  <InputOTPSlot index={2} className={isDark ? 'bg-gray-800 border-gray-700 text-white' : ''} />
-                  <InputOTPSlot index={3} className={isDark ? 'bg-gray-800 border-gray-700 text-white' : ''} />
-                  <InputOTPSlot index={4} className={isDark ? 'bg-gray-800 border-gray-700 text-white' : ''} />
-                  <InputOTPSlot index={5} className={isDark ? 'bg-gray-800 border-gray-700 text-white' : ''} />
-                </InputOTPGroup>
-              </InputOTP>
-            </div>
-          </div>
-
-          <Button 
-            onClick={handleVerifyOTP} 
-            disabled={loading || otp.length !== 6} 
-            className="w-full hover:scale-105 transition-all duration-300 hover:shadow-glow"
-          >
-            {loading ? 'Verifying...' : 'Verify & Login'}
-          </Button>
-
-          <div className="text-center">
-            <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>
-              {countdown > 0 
-                ? `Resend code in ${countdown}s` 
-                : (
-                  <Button 
-                    variant="link" 
-                    onClick={handleResendOTP} 
-                    disabled={loading}
-                    className={isDark ? 'text-primary' : ''}
-                  >
-                    Resend verification code
-                  </Button>
-                )
-              }
-            </p>
-            <Button 
-              variant="link" 
-              onClick={() => setStep('email')}
-              className={isDark ? 'text-primary mt-2' : 'mt-2'}
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              className="w-full"
+              disabled={isLoading || otp.join('').length !== 6}
             >
-              Change email address
+              {isLoading ? 'Verifying...' : 'Verify & Login'}
             </Button>
-          </div>
-        </div>
-      )}
-    </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 };
 

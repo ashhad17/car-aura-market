@@ -12,7 +12,8 @@ const {
   requestOtp,
   verifyOtp,
   verifyEmail,
-  requestPasswordReset
+  requestPasswordReset,
+  sendContactEmail
 
 } = require('../controllers/authController');
 
@@ -22,7 +23,7 @@ const { protect } = require('../middleware/auth');
 // @desc    Register user
 // @access  Public
 router.post('/register', register);
-
+router.post('/contact', sendContactEmail);
 // @route   POST /api/v1/auth/login
 // @desc    Login user
 // @access  Public

@@ -77,11 +77,12 @@ const ServiceFilters: React.FC<ServiceFiltersProps> = ({ onFilterChange, activeF
               <SelectItem value="maintenance">Maintenance</SelectItem>
               <SelectItem value="repair">Repair</SelectItem>
               <SelectItem value="inspection">Inspection</SelectItem>
-              <SelectItem value="detailing">Detailing</SelectItem>
+              <SelectItem value="cleaning">Cleaning</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        
+        {/* ['maintenance', 'repair', 'cleaning', 'inspection', 'other'] */}
         <div>
           <div className="flex justify-between mb-2">
             <Label className={isDark ? 'text-gray-200' : ''}>Price Range</Label>

@@ -107,6 +107,40 @@ const Profile = () => {
   if (!isAuthenticated) {
     return null; // Will be redirected
   }
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+      return;
+    }
+  
+    try {
+      setLoading(true);
+  
+      // Send DELETE request to the backend
+      await axios.delete(`http://localhost:5000/api/v1/users/${user.id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+  
+      toast({
+        title: "Account Deleted",
+        description: "Your account has been successfully deleted.",
+      });
+  
+      // Log the user out and redirect to the homepage
+      localStorage.removeItem("token");
+      navigate("/");
+    } catch (error: any) {
+      const message = error.response?.data?.message || "Failed to delete account.";
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -552,7 +586,9 @@ const Profile = () => {
                           <p className="text-sm text-gray-500 mb-3">
                             Permanently delete your account and all your data. This action cannot be undone.
                           </p>
-                          <Button variant="destructive">Delete My Account</Button>
+                          <Button variant="destructive" onClick={handleDeleteAccount} disabled={loading}>
+  {loading ? "Deleting..." : "Delete My Account"}
+</Button>
                         </div>
                       </div>
                     </CardContent>

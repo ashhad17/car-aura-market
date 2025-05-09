@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+import {jwtDecode} from "jwt-decode"; // Import jwt-decode
+
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -41,55 +43,10 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import axios from "axios";
+import { u } from "node_modules/framer-motion/dist/types.d-CQt5spQA";
 
 // Sample car data
-const carData = {
-  id: "1",
-  title: "2020 Toyota Camry XSE",
-  price: 25999,
-  year: 2020,
-  mileage: 35000,
-  condition: "Used - Excellent",
-  exteriorColor: "Pearl White",
-  interiorColor: "Black",
-  fuelType: "Gasoline",
-  transmission: "Automatic",
-  drivetrain: "FWD",
-  engine: "2.5L 4-Cylinder",
-  vin: "4T1BF1FK5LU123456",
-  description: "This beautiful Toyota Camry XSE is in excellent condition with low mileage. It features a premium sound system, leather seats, and advanced safety features. The car has been well maintained and comes with a clean history report.",
-  features: [
-    "Leather Seats",
-    "Navigation System",
-    "Bluetooth",
-    "Backup Camera",
-    "Sunroof/Moonroof",
-    "Heated Seats",
-    "Apple CarPlay/Android Auto",
-    "Blind Spot Monitoring",
-    "Lane Departure Warning",
-    "Keyless Entry & Start"
-  ],
-  images: [
-    "https://images.unsplash.com/photo-1580273916550-e323be2ae537?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=776&q=80",
-    "https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
-    "https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
-    "https://images.unsplash.com/photo-1543465077-db45d34b88a5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
-    "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1734&q=80"
-  ],
-  seller: {
-    id: "s1",
-    name: "Premium Auto Sales",
-    type: "Dealer",
-    rating: 4.8,
-    reviewCount: 124,
-    location: "Springfield, IL",
-    phone: "(555) 123-4567",
-    email: "sales@premiumauto.example.com"
-  },
-  location: "Springfield, IL",
-  listedDate: "2023-07-15"
-};
+
 interface CarListing {
   _id: string;
   make: string;
@@ -188,22 +145,60 @@ const CarDetails = () => {
     setIsBookingDialogOpen(true);
   };
   
-  const handleTestDriveSubmit = () => {
+  const handleTestDriveSubmit = async () => {
     if (!selectedDate || !selectedTime) {
       toast({
         title: "Missing information",
         description: "Please select both a date and time for your appointment.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
-    
-    setIsBookingDialogOpen(false);
-    
-    toast({
-      title: "Test Drive Scheduled",
-      description: `Your test drive is scheduled for ${format(selectedDate, 'PPP')} at ${selectedTime}.`,
-    });
+  
+    try {
+      // Decode the JWT token to get the userId
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast({
+          title: "Authentication Error",
+          description: "You must be logged in to schedule a test drive.",
+          variant: "destructive",
+        });
+        return;
+      }
+  
+      const decodedToken: { id: string } = jwtDecode(token);
+      const userId = decodedToken.id;
+  console.log("Decoded User ID:", userId);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/v1/cars/${id}/testdrive`,
+        {
+          date: selectedDate,
+          time: selectedTime,
+          user: userId, // Include userId in the request body
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      if (response.data.success) {
+        setIsBookingDialogOpen(false);
+        toast({
+          title: "Test Drive Scheduled",
+          description: `Your test drive is scheduled for ${format(selectedDate, "PPP")} at ${selectedTime}.`,
+        });
+      }
+    } catch (error) {
+      console.error("Error scheduling test drive:", error);
+      toast({
+        title: "Error",
+        description: "Failed to schedule test drive. Please try again later.",
+        variant: "destructive",
+      });
+    }
   };
   
   const handleAddToFavorites = () => {
@@ -613,67 +608,67 @@ const CarDetails = () => {
       
       {/* Booking Dialog */}
       <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Schedule a Test Drive</DialogTitle>
-            <DialogDescription>
-              Select your preferred date and time to test drive this {carDetails.year} {carDetails.make} {carDetails.model}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-6 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="date">Select Date</Label>
-              <div className="border rounded-md p-4">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  className="pointer-events-auto"
-                  disabled={(date) => 
-                    date < new Date(new Date().setHours(0, 0, 0, 0)) ||
-                    date > new Date(new Date().setMonth(new Date().getMonth() + 2))
-                  }
-                />
-              </div>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="time">Select Time</Label>
-              <Select onValueChange={setSelectedTime}>
-                <SelectTrigger id="time">
-                  <SelectValue placeholder="Select a time" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableTimes.map((time) => (
-                    <SelectItem key={time} value={time}>
-                      {time}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="grid gap-2">
-              <Label htmlFor="notes">Special Requests (optional)</Label>
-              <Textarea
-                id="notes"
-                placeholder="Any special instructions or requests..."
-                className="resize-none"
-              />
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsBookingDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleTestDriveSubmit}>
-              Schedule Test Drive
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+  <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle>Schedule a Test Drive</DialogTitle>
+      <DialogDescription>
+        Select your preferred date and time to test drive this {carDetails.year} {carDetails.make} {carDetails.model}
+      </DialogDescription>
+    </DialogHeader>
+
+    <div className="grid gap-6 py-4">
+      <div className="grid gap-2">
+        <Label htmlFor="date">Select Date</Label>
+        <div className="border rounded-md p-4">
+          <Calendar
+            mode="single"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            className="pointer-events-auto"
+            disabled={(date) =>
+              date < new Date(new Date().setHours(0, 0, 0, 0)) ||
+              date > new Date(new Date().setMonth(new Date().getMonth() + 2))
+            }
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="time">Select Time</Label>
+        <Select onValueChange={setSelectedTime}>
+          <SelectTrigger id="time">
+            <SelectValue placeholder="Select a time" />
+          </SelectTrigger>
+          <SelectContent>
+            {availableTimes.map((time) => (
+              <SelectItem key={time} value={time}>
+                {time}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="notes">Special Requests (optional)</Label>
+        <Textarea
+          id="notes"
+          placeholder="Any special instructions or requests..."
+          className="resize-none"
+        />
+      </div>
+    </div>
+
+    <DialogFooter>
+      <Button variant="outline" onClick={() => setIsBookingDialogOpen(false)}>
+        Cancel
+      </Button>
+      <Button onClick={handleTestDriveSubmit}>
+        Schedule Test Drive
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
       
       <Footer />
     </div>

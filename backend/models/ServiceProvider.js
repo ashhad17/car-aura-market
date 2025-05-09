@@ -103,8 +103,14 @@ const serviceProviderSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  image: String,
-  gallery: [String],
+  image: {
+    type: String, // URL of the main image
+    default: "true", // Ensure this is required if necessary
+  },
+  gallery: {
+    type: [String], // Array of image URLs
+    default: [], // Default to an empty array
+  },
   rating: {
     type: Number,
     default: 0
@@ -121,7 +127,8 @@ const serviceProviderSchema = new mongoose.Schema({
   specialties: [String],
   services: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Service' // Reference to the Service model
+    ref: 'Service',
+    default:[] // Reference to the Service model
   }],
   location: {
     address: String,

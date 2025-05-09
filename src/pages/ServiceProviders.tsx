@@ -9,15 +9,17 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { motion } from "framer-motion";
-
+import  ServiceProviderFormModal  from "../components/serviceProvider/ServiceProviderFormModal";
 const ServiceProviders = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { isDark } = useTheme();
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const handlePartnerClick = () => {
     if (isAuthenticated) {
-      navigate('/service-provider-dashboard');
+      setIsModalOpen(true);
+      // navigate('/service-provider-dashboard');
     } else {
       navigate('/login');
     }
@@ -59,7 +61,13 @@ const ServiceProviders = () => {
           
           <ServiceGrid />
         </div>
+        <ServiceProviderFormModal 
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}              
+        
+        />
       </main>
+
       <Footer />
     </div>
   );

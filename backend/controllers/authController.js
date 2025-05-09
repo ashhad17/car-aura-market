@@ -217,6 +217,30 @@ exports.logout = asyncHandler(async (req, res, next) => {
     data: {}
   });
 });
+exports.sendContactEmail = async (req, res, next) => {
+  try {
+    const { name, email, subject, message } = req.body;
+
+    if (!name || !email || !subject || !message) {
+      return res.status(400).json({ success: false, message: 'All fields are required.' });
+    }
+
+    const adminEmailText = `
+      New Contact Form Submission:
+      - Name: ${name}
+      - Email: ${email}
+      - Subject: ${subject}
+      - Message: ${message}
+    `;
+
+    await sendMail("mohammedashhad017@gmail.com", `Contact Form: ${subject}`, adminEmailText);
+
+    res.status(200).json({ success: true, message: 'Email sent successfully.' });
+  } catch (error) {
+    console.error('Error sending contact email:', error);
+    res.status(500).json({ success: false, message: 'Failed to send email.' });
+  }
+};
 
 // @desc    Get current logged in user
 // @route   GET /api/v1/auth/me

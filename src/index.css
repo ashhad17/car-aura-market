@@ -211,21 +211,21 @@
 .glow-card::before {
   content: '';
   position: absolute;
-  inset: -1px;
-  background: linear-gradient(45deg, transparent, var(--tw-gradient-from, hsl(var(--primary))), transparent);
-  z-index: -1;
-  border-radius: inherit;
-  transition: opacity 0.3s ease;
-  opacity: 0;
+  inset: 0; /* Ensure it covers the border area */
+  border: 2px solid hsl(var(--primary)); /* Add a glowing border */
+  border-radius: inherit; /* Match the card's border radius */
+  z-index: -1; /* Place it behind the card content */
+  transition: opacity 0.3s ease, box-shadow 0.3s ease;
+  opacity: 0; /* Initially hidden */
 }
 
 .glow-card:hover::before {
-  opacity: 0.7;
-  animation: glowingBorder 2s linear infinite;
+  opacity: 1; /* Make the border visible on hover */
+  box-shadow: 0 0 15px hsl(var(--primary)); /* Add a glowing effect */
 }
 
 .dark .glow-card::before {
-  background: linear-gradient(45deg, transparent, hsl(var(--primary)), transparent);
+  border-color: hsl(var(--primary)); /* Ensure it works in dark mode */
 }
 
 @keyframes glowingBorder {

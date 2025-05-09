@@ -10,10 +10,11 @@ import ServiceSection from "@/components/home/ServiceSection";
 import Testimonials from "@/components/home/Testimonials";
 import { services } from "@/lib/data";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "@/context/ThemeContext";
 
 const Index = () => {
   const navigate = useNavigate();
-  
+    const { isDark } = useTheme();
   const handlePartnerClick = () => {
     navigate('/service-provider-dashboard');
   };

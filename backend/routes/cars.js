@@ -8,7 +8,8 @@ const {
   updateCar,
   deleteCar,
   updateCarStatus,
-  getCarsBySellerId
+  getCarsBySellerId,
+  scheduleTestDrive
 } = require('../controllers/carController');
 const { validateCar, validateCarStatus, handleValidationErrors } = require('../middleware/validate');
 const upload = require('../middleware/upload');
@@ -17,6 +18,9 @@ const upload = require('../middleware/upload');
 // @desc    Get all cars
 // @access  Public
 router.get('/', getCars);
+
+
+router.post('/:id/testdrive', scheduleTestDrive);
 
 // @route   GET /api/v1/cars/:id
 // @desc    Get single car

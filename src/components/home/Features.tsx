@@ -3,6 +3,7 @@ import { Search, Info, Settings, LayoutDashboard } from "lucide-react";
 import { features } from "@/lib/data";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
+import { useTheme } from "@/context/ThemeContext";
 
 const featureIcons = {
   search: <Search className="h-6 w-6" />,
@@ -12,14 +13,15 @@ const featureIcons = {
 };
 
 const Features = () => {
+  const { isDark } = useTheme();
   return (
-    <section className="bg-gray-50 section-padding">
+    <section className={`${isDark ? 'bg-gray-900 text-white' : 'bg-gray-50'} section-padding`}>
       <div className="container mx-auto px-4">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Why Choose <span className="text-gradient">WheelsTrust</span>
           </h2>
-          <p className="text-gray-600">
+          <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
             We're revolutionizing the way people buy, sell, and service vehicles by
             prioritizing transparency and building trust between all parties.
           </p>
@@ -29,19 +31,25 @@ const Features = () => {
           {features.map((feature, index) => (
             <div
               key={index}
-              className="bg-white rounded-xl p-6 shadow-lg hover-scale"
+              className={`rounded-xl p-6 shadow-lg hover-scale ${
+                isDark ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-800'
+              }`}
             >
-              <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mb-4">
+              <div
+                className={`rounded-full w-12 h-12 flex items-center justify-center mb-4 ${
+                  isDark ? 'bg-primary/20' : 'bg-primary/10'
+                }`}
+              >
                 {featureIcons[feature.icon as keyof typeof featureIcons]}
               </div>
               <h3 className="text-xl font-semibold mb-3">{feature.title}</h3>
-              <p className="text-gray-600">{feature.description}</p>
+              <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                {feature.description}
+              </p>
             </div>
           ))}
         </div>
-
-     
-    </div>
+      </div>
     </section>
   );
 };

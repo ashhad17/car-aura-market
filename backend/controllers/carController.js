@@ -1,7 +1,9 @@
 const Car = require('../models/Car');
+const User = require('../models/User');
+const mongoose = require('mongoose');
 const ErrorResponse = require('../utils/errorResponse');
 
-
+const {sendMail} = require('../utils/mailer');
 // @route   GET /api/v1/cars
 // @access  Public
 // exports.getCars = async (req, res, next) => {
@@ -212,6 +214,13 @@ exports.createCar = async (req, res, next) => {
     });
 
     const car = await Car.create(req.body);
+    const adminEmailText = `
+    A new car listing has been created and requires verification:
+    - Title: ${car.title}
+    - Seller: ${req.user.name} (${req.user.email})
+  `;
+  sendMail("mohammedashhad017@gmail.com", 'New Car Listing Created', adminEmailText);
+
 
     res.status(201).json({
       success: true,
@@ -325,77 +334,6 @@ exports.getCar = async (req, res, next) => {
   }
 };
 
-// @route   POST /api/v1/cars
-// @access  Private
-// exports.createCar = async (req, res, next) => {
-//   try {
-//     req.body.seller = req.user.id;
-
-//     // Create title from year, make, model
-//     const { year, make, model } = req.body;
-//     req.body.title = `${year} ${make} ${model}`;
-
-//     // Parse document uploads if coming as JSON strings
-//     ['rcDocument', 'insuranceDocument', 'pucDocument'].forEach(field => {
-//       if (typeof req.body[field] === 'string') {
-//         req.body[field] = JSON.parse(req.body[field]);
-//       }
-//     });
-
-//     const car = await Car.create(req.body);
-
-//     res.status(201).json({
-//       success: true,
-//       message: 'Car listing created successfully',
-//       data: car
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
-
-// @desc    Update car listing
-// @route   PUT /api/v1/cars/:id
-// @access  Private
-// exports.updateCar = async (req, res, next) => {
-//   try {
-//     let car = await Car.findById(req.params.id);
-
-//     if (!car) {
-//       return next(
-//         new ErrorResponse(`Car not found with id of ${req.params.id}`, 404)
-//       );
-//     }
-
-//     // Make sure user is car owner or admin
-//     if (car.seller.toString() !== req.user.id && req.user.role !== 'admin') {
-//       return next(
-//         new ErrorResponse(
-//           `User ${req.user.id} is not authorized to update this listing`,
-//           403
-//         )
-//       );
-//     }
-
-//     car = await Car.findByIdAndUpdate(req.params.id, req.body, {
-//       new: true,
-//       runValidators: true
-//     });
-
-//     res.status(200).json({
-//       success: true,
-//       message: 'Car listing updated successfully',
-//       data: car
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
-
-// @desc    Delete car listing
-// @route   DELETE /api/v1/cars/:id
-// @access  Private
 exports.deleteCar = async (req, res, next) => {
   try {
     const car = await Car.findById(req.params.id);
@@ -435,6 +373,67 @@ exports.getCarsBySellerId = async (req, res, next) => {
     next(err);
   }
 };
+exports.scheduleTestDrive = async (req, res, next) => {
+  try {
+    const car = await Car.findById(req.params.id).populate({
+      path: 'seller',
+      select: 'name email',
+    });
+
+    if (!car) {
+      return next(new ErrorResponse(`Car not found with id of ${req.params.id}`, 404));
+    }
+
+  //get user by id
+    const { date, time,user } = req.body;
+    if (!date || !time) {
+      return next(new ErrorResponse('Date and time are required for scheduling a test drive', 400));
+    }
+    const user1 = await User.findById(user).select('name email');
+    
+    // const user = req.user;
+    if (!user) {
+      return next(new ErrorResponse('User not authenticated', 401));
+    }
+
+    if (!car.seller || !car.seller.email) {
+      return next(new ErrorResponse('Seller information is missing or incomplete', 500));
+    }
+
+    const userEmailText = `
+      Your test drive request has been received:
+      - Car: ${car.title}
+      - Date: ${date}
+      - Time: ${time}
+    `;
+
+    const sellerEmailText = `
+      A test drive has been scheduled for your car listing:
+      - Car: ${car.title}
+      - Date: ${date}
+      - Time: ${time}
+      - User: ${user1.name} (${user1.email})
+    `;
+console.log (user1.email);
+console.log (car.seller.email);
+    try {
+      await sendMail(user1.email, 'Test Drive Scheduled', userEmailText);
+      await sendMail(car.seller.email, 'Test Drive Scheduled for Your Car', sellerEmailText);
+    } catch (emailError) {
+      console.error('Error sending emails:', emailError);
+      return next(new ErrorResponse('Failed to send confirmation emails', 500));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Test drive scheduled successfully. Emails have been sent to the user and the seller.',
+    });
+  } catch (err) {
+    console.error('Error scheduling test drive:', err);
+    next(err);
+  }
+};
+
 // @desc    Update car status
 // @route   PATCH /api/v1/cars/:id/status
 // @access  Private
@@ -472,6 +471,12 @@ exports.updateCarStatus = async (req, res, next) => {
         runValidators: true
       }
     );
+    const userEmailText = `
+    The status of your car listing has been updated:
+    - Title: ${car.title}
+    - New Status: ${status}
+  `;
+  sendMail(car.seller.email, 'Car Listing Status Updated', userEmailText);
 
     res.status(200).json({
       success: true,

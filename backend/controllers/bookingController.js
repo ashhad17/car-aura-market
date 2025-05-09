@@ -1,6 +1,6 @@
 const Booking = require('../models/Booking');
 const ErrorResponse = require('../utils/errorResponse');
-
+const {sendMail} = require('../utils/mailer');
 // @desc    Get all bookings
 // @route   GET /api/v1/bookings
 // @access  Private
@@ -260,6 +260,24 @@ exports.createBooking = async (req, res, next) => {
 
     // Create the booking
     const booking = await Booking.create(req.body);
+    const providerEmailText = `
+    A new booking has been created for your services:
+    - Date: ${booking.date}
+    - Time: ${booking.time}
+    - User: ${req.user.name} (${req.user.email})
+    - Total Price: ${booking.totalPrice}
+  `;
+  sendMail(serviceProvider.email, 'New Booking Created', providerEmailText);
+
+  // Send email to user
+  const userEmailText = `
+    Your booking has been successfully created:
+    - Service Provider: ${serviceProvider.name}
+    - Date: ${booking.date}
+    - Time: ${booking.time}
+    - Total Price: ${booking.totalPrice}
+  `;
+  sendMail(req.user.email, 'Booking Confirmation', userEmailText);
 
     res.status(201).json({
       success: true,
@@ -392,6 +410,13 @@ exports.updateBookingStatus = async (req, res, next) => {
         runValidators: true
       }
     );
+    const userEmailText = `
+    The status of your booking has been updated:
+    - New Status: ${status}
+    - Date: ${booking.date}
+    - Time: ${booking.time}
+  `;
+  sendMail(booking.user.email, 'Booking Status Updated', userEmailText);
 
     res.status(200).json({
       success: true,

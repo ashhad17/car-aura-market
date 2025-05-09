@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
 import ReviewsSection from "@/components/review/ReviewsSection";
+import { useTheme } from "@/context/ThemeContext";
 
 interface Service {
   _id: string;
@@ -41,6 +42,7 @@ interface ServiceProvider {
   services: Service[];
   status: string;
   verified: boolean;
+  gallery: string[];
   specialties: string[];
   location: {
     address: string;
@@ -63,7 +65,7 @@ const ServiceProviderDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-  const { openAuthModal } = useAuth();
+  // const { openAuthModal } = useAuth();
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -75,7 +77,8 @@ const ServiceProviderDetails = () => {
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [bookedTimeSlots, setBookedTimeSlots] = useState<TimeSlot[]>([]);
   const { toast } = useToast();
-  const isDark = false; // Example variable to check if dark mode is enabled
+  
+  const { isDark } = useTheme();// Example variable to check if dark mode is enabled
 
   useEffect(() => {
     const fetchProviderDetails = async () => {
@@ -383,11 +386,59 @@ const ServiceProviderDetails = () => {
             <div>
               {/* Hero Section */}
               <div className="relative rounded-lg overflow-hidden shadow-xl">
-                <img 
-                  src={provider?.image} 
-                  alt={provider?.name} 
-                  className="w-full h-80 object-cover object-center" 
-                />
+              <div className="relative rounded-lg overflow-hidden shadow-xl">
+  {provider?.gallery && provider.gallery.length > 0 ? (
+    <>
+      {/* Display the active image */}
+      <img
+        src={provider.gallery[activeImageIndex]}
+        alt={`Gallery Image ${activeImageIndex + 1}`}
+        className="w-full h-80 object-cover object-center"
+      />
+
+      {/* Navigation Buttons */}
+      <button
+        onClick={() =>
+          setActiveImageIndex((prevIndex) =>
+            prevIndex === 0 ? provider.gallery.length - 1 : prevIndex - 1
+          )
+        }
+        className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
+      >
+        &#8249; {/* Left Arrow */}
+      </button>
+      <button
+        onClick={() =>
+          setActiveImageIndex((prevIndex) =>
+            prevIndex === provider.gallery.length - 1 ? 0 : prevIndex + 1
+          )
+        }
+        className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
+      >
+        &#8250; {/* Right Arrow */}
+      </button>
+
+      {/* Image Indicators */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        {provider.gallery.map((_, index) => (
+          <div
+            key={index}
+            className={`w-3 h-3 rounded-full ${
+              index === activeImageIndex ? "bg-white" : "bg-gray-400"
+            }`}
+          ></div>
+        ))}
+      </div>
+    </>
+  ) : (
+    // Fallback if no gallery images are available
+    <img
+      src={provider?.image}
+      alt={provider?.name}
+      className="w-full h-80 object-cover object-center"
+    />
+  )}
+</div>
                 <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-gray-900 to-transparent p-6">
                   <h1 className="text-3xl font-bold text-white">{provider?.name}</h1>
                   <div className="flex items-center text-yellow-400 mb-2">
@@ -546,37 +597,37 @@ const ServiceProviderDetails = () => {
               <div className="sticky top-24">
                 <h2 className={`text-xl font-semibold mb-4 ${isDark ? 'text-white' : ''}`}>Available Services</h2>
                 <div className="space-y-4">
-                {provider?.services.map((service) => (
-                  <div 
-                    key={service._id}
-                    className={`rounded-lg shadow-md p-6 cursor-pointer transition-all ${
-                      selectedServices.some(s => s._id === service._id) 
-                        ? 'ring-2 ring-primary' 
-                        : 'hover:shadow-lg'
-                    } ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white'}`}
-                    onClick={() => handleServiceSelect(service)}
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : ''}`}>{service.name}</h3>
-                        <p className={isDark ? 'text-gray-300 text-sm' : 'text-gray-600 text-sm'}>{service.description}</p>
-                      </div>
-                      {selectedServices.some(s => s._id === service._id) && (
-                        <Check className="h-5 w-5 text-primary" />
-                      )}
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <div className={`text-2xl font-bold text-primary`}>
-                        ${service.price.toFixed(2)}
-                      </div>
-                      <div className={isDark ? 'text-gray-300 flex items-center' : 'text-gray-600 flex items-center'}>
-                        <Clock className="h-4 w-4 mr-1" />
-                        {formatDuration(service.duration)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                </div>
+  {provider?.services.map((service) => (
+    <div
+      key={service._id}
+      className={`rounded-lg shadow-md p-6 cursor-pointer transition-all ${
+        selectedServices.some((s) => s._id === service._id)
+          ? 'ring-2 ring-primary'
+          : 'hover:shadow-lg'
+      } ${isDark ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white text-gray-800'}`}
+      onClick={() => handleServiceSelect(service)}
+    >
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-lg font-semibold">{service.name}</h3>
+          <p className="text-sm">{service.description}</p>
+        </div>
+        {selectedServices.some((s) => s._id === service._id) && (
+          <Check className="h-5 w-5 text-primary" />
+        )}
+      </div>
+      <div className="flex justify-between items-center">
+        <div className="text-2xl font-bold text-primary">
+          ${service.price.toFixed(2)}
+        </div>
+        <div className="flex items-center">
+          <Clock className="h-4 w-4 mr-1" />
+          {service.duration}
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
 
                 {/* Booking Summary */}
                 {selectedServices.length > 0 && (
@@ -588,7 +639,7 @@ const ServiceProviderDetails = () => {
                           <div key={service._id} className="flex justify-between items-center">
                             <div>
                               <h3 className={`font-medium ${isDark ? 'text-white' : ''}`}>{service.name}</h3>
-                              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{formatDuration(service.duration)}</p>
+                              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{service.duration}</p>
                             </div>
                             <div className="text-primary font-semibold">
                               ${service.price.toFixed(2)}

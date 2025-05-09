@@ -12,6 +12,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import ServiceProviderForm from "../serviceProvider/ServiceProviderForm";
 
 interface ServiceProvider {
   _id: string;
@@ -304,7 +305,7 @@ const ServiceProviderManagement = () => {
                 Create a new service provider account with the following details.
               </DialogDescription>
             </DialogHeader>
-            <Form {...form}>
+            {/* <Form {...form}>
               <form onSubmit={form.handleSubmit(handleAddProvider)} className="space-y-4">
                 <FormField
                   control={form.control}
@@ -407,7 +408,8 @@ const ServiceProviderManagement = () => {
                   <Button type="submit">Add Provider</Button>
                 </DialogFooter>
               </form>
-            </Form>
+            </Form> */}
+            <ServiceProviderForm/>
           </DialogContent>
         </Dialog>
       </div>
@@ -562,7 +564,7 @@ const ServiceProviderManagement = () => {
               Update service provider details below.
             </DialogDescription>
           </DialogHeader>
-          <Form {...form}>
+          {/* <Form {...form}>
             <form onSubmit={form.handleSubmit(handleEditProvider)} className="space-y-4">
               <FormField
                 control={form.control}
@@ -666,6 +668,15 @@ const ServiceProviderManagement = () => {
               </DialogFooter>
             </form>
           </Form>
+           */}<ServiceProviderForm
+      initialData={editProvider} // Pass the selected provider's data
+      isEdit={true} // Indicate that this is an edit operation
+      onSuccess={() => {
+        setEditProvider(null); // Close the dialog on success
+        fetchProviders(); // Refresh the list of providers
+      }}
+      onCancel={() => setEditProvider(null)} // Close the dialog on cancel
+    />
         </DialogContent>
       </Dialog>
     </div>

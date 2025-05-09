@@ -12,16 +12,17 @@ import { motion } from "framer-motion";
 
 interface ServiceProps {
   service: {
-    id: string;
+    _id: string;
     name: string;
     description: string;
     price: number;
     duration: string;
     category: string;
     image: string;
-    provider: {
+    serviceProvider: {
+      _id: string;
       name: string;
-      rating: number;
+      
     };
     features: string[];
   };
@@ -32,10 +33,10 @@ const ServiceCard: React.FC<ServiceProps> = ({ service }) => {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const { isDark } = useTheme();
-  
+
   const handleBookNow = () => {
     if (isAuthenticated) {
-      navigate(`/services/${service.id}`);
+      navigate(`/service-providers/${service.serviceProvider._id}`);
     } else {
       navigate('/login');
     }
@@ -46,7 +47,7 @@ const ServiceCard: React.FC<ServiceProps> = ({ service }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      whileHover={{ scale: 1.03 }}
+      whileHover={{ scale: 1 }}
     >
       <Card className={`overflow-hidden hover:shadow-lg transition-all duration-300 ${isDark ? 'bg-gray-800 border-gray-700 hover:shadow-glow-dark' : 'hover:shadow-glow-light glow-card'}`}>
         <div className="relative h-48">
@@ -68,11 +69,13 @@ const ServiceCard: React.FC<ServiceProps> = ({ service }) => {
             <CardTitle className={`text-xl ${isDark ? 'text-white' : ''}`}>{service.name}</CardTitle>
             <div className="flex items-center gap-1 text-yellow-500">
               <Star className="fill-yellow-500 h-4 w-4" />
-              <span className="text-sm font-medium">{service.provider.rating.toFixed(1)}</span>
+              <span className="text-sm font-medium">
+                {"No rating"}
+              </span>
             </div>
           </div>
           <CardDescription className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-500'}`}>
-            {service.provider.name}
+            {service.serviceProvider?.name || "Unknown Provider"}
           </CardDescription>
         </CardHeader>
         
@@ -83,12 +86,12 @@ const ServiceCard: React.FC<ServiceProps> = ({ service }) => {
             <span className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-500'}`}>{service.duration}</span>
           </div>
           <div className="flex flex-wrap gap-1 mb-1">
-            {service.features.slice(0, 2).map((feature, index) => (
+            {(service.features || []).slice(0, 2).map((feature, index) => (
               <Badge key={index} variant="outline" className={`text-xs ${isDark ? 'bg-gray-700 text-gray-200' : 'bg-gray-50'}`}>
                 {feature}
               </Badge>
             ))}
-            {service.features.length > 2 && (
+            {service.features?.length > 2 && (
               <Badge variant="outline" className={`text-xs ${isDark ? 'bg-gray-700 text-gray-200' : 'bg-gray-50'}`}>
                 +{service.features.length - 2} more
               </Badge>
@@ -115,3 +118,5 @@ const ServiceCard: React.FC<ServiceProps> = ({ service }) => {
 };
 
 export default ServiceCard;
+
+// export default ServiceCard;

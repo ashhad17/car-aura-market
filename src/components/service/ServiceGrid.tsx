@@ -60,8 +60,8 @@ const ServiceGrid: React.FC<ServiceGridProps> = ({ isPreview = false }) => {
   const fetchServiceProviders = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get<{ 
-        success: boolean; 
+      const response = await axios.get<{
+        success: boolean;
         data: {
           serviceProviders: ServiceProvider[];
           pagination: {
@@ -69,19 +69,25 @@ const ServiceGrid: React.FC<ServiceGridProps> = ({ isPreview = false }) => {
             pages: number;
             currentPage: number;
             limit: number;
-          }
-        }
+          };
+        };
       }>(
         `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/service-providers`
       );
-      
+  
       if (response.data.success && Array.isArray(response.data.data.serviceProviders)) {
         const serviceProviders = response.data.data.serviceProviders;
-        setProviders(serviceProviders);
-        setFilteredProviders(serviceProviders);
+  
+        // Filter only active providers
+        const activeProviders = serviceProviders.filter(
+          (provider) => provider.status === "active"
+        );
+  
+        setProviders(activeProviders);
+        setFilteredProviders(activeProviders);
       } else {
-        const errorMessage = !response.data.success 
-          ? "Server returned unsuccessful response" 
+        const errorMessage = !response.data.success
+          ? "Server returned unsuccessful response"
           : "Response data is not in the expected format";
         setError(errorMessage);
         toast({
@@ -95,7 +101,7 @@ const ServiceGrid: React.FC<ServiceGridProps> = ({ isPreview = false }) => {
       const errorMessage = axios.isAxiosError(error)
         ? error.response?.data?.message || error.message
         : "Failed to fetch service providers";
-      
+  
       setError(errorMessage);
       toast({
         title: "Error",

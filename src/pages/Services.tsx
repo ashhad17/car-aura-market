@@ -44,7 +44,7 @@ const Services = () => {
             
             <div className="md:col-span-3">
               <Tabs defaultValue="all" className="w-full" onValueChange={setActiveCategory} value={activeCategory}>
-                <TabsList className={`grid grid-cols-5 mb-8 ${isDark ? 'bg-gray-800' : ''}`}>
+                <TabsList className={`grid grid-cols-6 mb-8 ${isDark ? 'bg-gray-800' : ''}`}>
                   <TabsTrigger 
                     value="all"
                     className={isDark ? 'data-[state=active]:bg-gray-700' : ''}
@@ -62,9 +62,13 @@ const Services = () => {
                     className={isDark ? 'data-[state=active]:bg-gray-700' : ''}
                   >Inspection</TabsTrigger>
                   <TabsTrigger 
-                    value="detailing"
+                    value="cleaning"
                     className={isDark ? 'data-[state=active]:bg-gray-700' : ''}
-                  >Detailing</TabsTrigger>
+                  >Cleaning</TabsTrigger>
+                   <TabsTrigger 
+                    value="other"
+                    className={isDark ? 'data-[state=active]:bg-gray-700' : ''}
+                  >Other</TabsTrigger>
                 </TabsList>
                 <TabsContent value="all">
                   <ServicesList category={null} />
@@ -78,8 +82,11 @@ const Services = () => {
                 <TabsContent value="inspection">
                   <ServicesList category="inspection" />
                 </TabsContent>
-                <TabsContent value="detailing">
-                  <ServicesList category="detailing" />
+                <TabsContent value="cleaning">
+                  <ServicesList category="cleaning" />
+                </TabsContent>
+                <TabsContent value="other">
+                  <ServicesList category="other" />
                 </TabsContent>
               </Tabs>
             </div>
