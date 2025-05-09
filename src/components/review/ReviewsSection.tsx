@@ -104,97 +104,182 @@ const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     1: Math.round(reviewCount * 0.01),
   };
 
-  return (
-    <Card className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white'} hover:shadow-lg transition-all duration-300`}>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-        <div>
-          <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : ''}`}>Customer Reviews</h2>
-          <div className="flex items-center mt-1">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-5 w-5 ${
-                    i < Math.round(rating)
-                      ? "text-yellow-400 fill-yellow-400"
-                      : isDark ? "text-gray-600" : "text-gray-300"
-                  }`}
-                />
-              ))}
-            </div>
-            <span className={`ml-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-              <strong>{rating}</strong> out of 5 ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})
-            </span>
-          </div>
-        </div>
-        <Button
-          onClick={handleWriteReview}
-          className="mt-4 md:mt-0 hover:scale-105 transition-all duration-300 hover:shadow-glow"
-          variant="glow"
-        >
-          <MessageSquare className="mr-2 h-4 w-4" />
-          Write a Review
-        </Button>
-      </div>
+  // Animation variants
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 }
+    }
+  };
 
-      {/* Rating Distribution */}
-      <div className={`mb-8 p-4 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
-        <h3 className={`text-lg font-medium mb-3 ${isDark ? 'text-white' : ''}`}>Rating Distribution</h3>
-        <div className="space-y-2">
-          {[5, 4, 3, 2, 1].map((star) => (
-            <div key={star} className="flex items-center">
-              <div className="flex items-center w-16">
-                <span className={isDark ? 'text-gray-300' : 'text-gray-600'}>{star}</span>
-                <Star className={`ml-1 h-4 w-4 ${isDark ? 'text-yellow-400' : 'text-yellow-500'} fill-yellow-400`} />
-              </div>
-              <div className="w-full ml-2">
-                <div className="h-2 rounded-full bg-gray-200 dark:bg-gray-600">
-                  <div
-                    className="h-2 rounded-full bg-yellow-400"
-                    style={{ width: `${(ratingDistribution[star as keyof typeof ratingDistribution] / reviewCount) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-              <span className={`ml-2 w-10 text-right text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                {ratingDistribution[star as keyof typeof ratingDistribution]}
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: { 
+      opacity: 1, 
+      x: 0,
+      transition: { duration: 0.3 }
+    }
+  };
+
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={cardVariants}
+    >
+      <Card className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white'} hover:shadow-lg transition-all duration-300 border border-transparent hover:border-primary/30`}>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <div>
+            <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : ''}`}>Customer Reviews</h2>
+            <div className="flex items-center mt-1">
+              <motion.div 
+                className="flex items-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+              >
+                {[...Array(5)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ rotate: -30, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    transition={{ delay: 0.1 * i, duration: 0.3 }}
+                  >
+                    <Star
+                      className={`h-5 w-5 ${
+                        i < Math.round(rating)
+                          ? "text-yellow-400 fill-yellow-400"
+                          : isDark ? "text-gray-600" : "text-gray-300"
+                      }`}
+                    />
+                  </motion.div>
+                ))}
+              </motion.div>
+              <span className={`ml-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                <strong>{rating}</strong> out of 5 ({reviewCount} {reviewCount === 1 ? "review" : "reviews"})
               </span>
             </div>
-          ))}
+          </div>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Button
+              onClick={handleWriteReview}
+              className="mt-4 md:mt-0 hover:shadow-glow transition-all duration-300"
+              variant="glow"
+            >
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Write a Review
+            </Button>
+          </motion.div>
         </div>
-      </div>
 
-      {showReviewForm && (
-        <div className="mb-6">
-          <ReviewForm
-            onSubmit={handleReviewSubmit}
-            onCancel={() => setShowReviewForm(false)}
-          />
-        </div>
-      )}
+        {/* Rating Distribution */}
+        <motion.div 
+          className={`mb-8 p-4 rounded-lg ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <h3 className={`text-lg font-medium mb-3 ${isDark ? 'text-white' : ''}`}>Rating Distribution</h3>
+          <div className="space-y-2">
+            {[5, 4, 3, 2, 1].map((star) => (
+              <div key={star} className="flex items-center">
+                <div className="flex items-center w-16">
+                  <span className={isDark ? 'text-gray-300' : 'text-gray-600'}>{star}</span>
+                  <Star className={`ml-1 h-4 w-4 ${isDark ? 'text-yellow-400' : 'text-yellow-500'} fill-yellow-400`} />
+                </div>
+                <div className="w-full ml-2">
+                  <div className="h-2 rounded-full bg-gray-200 dark:bg-gray-600">
+                    <motion.div
+                      className="h-2 rounded-full bg-yellow-400"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(ratingDistribution[star as keyof typeof ratingDistribution] / reviewCount) * 100}%` }}
+                      transition={{ duration: 0.8, delay: 0.3 + (5 - star) * 0.1 }}
+                    ></motion.div>
+                  </div>
+                </div>
+                <span className={`ml-2 w-10 text-right text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                  {ratingDistribution[star as keyof typeof ratingDistribution]}
+                </span>
+              </div>
+            ))}
+          </div>
+        </motion.div>
 
-      <div className={`rounded-lg ${isDark ? 'bg-gray-700' : 'bg-white border'} mb-6`}>
-        <h3 className={`px-4 py-3 border-b ${isDark ? 'text-white border-gray-600' : ''}`}>Recent Reviews</h3>
-        <div className={`divide-y ${isDark ? 'divide-gray-700' : 'divide-gray-200'}`}>
-          {reviews.length > 0 ? (
-            reviews.map((review) => (
-              <ReviewItem key={review.id} review={review} />
-            ))
-          ) : (
-            <div className={`p-8 text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-              No reviews yet. Be the first to leave a review!
-            </div>
-          )}
-        </div>
-      </div>
+        {showReviewForm && (
+          <motion.div 
+            className="mb-6"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            transition={{ duration: 0.3 }}
+          >
+            <ReviewForm
+              onSubmit={handleReviewSubmit}
+              onCancel={() => setShowReviewForm(false)}
+              serviceProviderId={entityId} // Fix the TS error by passing the required prop
+            />
+          </motion.div>
+        )}
 
-      {reviewCount > 3 && (
-        <div className="flex justify-center">
-          <Button variant="outline" className={isDark ? 'border-gray-700 hover:bg-gray-700' : ''}>
-            View All {reviewCount} Reviews
-          </Button>
-        </div>
-      )}
-    </Card>
+        <motion.div 
+          className={`rounded-lg ${isDark ? 'bg-gray-700' : 'bg-white border'} mb-6`}
+          variants={containerVariants}
+        >
+          <h3 className={`px-4 py-3 border-b ${isDark ? 'text-white border-gray-600' : ''}`}>Recent Reviews</h3>
+          <div className={`divide-y ${isDark ? 'divide-gray-700' : 'divide-gray-200'}`}>
+            {reviews.length > 0 ? (
+              reviews.map((review, index) => (
+                <motion.div 
+                  key={review.id} 
+                  variants={itemVariants}
+                  custom={index}
+                >
+                  <ReviewItem review={review} />
+                </motion.div>
+              ))
+            ) : (
+              <motion.div 
+                className={`p-8 text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                No reviews yet. Be the first to leave a review!
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
+
+        {reviewCount > 3 && (
+          <motion.div 
+            className="flex justify-center"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.3 }}
+          >
+            <Button variant="outline" className={isDark ? 'border-gray-700 hover:bg-gray-700' : ''}>
+              View All {reviewCount} Reviews
+            </Button>
+          </motion.div>
+        )}
+      </Card>
+    </motion.div>
   );
 };
 

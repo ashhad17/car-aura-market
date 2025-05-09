@@ -91,10 +91,12 @@ const Hero = () => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <img
+            <motion.img
               src="https://images.unsplash.com/photo-1494976388531-d1058494cdd8?q=80&w=2070&auto=format&fit=crop"
               alt="Car hero"
-              className="rounded-lg shadow-2xl transform hover-scale"
+              className="rounded-lg shadow-2xl"
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.3 }}
             />
             
             <motion.div 
@@ -115,6 +117,46 @@ const Hero = () => {
                   <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>100% transparency & trust</p>
                 </div>
               </div>
+            </motion.div>
+
+            {/* Add floating car animations */}
+            <motion.div 
+              className="absolute -top-10 -right-16 w-24 h-24"
+              animate={{ 
+                y: [0, -15, 0],
+                rotate: [0, 5, 0] 
+              }}
+              transition={{ 
+                duration: 6,
+                repeat: Infinity,
+                repeatType: "reverse" 
+              }}
+            >
+              <img 
+                src="https://cdn-icons-png.flaticon.com/512/3202/3202926.png" 
+                alt="Car icon" 
+                className="w-full h-full object-contain opacity-80" 
+              />
+            </motion.div>
+
+            <motion.div 
+              className="absolute -bottom-10 right-20 w-16 h-16"
+              animate={{ 
+                y: [0, 10, 0],
+                rotate: [0, -8, 0] 
+              }}
+              transition={{ 
+                duration: 5,
+                repeat: Infinity,
+                repeatType: "reverse",
+                delay: 1 
+              }}
+            >
+              <img 
+                src="https://cdn-icons-png.flaticon.com/512/3774/3774278.png" 
+                alt="Car icon" 
+                className="w-full h-full object-contain opacity-80" 
+              />
             </motion.div>
           </motion.div>
         </div>
@@ -145,23 +187,56 @@ const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.7, duration: 0.6 }}
         >
-          <Button
-            onClick={handleBuyCar}
-            size="lg"
-            variant="glow"
-            className="bg-primary hover:bg-primary/90 text-white"
-          >
-            Browse Cars
-          </Button>
-          <Button onClick={handleSellCar} size="lg" variant="outline" className="glow-btn">
-            Sell Your Car
-          </Button>
-          <Button onClick={handleFindCar} size="lg" variant="secondary" className="glow-btn">
-            Find Your Match
-          </Button>
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button
+              onClick={handleBuyCar}
+              size="lg"
+              variant="glow"
+              className="bg-primary hover:bg-primary/90 text-white"
+            >
+              Browse Cars
+            </Button>
+          </motion.div>
+          
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button onClick={handleSellCar} size="lg" variant="outline" className="glow-btn">
+              Sell Your Car
+            </Button>
+          </motion.div>
+
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Button onClick={handleFindCar} size="lg" variant="secondary" className="glow-btn">
+              Find Your Match
+            </Button>
+          </motion.div>
         </motion.div>
       </div>
       
+      {/* Add animated car silhouette at the bottom */}
+      <motion.div 
+        className="absolute bottom-0 left-0 w-full overflow-hidden h-16 z-10"
+        style={{ opacity: 0.2 }}
+      >
+        <motion.div
+          initial={{ x: -500 }}
+          animate={{ x: window.innerWidth + 500 }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute bottom-0 left-0"
+        >
+          <svg width="180" height="60" viewBox="0 0 180 60" fill={isDark ? "white" : "black"} xmlns="http://www.w3.org/2000/svg">
+            <path d="M39.5,12.2c-2.5-1-5.2-1.5-8-1.5H22.8l-5.3,13.3h-13L0,35.7V46h7.7c0,0,0,4,3.5,4s3.5-4,3.5-4h121.9c0,0,0,4,3.5,4
+              s3.5-4,3.5-4H180V35.9l-4.8-12.7c0,0-1-2.5-3.5-2.5h-32.4l-5.2-2.7c-3-1.5-6.2-2.3-9.6-2.3h-23.2c-3.2,0-6.4,0.8-9.3,2.3L82,24.7
+              H58.7l-5-13.2C51.3,11.5,39.5,12.2,39.5,12.2z M14.3,38.5c-3.6,0-6.5-2.9-6.5-6.5S10.7,25.5,14.3,25.5s6.5,2.9,6.5,6.5
+              S17.9,38.5,14.3,38.5z M140.1,38.5c-3.6,0-6.5-2.9-6.5-6.5s2.9-6.5,6.5-6.5s6.5,2.9,6.5,6.5S143.7,38.5,140.1,38.5z M24.5,20.7h8.5c3.2,0,6.3,0.7,9.2,2.1
+              L59.7,31h14.8l13.5-9c2.5-1.7,5.5-2.5,8.5-2.5h23.2c3.3,0,6.5,0.8,9.5,2.3l17.1,9.1h28.7l2.5-7.5h-76.6c-2.8-2.7-6.5-4.1-10.3-4.1
+              c-3.8,0-7.7,1.4-10.4,4.1H31.4L24.5,20.7z"/>
+          </svg>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };

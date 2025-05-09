@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate, Link } from "react-router-dom";
@@ -5,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import OTPLoginForm from "@/components/auth/OTPLoginForm";
 import { useTheme } from "@/context/ThemeContext";
+import { motion } from "framer-motion";
 
 const OtpLogin = () => {
   const navigate = useNavigate();
@@ -12,6 +14,27 @@ const OtpLogin = () => {
 
   const handleComplete = () => {
     navigate("/");
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        when: "beforeChildren",
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5 }
+    }
   };
 
   return (
@@ -22,11 +45,33 @@ const OtpLogin = () => {
 
       <Navbar />
 
-      <main className="flex-grow flex items-center justify-center py-12">
-        <div className={`w-full max-w-md mx-auto p-8 rounded-lg shadow-md ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
-          <h1 className="text-2xl font-bold text-center mb-6">Login with OTP</h1>
+      <motion.main 
+        className="flex-grow flex items-center justify-center py-12"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <motion.div 
+          className={`w-full max-w-md mx-auto p-8 rounded-lg shadow-md ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}
+          variants={itemVariants}
+          whileHover={{ 
+            boxShadow: theme === "dark" ? 
+              "0px 0px 20px 1px rgba(59, 130, 246, 0.3)" : 
+              "0px 0px 20px 1px rgba(59, 130, 246, 0.15)" 
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <motion.h1 
+            className="text-2xl font-bold text-center mb-6"
+            variants={itemVariants}
+          >
+            Login with OTP
+          </motion.h1>
 
-          <div className="mb-6 flex justify-between items-center">
+          <motion.div 
+            className="mb-6 flex justify-between items-center"
+            variants={itemVariants}
+          >
             <Link to="/login" className={`text-sm ${theme === "dark" ? "text-blue-400" : "text-primary"} hover:underline flex items-center`}>
               ← Back to login options
             </Link>
@@ -36,11 +81,13 @@ const OtpLogin = () => {
             >
               Toggle Theme
             </button> */}
-          </div>
+          </motion.div>
 
-          <OTPLoginForm onComplete={handleComplete} />
-        </div>
-      </main>
+          <motion.div variants={itemVariants}>
+            <OTPLoginForm onComplete={handleComplete} />
+          </motion.div>
+        </motion.div>
+      </motion.main>
 
       <Footer />
     </div>

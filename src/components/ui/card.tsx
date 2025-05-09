@@ -16,7 +16,7 @@ const Card = React.forwardRef<
     ref={ref}
     className={cn(
       "rounded-lg border bg-card text-card-foreground shadow-sm transition-all duration-300",
-      glowEffect && "hover:shadow-glow border-primary/20 hover:border-primary",
+      glowEffect && "hover:shadow-glow relative before:absolute before:inset-0 before:rounded-lg before:border before:border-primary/50 before:opacity-0 hover:before:opacity-100 before:transition-all before:duration-300 hover:before:shadow-[0_0_15px_rgba(59,130,246,0.5)]",
       hoverAnimation && "hover:scale-105",
       className
     )}

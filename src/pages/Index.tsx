@@ -11,10 +11,12 @@ import Testimonials from "@/components/home/Testimonials";
 import { services } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/context/ThemeContext";
+import { motion } from "framer-motion";
 
 const Index = () => {
   const navigate = useNavigate();
-    const { isDark } = useTheme();
+  const { isDark } = useTheme();
+  
   const handlePartnerClick = () => {
     navigate('/service-provider-dashboard');
   };
@@ -26,22 +28,51 @@ const Index = () => {
         <Hero />
         <Features />
         <CarListingPreview cars={[]} />
-        <section className="py-16 bg-primary-50">
+        <motion.section 
+          className="py-16 bg-primary-50"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+        >
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Partner With Us</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto mb-8">
+            <motion.h2 
+              className="text-3xl md:text-4xl font-bold mb-4"
+              initial={{ y: 20, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
+              Partner With Us
+            </motion.h2>
+            <motion.p 
+              className="text-gray-600 max-w-2xl mx-auto mb-8"
+              initial={{ y: 20, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
               Are you a service provider? Join our network of trusted mechanics, body shops,
               and inspection services to grow your business.
-            </p>
-            <Button 
-              size="lg"
-              className="px-8 bg-primary hover:bg-primary/90"
-              onClick={handlePartnerClick}
+            </motion.p>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ y: 20, opacity: 0 }}
+              whileInView={{ y: 0, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.6 }}
             >
-              Become a Service Partner
-            </Button>
+              <Button 
+                size="lg"
+                className="px-8 bg-primary hover:bg-primary/90"
+                onClick={handlePartnerClick}
+              >
+                Become a Service Partner
+              </Button>
+            </motion.div>
           </div>
-        </section>
+        </motion.section>
         <ServiceSection services={services} />
         <Testimonials />
       </main>
