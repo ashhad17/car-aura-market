@@ -32,6 +32,7 @@ const Hero = () => {
       isDark ? 'bg-gradient-to-b from-gray-900/50 to-black/80' : 'bg-gradient-to-b from-primary/5 to-transparent'
     }`}>
       
+      {/* Dynamic background elements */}
       <div className="absolute top-20 right-0 w-3/4 h-3/4 opacity-10">
         <motion.div 
           className={`absolute rounded-full ${isDark ? 'bg-blue-500' : 'bg-primary'} w-96 h-96 blur-3xl -top-20 -right-20`}
@@ -119,12 +120,13 @@ const Hero = () => {
               </div>
             </motion.div>
 
-            {/* Add floating car animations */}
+            {/* Animated geometric shapes instead of cars */}
             <motion.div 
-              className="absolute -top-10 -right-16 w-24 h-24"
+              className="absolute -top-10 -right-16 w-24 h-24" 
               animate={{ 
                 y: [0, -15, 0],
-                rotate: [0, 5, 0] 
+                rotate: [0, 5, 0],
+                scale: [1, 1.05, 1]
               }}
               transition={{ 
                 duration: 6,
@@ -132,18 +134,15 @@ const Hero = () => {
                 repeatType: "reverse" 
               }}
             >
-              <img 
-                src="https://cdn-icons-png.flaticon.com/512/3202/3202926.png" 
-                alt="Car icon" 
-                className="w-full h-full object-contain opacity-80" 
-              />
+              <div className={`w-full h-full rounded-full ${isDark ? 'bg-blue-500/20' : 'bg-blue-300/30'} backdrop-blur-sm border border-white/10`}></div>
             </motion.div>
 
             <motion.div 
               className="absolute -bottom-10 right-20 w-16 h-16"
               animate={{ 
                 y: [0, 10, 0],
-                rotate: [0, -8, 0] 
+                rotate: [0, -8, 0],
+                scale: [1, 1.1, 1]
               }}
               transition={{ 
                 duration: 5,
@@ -152,11 +151,24 @@ const Hero = () => {
                 delay: 1 
               }}
             >
-              <img 
-                src="https://cdn-icons-png.flaticon.com/512/3774/3774278.png" 
-                alt="Car icon" 
-                className="w-full h-full object-contain opacity-80" 
-              />
+              <div className={`w-full h-full rounded-md transform rotate-45 ${isDark ? 'bg-purple-500/20' : 'bg-purple-300/30'} backdrop-blur-sm border border-white/10`}></div>
+            </motion.div>
+            
+            <motion.div 
+              className="absolute top-20 right-32 w-12 h-12"
+              animate={{ 
+                y: [0, -8, 0],
+                rotate: [0, 15, 0],
+                scale: [1, 0.9, 1]
+              }}
+              transition={{ 
+                duration: 7,
+                repeat: Infinity,
+                repeatType: "reverse",
+                delay: 2 
+              }}
+            >
+              <div className={`w-full h-full rounded-lg transform ${isDark ? 'bg-green-500/20' : 'bg-green-300/30'} backdrop-blur-sm border border-white/10`}></div>
             </motion.div>
           </motion.div>
         </div>
@@ -212,31 +224,43 @@ const Hero = () => {
         </motion.div>
       </div>
       
-      {/* Add animated car silhouette at the bottom */}
-      <motion.div 
-        className="absolute bottom-0 left-0 w-full overflow-hidden h-16 z-10"
-        style={{ opacity: 0.2 }}
-      >
-        <motion.div
-          initial={{ x: -500 }}
-          animate={{ x: window.innerWidth + 500 }}
+      {/* Replace car silhouette with animated wave/line */}
+      <div className="absolute bottom-0 left-0 w-full overflow-hidden h-10 z-10">
+        <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-full">
+          <motion.path 
+            d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" 
+            fill={isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)"}
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ 
+              pathLength: 1, 
+              opacity: 1,
+              x: [0, -20, 0],
+              y: [0, 2, 0]
+            }}
+            transition={{ 
+              pathLength: { duration: 2, ease: "easeInOut" },
+              opacity: { duration: 0.5 },
+              x: { duration: 10, repeat: Infinity, repeatType: "reverse" },
+              y: { duration: 8, repeat: Infinity, repeatType: "reverse" }
+            }}
+          />
+        </svg>
+      </div>
+      
+      {/* Add animated gradient line */}
+      <div className="absolute bottom-0 left-0 w-full h-[1px] overflow-hidden">
+        <motion.div 
+          className="h-full bg-gradient-to-r from-transparent via-primary to-transparent"
+          animate={{
+            x: ["-100%", "100%"]
+          }}
           transition={{
-            duration: 15,
+            duration: 8,
             repeat: Infinity,
             ease: "linear"
           }}
-          className="absolute bottom-0 left-0"
-        >
-          <svg width="180" height="60" viewBox="0 0 180 60" fill={isDark ? "white" : "black"} xmlns="http://www.w3.org/2000/svg">
-            <path d="M39.5,12.2c-2.5-1-5.2-1.5-8-1.5H22.8l-5.3,13.3h-13L0,35.7V46h7.7c0,0,0,4,3.5,4s3.5-4,3.5-4h121.9c0,0,0,4,3.5,4
-              s3.5-4,3.5-4H180V35.9l-4.8-12.7c0,0-1-2.5-3.5-2.5h-32.4l-5.2-2.7c-3-1.5-6.2-2.3-9.6-2.3h-23.2c-3.2,0-6.4,0.8-9.3,2.3L82,24.7
-              H58.7l-5-13.2C51.3,11.5,39.5,12.2,39.5,12.2z M14.3,38.5c-3.6,0-6.5-2.9-6.5-6.5S10.7,25.5,14.3,25.5s6.5,2.9,6.5,6.5
-              S17.9,38.5,14.3,38.5z M140.1,38.5c-3.6,0-6.5-2.9-6.5-6.5s2.9-6.5,6.5-6.5s6.5,2.9,6.5,6.5S143.7,38.5,140.1,38.5z M24.5,20.7h8.5c3.2,0,6.3,0.7,9.2,2.1
-              L59.7,31h14.8l13.5-9c2.5-1.7,5.5-2.5,8.5-2.5h23.2c3.3,0,6.5,0.8,9.5,2.3l17.1,9.1h28.7l2.5-7.5h-76.6c-2.8-2.7-6.5-4.1-10.3-4.1
-              c-3.8,0-7.7,1.4-10.4,4.1H31.4L24.5,20.7z"/>
-          </svg>
-        </motion.div>
-      </motion.div>
+        />
+      </div>
     </section>
   );
 };

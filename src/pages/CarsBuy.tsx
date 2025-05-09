@@ -13,6 +13,27 @@ const CarsBuy = () => {
   const { openModal } = useAuthModal();
   const { isDark } = useTheme();
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
+      opacity: 1,
+      transition: {
+        when: "beforeChildren",
+        staggerChildren: 0.2,
+        duration: 0.5
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.6 } 
+    }
+  };
+
   return (
     <>
       <Helmet>
@@ -21,43 +42,54 @@ const CarsBuy = () => {
       
       <Navbar />
       
-      <main className={`pt-24 pb-16 ${isDark ? 'bg-gray-900 text-white' : ''}`}>
+      <motion.main 
+        className={`pt-24 pb-16 ${isDark ? 'bg-gray-900 text-white' : ''}`}
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <section className="container mx-auto px-4">
           <motion.div 
-            className="max-w-4xl mx-auto mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            className="max-w-4xl mx-auto mb-12"
+            variants={itemVariants}
           >
-            <h1 className={`text-3xl md:text-4xl font-bold mb-4 ${isDark ? 'text-white' : ''}`}>Find Your Perfect Car</h1>
+            <h1 className={`text-3xl md:text-4xl font-bold mb-4 ${isDark ? 'text-white' : ''}`}>
+              Find Your Perfect Car
+            </h1>
             <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>
               Browse our selection of quality vehicles from trusted sellers. Each car is verified 
               and comes with a detailed history report.
             </p>
             
-            <div className="mt-6">
-              <Button 
-                className="hover:scale-105 transition-all duration-300 hover:shadow-glow mr-4"
-                onClick={() => openModal()}
-              >
-                Register to Save Favorites
-              </Button>
+            <div className="mt-8">
+              <motion.div className="inline-block mr-4" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button 
+                  className="hover:shadow-glow transition-all duration-300"
+                  onClick={() => openModal()}
+                >
+                  Register to Save Favorites
+                </Button>
+              </motion.div>
               
-              <Button 
-                variant="outline" 
-                className={`hover:scale-105 transition-all duration-300 ${
-                  isDark ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700' : ''
-                }`}
-                onClick={() => window.location.href = "/find-your-car"}
-              >
-                Car Finder Tool
-              </Button>
+              <motion.div className="inline-block" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button 
+                  variant="outline" 
+                  className={`transition-all duration-300 ${
+                    isDark ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700' : ''
+                  }`}
+                  onClick={() => window.location.href = "/find-your-car"}
+                >
+                  Car Finder Tool
+                </Button>
+              </motion.div>
             </div>
           </motion.div>
           
-          <CarGrid />
+          <motion.div variants={itemVariants}>
+            <CarGrid />
+          </motion.div>
         </section>
-      </main>
+      </motion.main>
       
       <Footer />
     </>

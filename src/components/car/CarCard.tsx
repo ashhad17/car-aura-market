@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { motion } from "framer-motion";
 
 interface CarCardProps {
   car: {
@@ -117,159 +118,255 @@ const CarCard: React.FC<CarCardProps> = ({ car, variant = "full" }) => {
 
   const isCompact = variant === "compact";
 
+  const cardVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    hover: { 
+      y: -5, 
+      boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)",
+      transition: { duration: 0.3, ease: "easeOut" }
+    }
+  };
+
+  const imageVariants = {
+    hidden: { scale: 0.9, opacity: 0 },
+    visible: { scale: 1, opacity: 1, transition: { duration: 0.4 } },
+    exit: { scale: 0.9, opacity: 0, transition: { duration: 0.2 } }
+  };
+
   return (
     <>
-      <Card className={`overflow-hidden group hover:shadow-md transition-all duration-300 ${car.featured ? "ring-2 ring-primary" : ""}`}>
-        <div className="relative">
-          <Link to={`/cars/details/${car._id}`} className="block">
-            <div className="relative w-full overflow-hidden">
-              <img
-                src={car.images[currentImageIndex].url}
-                alt={car.title}
-                className={`w-full ${isCompact ? "h-36" : "h-48 md:h-60"} object-cover transition-transform duration-300`}
-              />
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        whileHover="hover"
+        variants={cardVariants}
+      >
+        <Card className={`overflow-hidden h-full flex flex-col ${car.featured ? "ring-2 ring-primary" : ""}`}>
+          <div className="relative">
+            <Link to={`/cars/details/${car._id}`} className="block">
+              <motion.div 
+                className="relative w-full overflow-hidden"
+                key={currentImageIndex} // Force animation on image change
+                variants={imageVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+              >
+                <img
+                  src={car.images[currentImageIndex].url}
+                  alt={car.title}
+                  className={`w-full ${isCompact ? "h-40" : "h-52 md:h-64"} object-cover`}
+                />
+              </motion.div>
               
               {car.images.length > 1 && (
                 <>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/30 hover:bg-black/50 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={prevImage}
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <ChevronLeft className="h-5 w-5 text-white" />
-                    <span className="sr-only">Previous image</span>
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/30 hover:bg-black/50 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={nextImage}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/30 hover:bg-black/50 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={prevImage}
+                    >
+                      <ChevronLeft className="h-5 w-5 text-white" />
+                      <span className="sr-only">Previous image</span>
+                    </Button>
+                  </motion.div>
+                  
+                  <motion.div
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    <ChevronRight className="h-5 w-5 text-white" />
-                    <span className="sr-only">Next image</span>
-                  </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-black/30 hover:bg-black/50 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={nextImage}
+                    >
+                      <ChevronRight className="h-5 w-5 text-white" />
+                      <span className="sr-only">Next image</span>
+                    </Button>
+                  </motion.div>
                 </>
               )}
+            </Link>
+            
+            {car.featured && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
+                  Featured
+                </Badge>
+              </motion.div>
+            )}
+            
+            <div className="absolute top-2 right-2 flex gap-2">
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="h-8 w-8 rounded-full bg-white/80 hover:bg-white dark:bg-black/50 dark:hover:bg-black/70"
+                >
+                  <Heart className="h-4 w-4" />
+                  <span className="sr-only">Add to favorites</span>
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="h-8 w-8 rounded-full bg-white/80 hover:bg-white dark:bg-black/50 dark:hover:bg-black/70"
+                >
+                  <Share className="h-4 w-4" />
+                  <span className="sr-only">Share</span>
+                </Button>
+              </motion.div>
             </div>
-          </Link>
-          
-          {car.featured && (
-            <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
-              Featured
-            </Badge>
-          )}
-          
-          <div className="absolute top-2 right-2 flex gap-2">
-            <Button
-              size="icon"
-              variant="secondary"
-              className="h-8 w-8 rounded-full bg-white/80 hover:bg-white dark:bg-black/50 dark:hover:bg-black/70"
-            >
-              <Heart className="h-4 w-4" />
-              <span className="sr-only">Add to favorites</span>
-            </Button>
-            <Button
-              size="icon"
-              variant="secondary"
-              className="h-8 w-8 rounded-full bg-white/80 hover:bg-white dark:bg-black/50 dark:hover:bg-black/70"
-            >
-              <Share className="h-4 w-4" />
-              <span className="sr-only">Share</span>
-            </Button>
+            
+            {car.images.length > 1 && (
+              <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                {car.images.map((_, index) => (
+                  <motion.span
+                    key={index}
+                    initial={{ width: currentImageIndex === index ? "0.75rem" : "0.375rem" }}
+                    animate={{ 
+                      width: currentImageIndex === index ? "0.75rem" : "0.375rem",
+                      backgroundColor: currentImageIndex === index ? "rgba(255, 255, 255, 1)" : "rgba(255, 255, 255, 0.6)"
+                    }}
+                    className={`h-1.5 rounded-full transition-all duration-300`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-          
-          {car.images.length > 1 && (
-            <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
-              {car.images.map((_, index) => (
-                <span
-                  key={index}
-                  className={`h-1.5 rounded-full ${
-                    currentImageIndex === index ? "w-3 bg-white" : "w-1.5 bg-white/60"
-                  } transition-all`}
-                />
-              ))}
-            </div>
-          )}
-        </div>
 
-        <CardContent className={`${isCompact ? "p-3" : "p-5"}`}>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <h3 className={`${isCompact ? "text-base" : "text-lg"} font-semibold`}>
-                <Link to={`/cars/details/${car._id}`}>{car.title}</Link>
-              </h3>
-              <span className="font-bold text-primary">
-                ${car.price.toLocaleString()}
-              </span>
-            </div>
+          <CardContent className={`${isCompact ? "p-3" : "p-5"} flex-grow flex flex-col`}>
+            <div className="space-y-3 flex-grow">
+              <div className="flex justify-between">
+                <motion.h3 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.1 }}
+                  className={`${isCompact ? "text-base" : "text-lg"} font-semibold`}
+                >
+                  <Link to={`/cars/details/${car._id}`}>{car.title}</Link>
+                </motion.h3>
+                <motion.span 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="font-bold text-primary"
+                >
+                  ${car.price.toLocaleString()}
+                </motion.span>
+              </div>
 
-            <div className="flex flex-wrap gap-y-2 text-sm text-muted-foreground">
-              <div className="flex items-center w-1/2">
-                <Calendar className="h-4 w-4 mr-1" />
-                <span>{car.year}</span>
-              </div>
-              <div className="flex items-center w-1/2">
-                <Car className="h-4 w-4 mr-1" />
-                <span>{car.mileage.toLocaleString()} mi</span>
-              </div>
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="flex flex-wrap gap-y-2 text-sm text-muted-foreground"
+              >
+                <div className="flex items-center w-1/2">
+                  <Calendar className="h-4 w-4 mr-1" />
+                  <span>{car.year}</span>
+                </div>
+                <div className="flex items-center w-1/2">
+                  <Car className="h-4 w-4 mr-1" />
+                  <span>{car.mileage.toLocaleString()} mi</span>
+                </div>
+                {!isCompact && (
+                  <>
+                    <div className="flex items-center w-1/2">
+                      <span className="bg-muted text-foreground text-xs px-2 py-0.5 rounded">
+                        {car.condition}
+                      </span>
+                    </div>
+                    <div className="flex items-center w-1/2">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span>{car.location}</span>
+                    </div>
+                  </>
+                )}
+              </motion.div>
+
               {!isCompact && (
-                <>
-                  <div className="flex items-center w-1/2">
-                    <span className="bg-muted text-foreground text-xs px-2 py-0.5 rounded">
-                      {car.condition}
-                    </span>
-                  </div>
-                  <div className="flex items-center w-1/2">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span>{car.location}</span>
-                  </div>
-                </>
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="flex flex-wrap gap-2 pt-2"
+                >
+                  {car.fuel && (
+                    <Badge variant="outline">{car.fuel}</Badge>
+                  )}
+                  {car.transmission && (
+                    <Badge variant="outline">{car.transmission}</Badge>
+                  )}
+                </motion.div>
+              )}
+
+              {!isCompact && car.sellerName && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex items-center pt-2 text-sm text-muted-foreground"
+                >
+                  <User className="h-4 w-4 mr-1" />
+                  <span>
+                    {car.sellerName} • {car.sellerType}
+                  </span>
+                </motion.div>
               )}
             </div>
 
             {!isCompact && (
-              <div className="flex flex-wrap gap-2 pt-2">
-                {car.fuel && (
-                  <Badge variant="outline">{car.fuel}</Badge>
-                )}
-                {car.transmission && (
-                  <Badge variant="outline">{car.transmission}</Badge>
-                )}
-              </div>
-            )}
-
-            {!isCompact && car.sellerName && (
-              <div className="flex items-center pt-2 text-sm text-muted-foreground">
-                <User className="h-4 w-4 mr-1" />
-                <span>
-                  {car.sellerName} • {car.sellerType}
-                </span>
-              </div>
-            )}
-
-            {!isCompact && (
-              <div className="flex gap-2 pt-3">
-                <Button
-                  variant="default"
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="flex gap-2 pt-3 mt-auto"
+              >
+                <motion.div 
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                   className="flex-1"
-                  onClick={handleBookNow}
                 >
-                  Book Now
-                </Button>
-                <Button
-                  variant="outline"
+                  <Button
+                    variant="default"
+                    className="w-full"
+                    onClick={handleBookNow}
+                  >
+                    Book Now
+                  </Button>
+                </motion.div>
+                <motion.div 
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                   className="flex-1"
-                  onClick={handleTestDrive}
                 >
-                  <Car className="h-4 w-4 mr-2" />
-                  Test Drive
-                </Button>
-              </div>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleTestDrive}
+                  >
+                    <Car className="h-4 w-4 mr-2" />
+                    Test Drive
+                  </Button>
+                </motion.div>
+              </motion.div>
             )}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </motion.div>
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
