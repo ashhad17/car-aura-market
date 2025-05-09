@@ -780,44 +780,44 @@ console.log("Car Data "+carData);
       
       <Navbar />
       
-      <main className="pt-24 pb-16">
+      <main className={`pt-24 pb-16 ${isDark ? 'bg-gray-900 text-white' : ''}`}>
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                 <div>
-                  <h1 className="text-3xl font-bold mb-2">Sell Your Car</h1>
-                  <p className="text-gray-600">List your vehicle on WheelsTrust and reach thousands of potential buyers.</p>
+                  <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : ''}`}>Sell Your Car</h1>
+                  <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>List your vehicle on WheelsTrust and reach thousands of potential buyers.</p>
                 </div>
                 
-                <TabsList className="grid w-full sm:w-auto grid-cols-2 sm:grid-cols-1">
-                  <TabsTrigger value="sell-form">Sell Your Car</TabsTrigger>
-                  <TabsTrigger value="selling-tips">Selling Tips</TabsTrigger>
+                <TabsList className={`grid w-full sm:w-auto grid-cols-2 sm:grid-cols-1 ${isDark ? 'bg-gray-800' : ''}`}>
+                  <TabsTrigger value="sell-form" className={isDark ? 'data-[state=active]:bg-gray-700' : ''}>Sell Your Car</TabsTrigger>
+                  <TabsTrigger value="selling-tips" className={isDark ? 'data-[state=active]:bg-gray-700' : ''}>Selling Tips</TabsTrigger>
                 </TabsList>
               </div>
               
-              <div className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className={`bg-white rounded-lg shadow-md overflow-hidden ${isDark ? 'bg-gray-800 shadow-glow-dark' : ''}`}>
                 <TabsContent value="sell-form" className="p-0">
                   {currentStep < 4 && (
-                    <div className="bg-gray-50 border-b px-6 py-4">
+                    <div className={`bg-gray-50 border-b px-6 py-4 ${isDark ? 'bg-gray-700 border-gray-600' : ''}`}>
                       <div className="flex items-center">
-                        <div className={`flex items-center justify-center w-8 h-8 rounded-full mr-2 ${currentStep >= 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'}`}>
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-full mr-2 ${currentStep >= 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'} ${isDark && currentStep < 1 ? 'bg-gray-600 text-gray-300' : ''}`}>
                           1
                         </div>
-                        <div className="h-1 w-full bg-gray-200">
-                          <div className={`h-1 ${currentStep >= 2 ? 'bg-primary' : 'bg-gray-200'}`} style={{ width: '100%' }}></div>
+                        <div className={`h-1 w-full ${isDark ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                          <div className={`h-1 ${currentStep >= 2 ? 'bg-primary' : isDark ? 'bg-gray-600' : 'bg-gray-200'}`} style={{ width: '100%' }}></div>
                         </div>
-                        <div className={`flex items-center justify-center w-8 h-8 rounded-full mx-2 ${currentStep >= 2 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'}`}>
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-full mx-2 ${currentStep >= 2 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'} ${isDark && currentStep < 2 ? 'bg-gray-600 text-gray-300' : ''}`}>
                           2
                         </div>
-                        <div className="h-1 w-full bg-gray-200">
-                          <div className={`h-1 ${currentStep >= 3 ? 'bg-primary' : 'bg-gray-200'}`} style={{ width: '100%' }}></div>
+                        <div className={`h-1 w-full ${isDark ? 'bg-gray-600' : 'bg-gray-200'}`}>
+                          <div className={`h-1 ${currentStep >= 3 ? 'bg-primary' : isDark ? 'bg-gray-600' : 'bg-gray-200'}`} style={{ width: '100%' }}></div>
                         </div>
-                        <div className={`flex items-center justify-center w-8 h-8 rounded-full ml-2 ${currentStep >= 3 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'}`}>
+                        <div className={`flex items-center justify-center w-8 h-8 rounded-full ml-2 ${currentStep >= 3 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'} ${isDark && currentStep < 3 ? 'bg-gray-600 text-gray-300' : ''}`}>
                           3
                         </div>
                       </div>
-                      <div className="flex justify-between text-xs mt-1">
+                      <div className={`flex justify-between text-xs mt-1 ${isDark ? 'text-gray-300' : ''}`}>
                         <span>Vehicle Details</span>
                         <span>Photos & Features</span>
                         <span>Contact Info</span>
@@ -825,16 +825,16 @@ console.log("Car Data "+carData);
                     </div>
                   )}
                   
-                  <div className="p-6">
+                  <div className={`p-6 ${isDark ? 'bg-gray-800 text-gray-200' : ''}`}>
                     <form>
                       {renderStep()}
                     </form>
                   </div>
                 </TabsContent>
                 
-                <TabsContent value="selling-tips" className="p-6 space-y-6">
+                <TabsContent value="selling-tips" className={`p-6 space-y-6 ${isDark ? 'bg-gray-800 text-gray-200' : ''}`}>
                   <div>
-                    <h3 className="text-lg font-semibold mb-3">Tips to Sell Your Car Quickly</h3>
+                    <h3 className={`text-lg font-semibold mb-3 ${isDark ? 'text-white' : ''}`}>Tips to Sell Your Car Quickly</h3>
                     
                     <ul className="space-y-4">
                       <li className="flex">
@@ -889,12 +889,15 @@ console.log("Car Data "+carData);
                     </ul>
                   </div>
                   
-                  <div className="bg-gray-50 border rounded-md p-4">
-                    <h4 className="font-medium mb-2">Need help selling your car?</h4>
-                    <p className="text-gray-600 text-sm mb-3">
+                  <div className={`${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border'} rounded-md p-4`}>
+                    <h4 className={`font-medium mb-2 ${isDark ? 'text-white' : ''}`}>Need help selling your car?</h4>
+                    <p className={isDark ? 'text-gray-300 text-sm mb-3' : 'text-gray-600 text-sm mb-3'}>
                       Our team of experts can help you sell your car faster. From professional photography to handling inquiries on your behalf.
                     </p>
-                    <Button variant="outline">
+                    <Button 
+                      variant="outline"
+                      className={isDark ? 'border-gray-600 bg-gray-700 text-white hover:bg-gray-600' : ''}
+                    >
                       Learn About Concierge Service
                     </Button>
                   </div>

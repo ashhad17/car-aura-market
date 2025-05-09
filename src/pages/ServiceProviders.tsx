@@ -24,7 +24,7 @@ const ServiceProviders = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900 text-white' : ''}`}>
       <Helmet>
         <title>Service Providers | WheelsTrust</title>
       </Helmet>

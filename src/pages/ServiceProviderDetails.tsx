@@ -21,6 +21,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 import { Loader2 } from "lucide-react";
+import ReviewsSection from "@/components/review/ReviewsSection";
 
 interface Service {
   _id: string;
@@ -62,7 +63,7 @@ const ServiceProviderDetails = () => {
   const { id } = useParams<{ id: string }>();
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
-//   const { openAuthModal } = useAuth();
+  const { openAuthModal } = useAuth();
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
@@ -74,6 +75,7 @@ const ServiceProviderDetails = () => {
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
   const [bookedTimeSlots, setBookedTimeSlots] = useState<TimeSlot[]>([]);
   const { toast } = useToast();
+  const isDark = false; // Example variable to check if dark mode is enabled
 
   useEffect(() => {
     const fetchProviderDetails = async () => {
@@ -172,8 +174,7 @@ const ServiceProviderDetails = () => {
 
   const handleBookNow = () => {
     if (!isAuthenticated) {
-    //   openAuthModal();
-    navigate("/login");
+      navigate("/login");
       return;
     }
     if (selectedServices.length === 0) {
@@ -189,8 +190,7 @@ const ServiceProviderDetails = () => {
 
   const handleContactProvider = () => {
     if (!isAuthenticated) {
-    //   openAuthModal();
-    navigate("/login");
+      navigate("/login");
       return;
     }
     setIsMessageModalOpen(true);
@@ -198,8 +198,7 @@ const ServiceProviderDetails = () => {
 
   const handleBookingSubmit = async () => {
     if (!isAuthenticated) {
-    //   openAuthModal();
-    navigate("/login");
+      navigate("/login");
       return;
     }
     if (!selectedDate || !selectedTime) {
@@ -272,8 +271,7 @@ const ServiceProviderDetails = () => {
         console.error("Error status:", error.response?.status);
         console.error("Error headers:", error.response?.headers);
         if (error.response?.status === 401) {
-        //   openAuthModal();
-            navigate("/login");
+          navigate("/login");
           return;
         }
         if (error.response?.data?.message) {
@@ -373,12 +371,12 @@ const ServiceProviderDetails = () => {
   return (
     <>
       <Helmet>
-        <title>{provider.name} | WheelsTrust</title>
+        <title>{provider?.name || "Loading..."} | WheelsTrust</title>
       </Helmet>
       
       <Navbar />
       
-      <main className="pt-24 pb-16">
+      <main className={`pt-24 pb-16 ${isDark ? 'bg-gray-900 text-white' : ''}`}>
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column - Image and Details */}
@@ -386,47 +384,47 @@ const ServiceProviderDetails = () => {
               {/* Hero Section */}
               <div className="relative rounded-lg overflow-hidden shadow-xl">
                 <img 
-                  src={provider.image} 
-                  alt={provider.name} 
+                  src={provider?.image} 
+                  alt={provider?.name} 
                   className="w-full h-80 object-cover object-center" 
                 />
                 <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-gray-900 to-transparent p-6">
-                  <h1 className="text-3xl font-bold text-white">{provider.name}</h1>
+                  <h1 className="text-3xl font-bold text-white">{provider?.name}</h1>
                   <div className="flex items-center text-yellow-400 mb-2">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={`h-5 w-5 ${i < Math.floor(provider.rating) ? '' : 'opacity-50'}`} />
+                      <Star key={i} className={`h-5 w-5 ${i < Math.floor(provider?.rating || 0) ? 'fill-yellow-400' : 'opacity-50'}`} />
                     ))}
                     <span className="text-white ml-2 text-sm">
-                      {provider.rating} ({provider.reviewCount} reviews)
+                      {provider?.rating} ({provider?.reviewCount} reviews)
                     </span>
                   </div>
-                  <p className="text-gray-300">{provider.description}</p>
+                  <p className="text-gray-300">{provider?.description}</p>
                 </div>
               </div>
               
               {/* Provider Info */}
               <div className="mt-8">
-                <h2 className="text-xl font-semibold mb-4">Service Provider</h2>
-                <div className="bg-gray-50 rounded-lg shadow-md p-6">
+                <h2 className={`text-xl font-semibold mb-4 ${isDark ? 'text-white' : ''}`}>Service Provider</h2>
+                <div className={`rounded-lg shadow-md p-6 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-gray-50'}`}>
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="text-lg font-medium">{provider.name}</h3>
-                      <p className="text-gray-600 mb-2">
+                      <h3 className={`text-lg font-medium ${isDark ? 'text-white' : ''}`}>{provider?.name}</h3>
+                      <p className={isDark ? 'text-gray-300 mb-2' : 'text-gray-600 mb-2'}>
                         Professional auto care services since 2010.
                       </p>
-                      <div className="flex items-center text-gray-700 mb-2">
+                      <div className={`flex items-center ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
                         <MapPin className="h-4 w-4 mr-2" />
-                        {provider.location.address}, {provider.location.city}, {provider.location.state} {provider.location.zipCode}
+                        {provider?.location.address}, {provider?.location.city}, {provider?.location.state} {provider?.location.zipCode}
                       </div>
                       <Link to="/about" className="text-primary hover:underline">
-                        Learn more about {provider.name}
+                        Learn more about {provider?.name}
                       </Link>
                     </div>
                     
                     <Button 
                       variant="outline" 
                       onClick={handleContactProvider}
-                      className="flex items-center"
+                      className={`flex items-center ${isDark ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : ''}`}
                     >
                       <MessageSquare className="h-4 w-4 mr-2" />
                       Contact Provider
@@ -438,22 +436,28 @@ const ServiceProviderDetails = () => {
               {/* Reviews and Availability Tabs */}
               <div className="mt-8">
                 <Tabs defaultValue="availability">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="availability">Availability</TabsTrigger>
-                    <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                  <TabsList className={`grid w-full grid-cols-2 ${isDark ? 'bg-gray-800' : ''}`}>
+                    <TabsTrigger 
+                      value="availability"
+                      className={isDark ? 'data-[state=active]:bg-gray-700' : ''}
+                    >Availability</TabsTrigger>
+                    <TabsTrigger 
+                      value="reviews"
+                      className={isDark ? 'data-[state=active]:bg-gray-700' : ''}
+                    >Reviews</TabsTrigger>
                   </TabsList>
                   
                   <TabsContent value="availability" className="mt-4">
-                    <div className="bg-white rounded-lg shadow-md p-6">
-                      <h3 className="text-lg font-medium mb-4">Service Hours</h3>
+                    <div className={`rounded-lg shadow-md p-6 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white'}`}>
+                      <h3 className={`text-lg font-medium mb-4 ${isDark ? 'text-white' : ''}`}>Service Hours</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {Object.entries(provider.hours).map(([day, hours]) => (
-                          <div key={day} className="bg-gray-50 rounded-lg p-4">
-                            <div className="flex items-center text-gray-700 mb-1">
+                        {provider && Object.entries(provider.hours).map(([day, hours]) => (
+                          <div key={day} className={`rounded-lg p-4 ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                            <div className={`flex items-center ${isDark ? 'text-gray-300' : 'text-gray-700'} mb-1`}>
                               <Calendar className="h-4 w-4 mr-2" />
                               <span className="font-medium">{day}</span>
                             </div>
-                            <div className="flex items-center text-gray-700">
+                            <div className={`flex items-center ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                               <Clock className="h-4 w-4 mr-2" />
                               <span>{hours}</span>
                             </div>
@@ -464,66 +468,72 @@ const ServiceProviderDetails = () => {
                   </TabsContent>
                   
                   <TabsContent value="reviews" className="mt-4">
-                    <div className="bg-white rounded-lg shadow-md p-6">
-                      <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-lg font-medium">Customer Reviews</h3>
-                        <div className="flex items-center">
-                          <div className="flex items-center text-yellow-400 mr-2">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className={`h-4 w-4 ${i < Math.floor(provider.rating) ? '' : 'opacity-50'}`} />
-                            ))}
-                          </div>
-                          <span className="text-gray-700">
-                            {provider.rating} ({provider.reviewCount} reviews)
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-6">
-                        {/* Sample reviews */}
-                        <div className="border-b pb-4">
-                          <div className="flex items-center mb-2">
-                            <div className="w-10 h-10 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
-                              <User className="h-6 w-6 text-gray-500" />
+                    <div className={`rounded-lg shadow-md p-0 overflow-hidden ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white'}`}>
+                      {/* Show a few preview reviews in the tab */}
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-6">
+                          <h3 className={`text-lg font-medium ${isDark ? 'text-white' : ''}`}>Recent Reviews</h3>
+                          <div className="flex items-center">
+                            <div className="flex items-center text-yellow-400 mr-2">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`h-4 w-4 ${i < Math.floor(provider?.rating || 0) ? '' : 'opacity-50'}`} />
+                              ))}
                             </div>
-                            <div>
-                              <div className="font-medium">John D.</div>
-                              <div className="text-gray-500 text-xs">1 week ago</div>
-                            </div>
+                            <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>
+                              {provider?.rating} ({provider?.reviewCount} reviews)
+                            </span>
                           </div>
-                          <div className="flex items-center text-yellow-400 mb-2">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className={`h-3 w-3 ${i < 5 ? '' : 'opacity-50'}`} />
-                            ))}
-                          </div>
-                          <p className="text-gray-700 text-sm">
-                            Excellent service! My car looks brand new after the detailing. The team was very professional and thorough.
-                          </p>
                         </div>
                         
-                        <div className="border-b pb-4">
-                          <div className="flex items-center mb-2">
-                            <div className="w-10 h-10 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
-                              <User className="h-6 w-6 text-gray-500" />
+                        <div className="space-y-6">
+                          {/* Sample reviews */}
+                          <div className={`border-b pb-4 ${isDark ? 'border-gray-700' : ''}`}>
+                            <div className="flex items-center mb-2">
+                              <div className={`w-10 h-10 rounded-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} mr-3 flex items-center justify-center`}>
+                                <User className={`h-6 w-6 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
+                              </div>
+                              <div>
+                                <div className={`font-medium ${isDark ? 'text-white' : ''}`}>John D.</div>
+                                <div className={isDark ? 'text-gray-400 text-xs' : 'text-gray-500 text-xs'}>1 week ago</div>
+                              </div>
                             </div>
-                            <div>
-                              <div className="font-medium">Sarah M.</div>
-                              <div className="text-gray-500 text-xs">2 weeks ago</div>
+                            <div className="flex items-center text-yellow-400 mb-2">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`h-3 w-3 ${i < 5 ? 'fill-yellow-400' : 'opacity-50'}`} />
+                              ))}
                             </div>
+                            <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                              Excellent service! My car looks brand new after the detailing. The team was very professional and thorough.
+                            </p>
                           </div>
-                          <div className="flex items-center text-yellow-400 mb-2">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className={`h-3 w-3 ${i < 4 ? '' : 'opacity-50'}`} />
-                            ))}
+                          
+                          <div className={`pb-4 ${isDark ? 'border-gray-700' : ''}`}>
+                            <div className="flex items-center mb-2">
+                              <div className={`w-10 h-10 rounded-full ${isDark ? 'bg-gray-700' : 'bg-gray-200'} mr-3 flex items-center justify-center`}>
+                                <User className={`h-6 w-6 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
+                              </div>
+                              <div>
+                                <div className={`font-medium ${isDark ? 'text-white' : ''}`}>Sarah M.</div>
+                                <div className={isDark ? 'text-gray-400 text-xs' : 'text-gray-500 text-xs'}>2 weeks ago</div>
+                              </div>
+                            </div>
+                            <div className="flex items-center text-yellow-400 mb-2">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`h-3 w-3 ${i < 4 ? 'fill-yellow-400' : 'opacity-50'}`} />
+                              ))}
+                            </div>
+                            <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                              Good service overall. They took great care of the interior, though I would have liked a bit more attention to the wheels.
+                            </p>
                           </div>
-                          <p className="text-gray-700 text-sm">
-                            Good service overall. They took great care of the interior, though I would have liked a bit more attention to the wheels.
-                          </p>
+                          
+                          <Button 
+                            variant="outline" 
+                            className={`w-full ${isDark ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' : ''}`}
+                          >
+                            View All {provider?.reviewCount} Reviews
+                          </Button>
                         </div>
-                        
-                        <Button variant="outline" className="w-full">
-                          View All {provider.reviewCount} Reviews
-                        </Button>
                       </div>
                     </div>
                   </TabsContent>
@@ -534,51 +544,51 @@ const ServiceProviderDetails = () => {
             {/* Right Column - Services Selection */}
             <div>
               <div className="sticky top-24">
-                <h2 className="text-xl font-semibold mb-4">Available Services</h2>
+                <h2 className={`text-xl font-semibold mb-4 ${isDark ? 'text-white' : ''}`}>Available Services</h2>
                 <div className="space-y-4">
-                {provider.services.map((service) => (
-  <div 
-    key={service._id}
-    className={`bg-white rounded-lg shadow-md p-6 cursor-pointer transition-all ${
-      selectedServices.some(s => s._id === service._id) 
-        ? 'ring-2 ring-primary' 
-        : 'hover:shadow-lg'
-    }`}
-    onClick={() => handleServiceSelect(service)}
-  >
-    <div className="flex justify-between items-start mb-4">
-      <div>
-        <h3 className="text-lg font-semibold">{service.name}</h3>
-        <p className="text-gray-600 text-sm">{service.description}</p>
-      </div>
-      {selectedServices.some(s => s._id === service._id) && (
-        <Check className="h-5 w-5 text-primary" />
-      )}
-    </div>
-    <div className="flex justify-between items-center">
-      <div className="text-2xl font-bold text-primary">
-        ${service.price.toFixed(2)}
-      </div>
-      <div className="text-gray-600 flex items-center">
-        <Clock className="h-4 w-4 mr-1" />
-        {formatDuration(service.duration)}
-      </div>
-    </div>
-  </div>
-))}
+                {provider?.services.map((service) => (
+                  <div 
+                    key={service._id}
+                    className={`rounded-lg shadow-md p-6 cursor-pointer transition-all ${
+                      selectedServices.some(s => s._id === service._id) 
+                        ? 'ring-2 ring-primary' 
+                        : 'hover:shadow-lg'
+                    } ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white'}`}
+                    onClick={() => handleServiceSelect(service)}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : ''}`}>{service.name}</h3>
+                        <p className={isDark ? 'text-gray-300 text-sm' : 'text-gray-600 text-sm'}>{service.description}</p>
+                      </div>
+                      {selectedServices.some(s => s._id === service._id) && (
+                        <Check className="h-5 w-5 text-primary" />
+                      )}
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <div className={`text-2xl font-bold text-primary`}>
+                        ${service.price.toFixed(2)}
+                      </div>
+                      <div className={isDark ? 'text-gray-300 flex items-center' : 'text-gray-600 flex items-center'}>
+                        <Clock className="h-4 w-4 mr-1" />
+                        {formatDuration(service.duration)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
                 </div>
 
                 {/* Booking Summary */}
                 {selectedServices.length > 0 && (
                   <div className="mt-8">
-                    <div className="bg-white rounded-lg shadow-md p-6">
-                      <h2 className="text-xl font-semibold mb-4">Selected Services</h2>
+                    <div className={`rounded-lg shadow-md p-6 ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white'}`}>
+                      <h2 className={`text-xl font-semibold mb-4 ${isDark ? 'text-white' : ''}`}>Selected Services</h2>
                       <div className="space-y-4 mb-6">
                         {selectedServices.map((service) => (
                           <div key={service._id} className="flex justify-between items-center">
                             <div>
-                              <h3 className="font-medium">{service.name}</h3>
-                              <p className="text-sm text-gray-600">{service.duration}</p>
+                              <h3 className={`font-medium ${isDark ? 'text-white' : ''}`}>{service.name}</h3>
+                              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{formatDuration(service.duration)}</p>
                             </div>
                             <div className="text-primary font-semibold">
                               ${service.price.toFixed(2)}
@@ -587,13 +597,13 @@ const ServiceProviderDetails = () => {
                         ))}
                       </div>
                       <div className="flex justify-between items-center mb-6">
-                        <span className="text-lg font-semibold">Total</span>
+                        <span className={`text-lg font-semibold ${isDark ? 'text-white' : ''}`}>Total</span>
                         <span className="text-2xl font-bold text-primary">
                           ${selectedServices.reduce((sum, service) => sum + service.price, 0).toFixed(2)}
                         </span>
                       </div>
                       <Button 
-                        className="w-full"
+                        className="w-full hover:scale-105 transition-all duration-300 hover:shadow-glow"
                         onClick={handleBookNow}
                       >
                         Book Selected Services
@@ -604,11 +614,21 @@ const ServiceProviderDetails = () => {
               </div>
             </div>
           </div>
+          
+          {/* Reviews Section */}
+          <div className="mt-12">
+            <ReviewsSection 
+              entityId={id || ''}
+              entityType="serviceProvider"
+              initialRating={provider?.rating || 4.5}
+              initialReviewCount={provider?.reviewCount || 3}
+            />
+          </div>
         </div>
       </main>
       <Footer />
       
-      {/* Booking Modal */}
+      {/* Booking Modal and Message Modal */}
       <Dialog open={isBookingModalOpen} onOpenChange={setIsBookingModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -693,13 +713,12 @@ const ServiceProviderDetails = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Message Modal */}
       <Dialog open={isMessageModalOpen} onOpenChange={setIsMessageModalOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Contact Service Provider</DialogTitle>
             <DialogDescription>
-              Send a message to {provider.name}
+              Send a message to {provider?.name}
             </DialogDescription>
           </DialogHeader>
           

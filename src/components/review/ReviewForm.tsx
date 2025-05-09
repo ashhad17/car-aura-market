@@ -1,178 +1,132 @@
 
-import React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Star } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
-import { useAuth } from "@/context/AuthContext";
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { useTheme } from '@/context/ThemeContext';
+import { Star, User } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const reviewSchema = z.object({
-  rating: z.number().min(1, "Please select a rating").max(5),
-  comment: z.string().min(5, "Review must be at least 5 characters"),
-  title: z.string().min(3, "Title must be at least 3 characters"),
+  rating: z.number().min(1, { message: 'Please select a rating' }).max(5),
+  comment: z.string().min(5, { message: 'Please enter at least 5 characters' }).max(500),
 });
 
 type ReviewFormValues = z.infer<typeof reviewSchema>;
 
 interface ReviewFormProps {
-  serviceProviderId: string;
-  onSuccess?: () => void;
-  onCancel?: () => void;
+  onSubmit: (data: ReviewFormValues) => void;
+  onCancel: () => void;
 }
 
-const ReviewForm: React.FC<ReviewFormProps> = ({
-  serviceProviderId,
-  onSuccess,
-  onCancel,
-}) => {
-  const [hoveredRating, setHoveredRating] = React.useState(0);
+const ReviewForm: React.FC<ReviewFormProps> = ({ onSubmit, onCancel }) => {
+  const [rating, setRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
   const { toast } = useToast();
-  const { user, isAuthenticated } = useAuth();
+  const { isDark } = useTheme();
 
   const form = useForm<ReviewFormValues>({
     resolver: zodResolver(reviewSchema),
     defaultValues: {
       rating: 0,
-      comment: "",
-      title: "",
+      comment: '',
     },
   });
 
-  const { setValue, watch } = form;
-  const currentRating = watch("rating");
-
-  const onSubmit = async (data: ReviewFormValues) => {
-    if (!isAuthenticated || !user) {
+  const handleSubmit = (data: ReviewFormValues) => {
+    if (rating === 0) {
       toast({
-        title: "Authentication Required",
-        description: "Please login to submit a review",
+        title: "Rating Required",
+        description: "Please select a rating before submitting",
         variant: "destructive",
       });
       return;
     }
-
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/service-providers/${serviceProviderId}/reviews`,
-        data,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-
-      if (response.data.success) {
-        toast({
-          title: "Review Submitted",
-          description: "Thank you for sharing your experience!",
-        });
-        
-        if (onSuccess) {
-          onSuccess();
-        }
-      }
-    } catch (error) {
-      console.error("Error submitting review:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit your review. Please try again.",
-        variant: "destructive",
-      });
-    }
+    
+    onSubmit({ ...data, rating });
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="rating"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Rating</FormLabel>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((rating) => (
-                  <Star
-                    key={rating}
-                    className={`h-8 w-8 cursor-pointer transition-all ${
-                      (hoveredRating || field.value) >= rating
-                        ? "fill-yellow-400 text-yellow-400"
-                        : "text-gray-300"
-                    }`}
-                    onMouseEnter={() => setHoveredRating(rating)}
-                    onMouseLeave={() => setHoveredRating(0)}
-                    onClick={() => setValue("rating", rating)}
-                  />
-                ))}
-              </div>
-              <FormDescription>
-                How would you rate your experience?
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Review Title</FormLabel>
-              <FormControl>
-                <Input placeholder="Summarize your experience" {...field} />
-              </FormControl>
-              <FormDescription>
-                A brief title for your review
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="comment"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Your Review</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Share your experience with this service provider"
-                  className="h-32"
-                  {...field}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-md`}
+    >
+      <div className="mb-6">
+        <h3 className={`text-lg font-semibold mb-1 ${isDark ? 'text-white' : ''}`}>Write a Review</h3>
+        <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+          Share your experience to help others make better decisions
+        </p>
+      </div>
+      
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <div>
+          <label className={`block mb-2 text-sm font-medium ${isDark ? 'text-gray-200' : ''}`}>Your Rating*</label>
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((value) => (
+              <button
+                key={value}
+                type="button"
+                className="focus:outline-none"
+                onClick={() => setRating(value)}
+                onMouseEnter={() => setHoverRating(value)}
+                onMouseLeave={() => setHoverRating(0)}
+              >
+                <Star
+                  className={`h-8 w-8 transition-colors ${
+                    value <= (hoverRating || rating)
+                      ? 'fill-yellow-400 text-yellow-400'
+                      : isDark ? 'text-gray-600' : 'text-gray-300'
+                  }`}
                 />
-              </FormControl>
-              <FormDescription>
-                Please provide details about your experience
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
+              </button>
+            ))}
+            <span className={`ml-2 text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              {rating === 1 && 'Poor'}
+              {rating === 2 && 'Fair'}
+              {rating === 3 && 'Good'}
+              {rating === 4 && 'Very Good'}
+              {rating === 5 && 'Excellent'}
+            </span>
+          </div>
+          {form.formState.errors.rating && (
+            <p className="text-red-500 text-sm mt-1">{form.formState.errors.rating.message}</p>
           )}
-        />
-
-        <div className="flex justify-end gap-2">
-          {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
+        </div>
+        
+        <div>
+          <label className={`block mb-2 text-sm font-medium ${isDark ? 'text-gray-200' : ''}`}>Your Review*</label>
+          <Textarea
+            {...form.register('comment')}
+            placeholder="Tell us about your experience..."
+            className={`min-h-[120px] ${isDark ? 'bg-gray-700 border-gray-600 text-white' : ''}`}
+          />
+          {form.formState.errors.comment && (
+            <p className="text-red-500 text-sm mt-1">{form.formState.errors.comment.message}</p>
           )}
+        </div>
+        
+        <div className="flex justify-end gap-3 pt-2">
           <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            className={isDark ? 'border-gray-600 hover:bg-gray-700' : ''}
+          >
+            Cancel
+          </Button>
+          <Button 
             type="submit"
-            disabled={!isAuthenticated || currentRating === 0}
+            className="hover:scale-105 transition-all duration-300 hover:shadow-glow"
           >
             Submit Review
           </Button>
         </div>
       </form>
-    </Form>
+    </motion.div>
   );
 };
 

@@ -1,250 +1,209 @@
 
 import React, { useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import axios from 'axios';
-import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
+import { motion } from 'framer-motion';
+import { Mail, AlertCircle } from 'lucide-react';
+import { 
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot
+} from '@/components/ui/input-otp';
 
 interface OTPLoginFormProps {
-  onComplete: () => void;
+  onComplete?: () => void;
 }
 
-const phoneRegex = /^(\+\d{1,3}[- ]?)?\d{10}$/;
-
-const otpStep1Schema = z.object({
-  phone: z.string()
-    .refine(value => phoneRegex.test(value), {
-      message: 'Please enter a valid phone number',
-    }),
-});
-
-const otpStep2Schema = z.object({
-  otp: z.string()
-    .length(6, 'OTP must be exactly 6 digits')
-    .regex(/^\d+$/, 'OTP can only contain numbers'),
-});
-
-type OTPStep1Values = z.infer<typeof otpStep1Schema>;
-type OTPStep2Values = z.infer<typeof otpStep2Schema>;
-
-const OTPLoginForm: React.FC<OTPLoginFormProps> = ({
-  onComplete,
-}) => {
-  const [step, setStep] = useState<1 | 2>(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [phone, setPhone] = useState('');
-  const [error, setError] = useState<string | null>(null);
+const OTPLoginForm: React.FC<OTPLoginFormProps> = ({ onComplete }) => {
+  const [step, setStep] = useState<'email' | 'otp'>('email');
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
   const { toast } = useToast();
-  const { loginWithOtp } = useAuth();
+  const { isDark } = useTheme();
 
-  const step1Form = useForm<OTPStep1Values>({
-    resolver: zodResolver(otpStep1Schema),
-    defaultValues: {
-      phone: '',
-    },
-  });
-
-  const step2Form = useForm<OTPStep2Values>({
-    resolver: zodResolver(otpStep2Schema),
-    defaultValues: {
-      otp: '',
-    },
-  });
-
-  const handleStep1Submit = async (data: OTPStep1Values) => {
-    setIsLoading(true);
-    setError(null);
-    setPhone(data.phone);
-
-    try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/send-otp`,
-        { phone: data.phone }
-      );
-
-      toast({
-        title: 'OTP Sent',
-        description: 'A verification code has been sent to your phone',
+  const startCountdown = () => {
+    setCountdown(30);
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
       });
-      
-      setStep(2);
-    } catch (error: any) {
-      setError(error?.response?.data?.message || 'Failed to send OTP. Please try again.');
-      toast({
-        title: 'Error',
-        description: error?.response?.data?.message || 'Failed to send OTP',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    }, 1000);
   };
 
-  const handleStep2Submit = async (data: OTPStep2Values) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      // In a real app, we'd verify the OTP with the backend
-      const response = await loginWithOtp(phone, data.otp);
-      
+  const handleSendOTP = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !email.includes('@')) {
       toast({
-        title: 'Success',
-        description: 'You have successfully logged in',
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
       });
-      
-      onComplete();
-    } catch (error: any) {
-      setError(error?.response?.data?.message || 'Invalid OTP. Please try again.');
-      toast({
-        title: 'Error',
-        description: error?.response?.data?.message || 'Invalid OTP',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
+      return;
     }
-  };
 
-  const resendOTP = async () => {
-    setIsLoading(true);
+    setLoading(true);
     
-    try {
-      await axios.post(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/auth/resend-otp`,
-        { phone }
-      );
-      
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+      setStep('otp');
+      startCountdown();
       toast({
-        title: 'OTP Resent',
-        description: 'A new verification code has been sent to your phone',
+        title: "OTP Sent!",
+        description: `A verification code has been sent to ${email}`,
       });
-    } catch (error: any) {
+    }, 1500);
+  };
+
+  const handleVerifyOTP = () => {
+    if (otp.length !== 6) {
       toast({
-        title: 'Error',
-        description: error?.response?.data?.message || 'Failed to resend OTP',
-        variant: 'destructive',
+        title: "Invalid OTP",
+        description: "Please enter the complete 6-digit verification code",
+        variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+      return;
     }
+
+    setLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+      toast({
+        title: "Login Successful",
+        description: "You have been logged in successfully",
+      });
+      if (onComplete) onComplete();
+    }, 1500);
+  };
+
+  const handleResendOTP = () => {
+    setLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
+      startCountdown();
+      toast({
+        title: "OTP Resent!",
+        description: `A new verification code has been sent to ${email}`,
+      });
+    }, 1500);
   };
 
   return (
-    <Card className="w-full border-none shadow-md">
-      <CardHeader>
-        <CardTitle className="text-2xl text-center">
-          {step === 1 ? 'Login with Phone' : 'Enter Verification Code'}
-        </CardTitle>
-        <CardDescription className="text-center">
-          {step === 1 
-            ? 'Enter your phone number to receive a verification code' 
-            : `A 6-digit code has been sent to ${phone}`
-          }
-        </CardDescription>
-      </CardHeader>
-      
-      <CardContent>
-        {error && (
-          <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md mb-4">
-            {error}
-          </div>
-        )}
-        
-        {step === 1 ? (
-          <form onSubmit={step1Form.handleSubmit(handleStep1Submit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                placeholder="+1 (555) 123-4567"
-                {...step1Form.register('phone')}
-                className="w-full"
-              />
-              {step1Form.formState.errors.phone && (
-                <p className="text-sm text-destructive">
-                  {step1Form.formState.errors.phone.message}
-                </p>
-              )}
-            </div>
-            
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Sending...' : 'Send Code'}
-            </Button>
-          </form>
-        ) : (
-          <form onSubmit={step2Form.handleSubmit(handleStep2Submit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="otp">Verification Code</Label>
-              <div className="flex justify-center">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {step === 'email' ? (
+        <form onSubmit={handleSendOTP} className="space-y-6">
+          <div className="space-y-2">
+            <div className="relative">
+              <label htmlFor="email" className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-200' : ''}`}>Email Address</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <Mail className={`h-5 w-5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`} />
+                </div>
                 <Input
-                  id="otp"
-                  placeholder="Enter 6-digit code"
-                  {...step2Form.register('otp')}
-                  className="w-full text-center tracking-widest font-mono text-lg"
-                  maxLength={6}
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`pl-10 ${isDark ? 'bg-gray-800 border-gray-700 text-white' : ''}`}
+                  placeholder="your.email@example.com"
+                  required
                 />
               </div>
-              {step2Form.formState.errors.otp && (
-                <p className="text-sm text-destructive text-center">
-                  {step2Form.formState.errors.otp.message}
-                </p>
-              )}
             </div>
+          </div>
+
+          <div className={`p-3 rounded-md flex items-start gap-3 ${isDark ? 'bg-gray-700' : 'bg-blue-50'}`}>
+            <AlertCircle className={`h-5 w-5 flex-shrink-0 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+            <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-blue-700'}`}>
+              We'll send a verification code to your email address to confirm it's you.
+            </p>
+          </div>
+
+          <Button 
+            type="submit" 
+            disabled={loading} 
+            className="w-full hover:scale-105 transition-all duration-300 hover:shadow-glow"
+          >
+            {loading ? 'Sending...' : 'Send Verification Code'}
+          </Button>
+        </form>
+      ) : (
+        <div className="space-y-6">
+          <div>
+            <p className={`mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+              Enter the 6-digit code sent to <span className="font-medium">{email}</span>
+            </p>
             
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Verifying...' : 'Verify'}
-            </Button>
-            
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-2">
-                Didn't receive a code?
-              </p>
-              <Button
-                type="button"
-                variant="link"
-                onClick={resendOTP}
-                disabled={isLoading}
-                className="h-auto p-0"
+            <div className="flex justify-center my-6">
+              <InputOTP
+                value={otp}
+                onChange={(value) => setOtp(value)}
+                maxLength={6}
+                containerClassName="gap-2 sm:gap-4"
               >
-                Resend Code
-              </Button>
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} className={isDark ? 'bg-gray-800 border-gray-700 text-white' : ''} />
+                  <InputOTPSlot index={1} className={isDark ? 'bg-gray-800 border-gray-700 text-white' : ''} />
+                  <InputOTPSlot index={2} className={isDark ? 'bg-gray-800 border-gray-700 text-white' : ''} />
+                  <InputOTPSlot index={3} className={isDark ? 'bg-gray-800 border-gray-700 text-white' : ''} />
+                  <InputOTPSlot index={4} className={isDark ? 'bg-gray-800 border-gray-700 text-white' : ''} />
+                  <InputOTPSlot index={5} className={isDark ? 'bg-gray-800 border-gray-700 text-white' : ''} />
+                </InputOTPGroup>
+              </InputOTP>
             </div>
-          </form>
-        )}
-      </CardContent>
-      
-      <CardFooter className="flex justify-center">
-        <Button
-          variant="ghost"
-          onClick={() => setStep(1)}
-          className={step === 1 ? 'hidden' : ''}
-        >
-          Change Phone Number
-        </Button>
-      </CardFooter>
-    </Card>
+          </div>
+
+          <Button 
+            onClick={handleVerifyOTP} 
+            disabled={loading || otp.length !== 6} 
+            className="w-full hover:scale-105 transition-all duration-300 hover:shadow-glow"
+          >
+            {loading ? 'Verifying...' : 'Verify & Login'}
+          </Button>
+
+          <div className="text-center">
+            <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>
+              {countdown > 0 
+                ? `Resend code in ${countdown}s` 
+                : (
+                  <Button 
+                    variant="link" 
+                    onClick={handleResendOTP} 
+                    disabled={loading}
+                    className={isDark ? 'text-primary' : ''}
+                  >
+                    Resend verification code
+                  </Button>
+                )
+              }
+            </p>
+            <Button 
+              variant="link" 
+              onClick={() => setStep('email')}
+              className={isDark ? 'text-primary mt-2' : 'mt-2'}
+            >
+              Change email address
+            </Button>
+          </div>
+        </div>
+      )}
+    </motion.div>
   );
 };
 
