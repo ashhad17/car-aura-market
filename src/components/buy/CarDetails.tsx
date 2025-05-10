@@ -94,15 +94,15 @@ const CarDetails = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {/* Car Images */}
         <div className="space-y-4">
-          <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
+          <div className="relative aspect-[16/9] w-full rounded-lg overflow-hidden">
             {car.images && car.images.length > 0 ? (
               <img
                 src={car.images[0]}
                 alt={`${car.make} ${car.model}`}
-                className="w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-contain object-center"
               />
             ) : (
-              <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+              <div className="absolute inset-0 w-full h-full bg-gray-200 flex items-center justify-center">
                 <span className="text-gray-500">No image available</span>
               </div>
             )}
@@ -110,11 +110,11 @@ const CarDetails = () => {
           {car.images && car.images.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
               {car.images.slice(1).map((image, index) => (
-                <div key={index} className="aspect-w-1 aspect-h-1 rounded overflow-hidden">
+                <div key={index} className="relative aspect-[4/3] rounded overflow-hidden">
                   <img
                     src={image}
                     alt={`${car.make} ${car.model} - ${index + 2}`}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-contain object-center"
                   />
                 </div>
               ))}

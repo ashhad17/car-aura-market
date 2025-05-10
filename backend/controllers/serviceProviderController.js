@@ -93,6 +93,16 @@ exports.createServiceProvider = async (req, res, next) => {
   try {
     req.body.user = req.user.id;
     const serviceProvider = await ServiceProvider.create(req.body);
+    const admin = await User.findOne({ role: 'admin' });
+    if (admin) {
+      await Notification.create({
+        user: admin._id,
+        title: 'New Service Provider Registered',
+        description: `A new service provider ${serviceProvider.name} has been registered`,
+        // description: `A new service provider "${car.title}" has been created by ${req.user.name}`,
+        type: 'system'
+      });
+    }
     res.status(201).json({
       success: true,
       message: 'Service provider created successfully',
@@ -163,6 +173,13 @@ exports.updateServiceProviderStatus = async (req, res, next) => {
       { status, updatedAt: Date.now() },
       { new: true, runValidators: true }
     );
+    // Create notification for service provider
+    await Notification.create({
+      user: serviceProvider.user,
+      title: 'Status Update',
+      description: `Your service provider status has been updated to ${status}`,
+      type: 'system'
+    });
     res.status(200).json({
       success: true,
       message: 'Service provider status updated successfully',

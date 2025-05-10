@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { ServiceType } from "@/lib/data";
 import ServiceCard from "./ServiceCard";
@@ -161,11 +160,13 @@ const ServiceGrid: React.FC<ServiceGridProps> = ({ isPreview = false }) => {
                 : 'bg-white hover:shadow-glow-light'
             }`}
           >
-            <img 
-              src={provider.image} 
-              alt={provider.name}
-              className="w-full h-48 object-cover"
-            />
+            <div className="relative aspect-[16/9] w-full overflow-hidden">
+              <img 
+                src={provider.image} 
+                alt={provider.name}
+                className="absolute inset-0 w-full h-full object-contain object-center"
+              />
+            </div>
             <div className="p-4">
               <h3 className={`text-lg font-semibold mb-2 ${isDark ? 'text-white' : ''}`}>{provider.name}</h3>
               <p className={`text-sm mb-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{provider.description}</p>

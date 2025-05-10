@@ -6,55 +6,26 @@ const ErrorResponse = require('../utils/errorResponse');
 // @access  Private
 exports.getNotifications = async (req, res, next) => {
   try {
-    // Copy req.query
-    const reqQuery = { ...req.query };
+    console.log('Fetching notifications for user:', req.user.id);
+    
+    // Finding resource - only get notifications for current user
+    let query = Notification.find({ user: req.user.id });
 
-    // Fields to exclude
-    const removeFields = ['select', 'sort', 'page', 'limit'];
-
-    // Loop over removeFields and delete them from reqQuery
-    removeFields.forEach(param => delete reqQuery[param]);
-
-    // Create query string
-    let queryStr = JSON.stringify(reqQuery);
-
-    // Create operators ($gt, $gte, etc)
-    queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
-
-    // Finding resource
-    let query = Notification.find({
-      ...JSON.parse(queryStr),
-      user: req.user.id
-    });
-
-    // Select Fields
-    if (req.query.select) {
-      const fields = req.query.select.split(',').join(' ');
-      query = query.select(fields);
-    }
-
-    // Sort
-    if (req.query.sort) {
-      const sortBy = req.query.sort.split(',').join(' ');
-      query = query.sort(sortBy);
-    } else {
-      query = query.sort('-createdAt');
-    }
+    // Sort by createdAt in descending order (newest first)
+    query = query.sort('-createdAt');
 
     // Pagination
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
-    const total = await Notification.countDocuments({
-      ...JSON.parse(queryStr),
-      user: req.user.id
-    });
+    const total = await Notification.countDocuments({ user: req.user.id });
 
     query = query.skip(startIndex).limit(limit);
 
     // Executing query
     const notifications = await query;
+    console.log('Found notifications:', notifications);
 
     // Pagination result
     const pagination = {};
@@ -73,7 +44,7 @@ exports.getNotifications = async (req, res, next) => {
       };
     }
 
-    res.status(200).json({
+    const response = {
       success: true,
       data: {
         notifications,
@@ -84,8 +55,12 @@ exports.getNotifications = async (req, res, next) => {
           limit
         }
       }
-    });
+    };
+    
+    console.log('Sending response:', response);
+    res.status(200).json(response);
   } catch (err) {
+    console.error('Error in getNotifications:', err);
     next(err);
   }
 };
@@ -203,7 +178,7 @@ exports.deleteNotification = async (req, res, next) => {
       );
     }
 
-    await notification.remove();
+    await Notification.findByIdAndDelete(req.params.id);
 
     res.status(200).json({
       success: true,
@@ -239,7 +214,7 @@ exports.markAsRead = async (req, res, next) => {
 
     notification = await Notification.findByIdAndUpdate(
       req.params.id,
-      { isRead: true, readAt: Date.now() },
+      { read: true },
       {
         new: true,
         runValidators: true
@@ -249,11 +224,7 @@ exports.markAsRead = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: 'Notification marked as read',
-      data: {
-        id: notification._id,
-        isRead: notification.isRead,
-        readAt: notification.readAt
-      }
+      data: notification
     });
   } catch (err) {
     next(err);
@@ -266,8 +237,8 @@ exports.markAsRead = async (req, res, next) => {
 exports.markAllAsRead = async (req, res, next) => {
   try {
     await Notification.updateMany(
-      { user: req.user.id, isRead: false },
-      { isRead: true, readAt: Date.now() }
+      { user: req.user.id, read: false },
+      { read: true }
     );
 
     res.status(200).json({

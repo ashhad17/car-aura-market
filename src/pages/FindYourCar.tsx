@@ -73,7 +73,23 @@ interface CarRecommendation {
 }
 
 const questions: Question[] = [
-  
+  {
+    id: "make",
+    question: "What car make are you interested in?",
+    type: "single",
+    options: [
+      { id: "toyota", label: "Toyota", value: "Toyota" },
+      { id: "honda", label: "Honda", value: "Honda" },
+      { id: "ford", label: "Ford", value: "Ford" },
+      { id: "chevrolet", label: "Chevrolet", value: "Chevrolet" },
+      { id: "bmw", label: "BMW", value: "BMW" },
+      { id: "mercedes", label: "Mercedes-Benz", value: "Mercedes-Benz" },
+      { id: "audi", label: "Audi", value: "Audi" },
+      { id: "nissan", label: "Nissan", value: "Nissan" },
+      { id: "hyundai", label: "Hyundai", value: "Hyundai" },
+      { id: "kia", label: "Kia", value: "Kia" }
+    ]
+  },
   {
     id: "budget",
     question: "What's your budget range?",
@@ -83,14 +99,30 @@ const questions: Question[] = [
     step: 10000
   },
   {
+    id: "year",
+    question: "What year range are you looking for?",
+    type: "slider",
+    min: 2000,
+    max: 2024,
+    step: 1
+  },
+  {
+    id: "totalDriven",
+    question: "Maximum kilometers driven?",
+    type: "slider",
+    min: 0,
+    max: 200000,
+    step: 5000
+  },
+  {
     id: "fuelType",
-    question: "What type of fuel/power do you prefer?",
+    question: "What type of fuel do you prefer?",
     type: "single",
     options: [
-      { id: "gasoline", label: "Gasoline", value: "gasoline" },
-      { id: "diesel", label: "Diesel", value: "diesel" },
-      { id: "hybrid", label: "Hybrid", value: "hybrid" },
-      { id: "electric", label: "Electric", value: "electric" }
+      { id: "gasoline", label: "Gasoline", value: "Gasoline" },
+      { id: "diesel", label: "Diesel", value: "Diesel" },
+      { id: "hybrid", label: "Hybrid", value: "Hybrid" },
+      { id: "electric", label: "Electric", value: "Electric" }
     ]
   },
   {
@@ -98,8 +130,9 @@ const questions: Question[] = [
     question: "What type of transmission do you prefer?",
     type: "single",
     options: [
-      { id: "automatic", label: "Automatic", value: "automatic" },
-      { id: "manual", label: "Manual", value: "manual" }
+      { id: "automatic", label: "Automatic", value: "Automatic" },
+      { id: "manual", label: "Manual", value: "Manual" },
+      { id: "cvt", label: "CVT", value: "CVT" }
     ]
   },
   {
@@ -107,12 +140,25 @@ const questions: Question[] = [
     question: "What type of car body style do you prefer?",
     type: "single",
     options: [
-      { id: "sedan", label: "Sedan", value: "sedan" },
-      { id: "suv", label: "SUV", value: "suv" },
-      { id: "hatchback", label: "Hatchback", value: "hatchback" },
-      { id: "truck", label: "Truck", value: "truck" },
-      { id: "coupe", label: "Coupe", value: "coupe" },
-      { id: "convertible", label: "Convertible", value: "convertible" }
+      { id: "sedan", label: "Sedan", value: "Sedan" },
+      { id: "suv", label: "SUV", value: "SUV" },
+      { id: "hatchback", label: "Hatchback", value: "Hatchback" },
+      { id: "truck", label: "Truck", value: "Truck" },
+      { id: "coupe", label: "Coupe", value: "Coupe" },
+      { id: "convertible", label: "Convertible", value: "Convertible" },
+      { id: "wagon", label: "Wagon", value: "Wagon" },
+      { id: "van", label: "Van", value: "Van" }
+    ]
+  },
+  {
+    id: "condition",
+    question: "What condition are you looking for?",
+    type: "single",
+    options: [
+      { id: "excellent", label: "Excellent", value: "Excellent" },
+      { id: "good", label: "Good", value: "Good" },
+      { id: "fair", label: "Fair", value: "Fair" },
+      { id: "poor", label: "Poor", value: "Poor" }
     ]
   },
   {
@@ -136,27 +182,6 @@ const questions: Question[] = [
       { id: "premiumAudio", label: "Premium Audio", value: "Premium Audio" },
       { id: "thirdRowSeating", label: "Third Row Seating", value: "Third Row Seating" }
     ]
-  },
-  {
-    id: "exteriorColor",
-    question: "What exterior color do you prefer?",
-    type: "single",
-    options: [
-      { id: "black", label: "Black", value: "black" },
-      { id: "white", label: "White", value: "white" },
-      { id: "silver", label: "Silver", value: "silver" },
-      { id: "blue", label: "Blue", value: "blue" },
-      { id: "red", label: "Red", value: "red" },
-      { id: "other", label: "Other", value: "other" }
-    ]
-  },
-  {
-    id: "mileage",
-    question: "What is the maximum mileage you're comfortable with?",
-    type: "slider",
-    min: 0,
-    max: 100,
-    step: 5
   }
 ];
 
@@ -241,37 +266,87 @@ const FindYourCar = () => {
       return;
     }
   
-    // Filter cars based on user answers
-    const filteredCars = cars.filter((car) => {
-      const statusMatch = car.status === "active"; // Only include active cars
-      // const purposeMatch = !answers.purpose || car.features.includes(answers.purpose);
-      const budgetMatch = !answers.budget || car.price <= parseInt(answers.budget, 10);
-      const fuelTypeMatch =
-        !answers.fuelType || car.fuelType?.toLowerCase() === answers.fuelType.toLowerCase();
-      const transmissionMatch =
-        !answers.transmission ||
-        car.transmission?.toLowerCase() === answers.transmission.toLowerCase();
-      const bodyTypeMatch =
-        !answers.bodyType || car.bodyType?.toLowerCase() === answers.bodyType.toLowerCase();
-      const featuresMatch =
-        !answers.features ||
-        answers.features.every((feature: string) => car.features.includes(feature));
-      const exteriorColorMatch =
-        !answers.exteriorColor ||
-        car.exteriorColor?.toLowerCase() === answers.exteriorColor.toLowerCase();
-      const mileageMatch = !answers.mileage || car.mileage <= parseInt(answers.mileage, 10);
+    // Filter cars based on user answers and calculate match percentage
+    const filteredCars = cars.map((car) => {
+      let matchScore = 0;
+      let totalCriteria = 0;
   
-      return (
-        statusMatch &&
-        budgetMatch &&
-        fuelTypeMatch &&
-        transmissionMatch &&
-        bodyTypeMatch &&
-        featuresMatch &&
-        exteriorColorMatch &&
-        mileageMatch
-      );
-    });
+      // Make match
+      if (answers.make) {
+        totalCriteria++;
+        if (car.make === answers.make) matchScore++;
+      }
+  
+      // Budget match (within 20% range)
+      if (answers.budget) {
+        totalCriteria++;
+        const budget = Number(answers.budget);
+        const carPrice = Number(car.price);
+        if (carPrice <= budget && carPrice >= budget * 0.8) matchScore++;
+      }
+  
+      // Year match
+      if (answers.year) {
+        totalCriteria++;
+        const year = Number(answers.year);
+        const carYear = Number(car.year);
+        if (carYear >= year - 2 && carYear <= year + 2) matchScore++;
+      }
+  
+      // Total Driven match
+      if (answers.totalDriven) {
+        totalCriteria++;
+        const maxDriven = Number(answers.totalDriven);
+        const carDriven = Number(car.totalDriven);
+        if (carDriven <= maxDriven) matchScore++;
+      }
+  
+      // Fuel Type match
+      if (answers.fuelType) {
+        totalCriteria++;
+        if (car.fuelType === answers.fuelType) matchScore++;
+      }
+  
+      // Transmission match
+      if (answers.transmission) {
+        totalCriteria++;
+        if (car.transmission === answers.transmission) matchScore++;
+      }
+  
+      // Body Type match
+      if (answers.bodyType) {
+        totalCriteria++;
+        if (car.bodyType === answers.bodyType) matchScore++;
+      }
+  
+      // Condition match
+      if (answers.condition) {
+        totalCriteria++;
+        if (car.condition === answers.condition) matchScore++;
+      }
+  
+      // Features match (partial match)
+      if (answers.features && answers.features.length > 0) {
+        totalCriteria++;
+        const matchingFeatures = answers.features.filter(feature => 
+          car.features.includes(feature)
+        ).length;
+        if (matchingFeatures > 0) {
+          matchScore += matchingFeatures / answers.features.length;
+        }
+      }
+  
+      // Calculate match percentage
+      const matchPercentage = totalCriteria > 0 
+        ? Math.round((matchScore / totalCriteria) * 100)
+        : 0;
+  
+      return {
+        ...car,
+        match: matchPercentage
+      };
+    }).filter(car => car.status === "active" && car.match > 0)
+      .sort((a, b) => b.match - a.match);
   
     setRecommendations(filteredCars);
   };
@@ -477,11 +552,11 @@ const FindYourCar = () => {
           }`}
         >
           <div className="md:flex">
-            <div className="md:w-2/5">
+            <div className="md:w-2/5 relative h-48 md:h-auto">
               <img
-                src={car.images?.[0] || "/placeholder.jpg"}
+                src={car.images?.[0]?.url || "/placeholder.jpg"}
                 alt={car.make+" "+car.model}
-                className="h-full w-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover"
               />
             </div>
             <div className="p-6 md:w-3/5">

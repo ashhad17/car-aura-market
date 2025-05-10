@@ -6,11 +6,17 @@ dotenv.config({ path: path.join(__dirname, 'config', 'config.env') });
 
 const app = require('./app');
 const connectDB = require('./config/db');
+const serviceProviderRoutes = require('./routes/serviceProviders');
+const reviewRoutes = require('./routes/reviews');
 
 // Connect to database
 connectDB();
 
 const PORT = process.env.PORT || 5000;
+
+// Mount routers
+app.use('/api/v1/service-providers', serviceProviderRoutes);
+app.use('/api/v1/service-providers/:serviceProviderId/reviews', reviewRoutes);
 
 const server = app.listen(
   PORT,

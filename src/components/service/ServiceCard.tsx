@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,11 +32,11 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service }) => {
           isDark ? 'bg-gray-800 border-gray-700 hover:shadow-glow-dark' : 'hover:shadow-glow-light'
         }`}
       >
-        <div className="relative h-48 w-full overflow-hidden">
+        <div className="relative aspect-[16/9] w-full overflow-hidden">
           <img
             src={serviceImage}
             alt={service.name}
-            className="h-full w-full object-cover object-center transition-transform duration-500 hover:scale-110"
+            className="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-500 hover:scale-110"
           />
           {service.featured && (
             <Badge className="absolute right-2 top-2 bg-yellow-500 animate-pulse">Featured</Badge>

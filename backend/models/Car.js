@@ -115,6 +115,12 @@ const carSchema = new mongoose.Schema({
     required: false
   },
   
+  bodyType: {
+    type: String,
+    enum: ['Sedan', 'SUV', 'Hatchback', 'Truck', 'Coupe', 'Convertible', 'Wagon', 'Van'],
+    required: false
+  },
+  
   // Seller information
   seller: {
     type: mongoose.Schema.Types.ObjectId,

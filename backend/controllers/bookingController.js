@@ -1,6 +1,8 @@
 const Booking = require('../models/Booking');
 const ErrorResponse = require('../utils/errorResponse');
 const {sendMail} = require('../utils/mailer');
+const Notification = require('../models/Notification');
+const ServiceProvider = require('../models/ServiceProvider');
 // @desc    Get all bookings
 // @route   GET /api/v1/bookings
 // @access  Private
@@ -135,101 +137,6 @@ exports.getBooking = async (req, res, next) => {
 // @desc    Create new booking
 // @route   POST /api/v1/bookings
 // @access  Private
-// exports.createBooking = async (req, res, next) => {
-//   try {
-//     console.log('=== Booking Creation Debug ===');
-//     console.log('1. Received booking request:', JSON.stringify(req.body, null, 2));
-//     console.log('2. User from request:', JSON.stringify(req.user, null, 2));
-
-//     // Add user to req.body
-//     req.body.user = req.user.id;
-//     console.log('3. Updated booking request with user:', JSON.stringify(req.body, null, 2));
-
-//     // Validate required fields
-//     const requiredFields = ['serviceProvider', 'services', 'date', 'time', 'totalPrice'];
-//     console.log('4. Checking required fields:', requiredFields);
-    
-//     for (const field of requiredFields) {
-//       console.log(`5. Checking field ${field}:`, req.body[field]);
-//       if (!req.body[field]) {
-//         console.log(`6. Missing required field: ${field}`);
-//         return res.status(400).json({
-//           success: false,
-//           message: `Missing required field: ${field}`,
-//           receivedData: req.body
-//         });
-//       }
-//     }
-
-//     // Validate services array
-//     console.log('7. Validating services array:', req.body.services);
-//     if (!Array.isArray(req.body.services) || req.body.services.length === 0) {
-//       console.log('8. Invalid services array:', req.body.services);
-//       return res.status(400).json({
-//         success: false,
-//         message: 'At least one service is required',
-//         receivedData: req.body
-//       });
-//     }
-
-//     // Validate each service
-//     console.log('9. Validating individual services');
-//     for (const service of req.body.services) {
-//       console.log('10. Validating service:', service);
-//       if (!service.name || !service.price || !service.duration) {
-//         console.log('11. Invalid service:', service);
-//         return res.status(400).json({
-//           success: false,
-//           message: 'Each service must have name, price, and duration',
-//           receivedData: req.body
-//         });
-//       }
-//     }
-
-//     // Check if the time slot is already booked
-//     console.log('12. Checking for existing bookings');
-//     const existingBooking = await Booking.findOne({
-//       serviceProvider: req.body.serviceProvider,
-//       date: new Date(req.body.date),
-//       time: req.body.time,
-//       status: { $in: ['pending', 'confirmed'] }
-//     });
-
-//     if (existingBooking) {
-//       console.log('13. Time slot already booked:', existingBooking);
-//       return res.status(400).json({
-//         success: false,
-//         message: 'This time slot is already booked',
-//         receivedData: req.body
-//       });
-//     }
-
-//     // Create the booking
-//     console.log('14. Creating booking with data:', JSON.stringify(req.body, null, 2));
-//     const booking = await Booking.create(req.body);
-//     console.log('15. Booking created successfully:', JSON.stringify(booking, null, 2));
-
-//     res.status(201).json({
-//       success: true,
-//       message: 'Booking created successfully',
-//       data: booking
-//     });
-//   } catch (err) {
-//     console.error('16. Booking creation error:', err);
-//     if (err.name === 'ValidationError') {
-//       console.error('17. Validation error details:', err.errors);
-//       return res.status(400).json({
-//         success: false,
-//         message: 'Validation error',
-//         errors: Object.values(err.errors).map(e => e.message),
-//         receivedData: req.body
-//       });
-//     }
-//     next(err);
-//   }
-// };
-const ServiceProvider = require('../models/ServiceProvider');
-
 exports.createBooking = async (req, res, next) => {
   try {
     console.log('=== Booking Creation Debug ===');
@@ -260,25 +167,42 @@ exports.createBooking = async (req, res, next) => {
 
     // Create the booking
     const booking = await Booking.create(req.body);
+
+    // Send email to service provider
     const providerEmailText = `
     A new booking has been created for your services:
     - Date: ${booking.date}
     - Time: ${booking.time}
     - User: ${req.user.name} (${req.user.email})
     - Total Price: ${booking.totalPrice}
-  `;
-  sendMail(serviceProvider.email, 'New Booking Created', providerEmailText);
+    `;
+    sendMail(serviceProvider.email, 'New Booking Created', providerEmailText);
 
-  // Send email to user
-  const userEmailText = `
+    // Send email to user
+    const userEmailText = `
     Your booking has been successfully created:
     - Service Provider: ${serviceProvider.name}
     - Date: ${booking.date}
     - Time: ${booking.time}
     - Total Price: ${booking.totalPrice}
-  `;
-  sendMail(req.user.email, 'Booking Confirmation', userEmailText);
+    `;
+    sendMail(req.user.email, 'Booking Confirmation', userEmailText);
 
+    // Create notification for service provider
+    await Notification.create({
+      user: serviceProvider.user,
+      title: 'New Booking',
+      description: `A new booking has been created by ${req.user.name} for ${new Date(booking.date).toLocaleDateString()} at ${booking.time}`,
+      type: 'booking'
+    });
+    await Notification.create({
+      //set user as current looged in user id 
+      
+      user: req.user._id,
+      title: 'Booking Confirmation',
+      description: `Your booking with ${serviceProvider.name} has been created   for ${new Date(booking.date).toLocaleDateString()} at ${booking.time}`,
+      type: 'booking'
+    });
     res.status(201).json({
       success: true,
       message: 'Booking created successfully',

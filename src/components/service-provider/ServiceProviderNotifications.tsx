@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNotifications } from '@/hooks/useNotifications';
 
-const AdminNotifications = () => {
+const ServiceProviderNotifications = () => {
   const { 
     notifications, 
     loading, 
@@ -195,4 +195,4 @@ const AdminNotifications = () => {
   );
 };
 
-export default AdminNotifications;
+export default ServiceProviderNotifications; 

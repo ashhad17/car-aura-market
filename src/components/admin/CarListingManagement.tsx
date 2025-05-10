@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -94,7 +93,7 @@ const CarListingCard = ({
     <Card key={car._id}>
       <CardContent className="p-0">
         <div className="flex flex-col md:flex-row">
-          <div className="md:w-1/4 h-48 md:h-auto bg-gray-100 relative">
+          <div className="md:w-1/4 relative aspect-[16/9] md:aspect-auto md:h-auto overflow-hidden">
             {car.images && car.images.length > 0 ? (
               <>
                 <Button 
@@ -108,11 +107,11 @@ const CarListingCard = ({
                 <img 
                   src={car.images[0].url} 
                   alt={car.title} 
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain object-center"
                 />
               </>
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
+              <div className="absolute inset-0 w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
                 No Image
               </div>
             )}

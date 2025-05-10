@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
@@ -32,7 +31,9 @@ import {
   Fuel, 
   Gauge,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Pause,
+  Play
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -91,6 +92,8 @@ const CarDetails = () => {
   const [isBookingDialogOpen, setIsBookingDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string>("");
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+  const slideshowInterval = 2000; // Changed to 2 seconds between slides
   
   useEffect(() => {
     const fetchCarDetails = async () => {
@@ -124,6 +127,25 @@ const CarDetails = () => {
     fetchCarDetails();
   }, [id]);
   
+  // Add useEffect for automatic slideshow
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (isAutoPlaying && carDetails?.images.length > 1) {
+      intervalId = setInterval(() => {
+        setSelectedImageIndex((prev) => 
+          prev === carDetails.images.length - 1 ? 0 : prev + 1
+        );
+      }, slideshowInterval);
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isAutoPlaying, carDetails?.images.length]);
+
   const handleBookNow = () => {
     if (!isAuthenticated) {
       navigate('/login');
@@ -242,6 +264,11 @@ const CarDetails = () => {
     );
   };
 
+  // Add function to toggle slideshow
+  const toggleSlideshow = () => {
+    setIsAutoPlaying(!isAutoPlaying);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -308,7 +335,7 @@ const CarDetails = () => {
                 <img 
                   src={carDetails.images[selectedImageIndex].url} 
                   alt={`${carDetails.make} ${carDetails.model}`}
-                  className="w-full h-96 object-cover rounded-lg transition-transform duration-500"
+                  className="w-full h-96 object-cover rounded-lg transition-transform duration-300"
                 />
                 
                 {carDetails.images.length > 1 && (
@@ -317,7 +344,10 @@ const CarDetails = () => {
                       size="icon"
                       variant="ghost"
                       className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/30 hover:bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={prevImage}
+                      onClick={() => {
+                        prevImage();
+                        setIsAutoPlaying(false);
+                      }}
                     >
                       <ChevronLeft className="h-6 w-6 text-white" />
                       <span className="sr-only">Previous image</span>
@@ -326,10 +356,30 @@ const CarDetails = () => {
                       size="icon"
                       variant="ghost"
                       className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/30 hover:bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={nextImage}
+                      onClick={() => {
+                        nextImage();
+                        setIsAutoPlaying(false);
+                      }}
                     >
                       <ChevronRight className="h-6 w-6 text-white" />
                       <span className="sr-only">Next image</span>
+                    </Button>
+                    
+                    {/* Add slideshow control button */}
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="absolute top-2 right-2 h-10 w-10 rounded-full bg-black/30 hover:bg-black/50"
+                      onClick={toggleSlideshow}
+                    >
+                      {isAutoPlaying ? (
+                        <Pause className="h-6 w-6 text-white" />
+                      ) : (
+                        <Play className="h-6 w-6 text-white" />
+                      )}
+                      <span className="sr-only">
+                        {isAutoPlaying ? "Pause slideshow" : "Start slideshow"}
+                      </span>
                     </Button>
                     
                     <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5">
@@ -339,7 +389,10 @@ const CarDetails = () => {
                           className={`h-2 rounded-full transition-all ${
                             selectedImageIndex === index ? "w-6 bg-white" : "w-2 bg-white/60 hover:bg-white/80"
                           }`}
-                          onClick={() => setSelectedImageIndex(index)}
+                          onClick={() => {
+                            setSelectedImageIndex(index);
+                            setIsAutoPlaying(false);
+                          }}
                           aria-label={`View image ${index + 1}`}
                         />
                       ))}
@@ -348,19 +401,25 @@ const CarDetails = () => {
                 )}
               </div>
               
+              {/* Thumbnail Grid */}
               <div className="grid grid-cols-5 gap-2">
                 {carDetails.images.map((image, index) => (
                   <div
                     key={index}
-                    className={`cursor-pointer rounded-md overflow-hidden ${
-                      selectedImageIndex === index ? "ring-2 ring-primary" : "opacity-80 hover:opacity-100"
+                    className={`cursor-pointer rounded-md overflow-hidden transition-all duration-300 ${
+                      selectedImageIndex === index 
+                        ? "ring-2 ring-primary scale-105" 
+                        : "opacity-80 hover:opacity-100 hover:scale-105"
                     }`}
-                    onClick={() => setSelectedImageIndex(index)}
+                    onClick={() => {
+                      setSelectedImageIndex(index);
+                      setIsAutoPlaying(false);
+                    }}
                   >
                     <img 
                       src={image.url}
                       alt={`${carDetails.make} ${carDetails.model} - image ${index+1}`}
-                      className="h-20 w-full object-cover transition-all"
+                      className="h-20 w-full object-cover"
                     />
                   </div>
                 ))}

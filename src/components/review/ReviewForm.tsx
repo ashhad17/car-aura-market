@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useTheme } from '@/context/ThemeContext';
 import { Star, User } from 'lucide-react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 const reviewSchema = z.object({
   rating: z.number().min(1, { message: 'Please select a rating' }).max(5),
@@ -26,6 +26,7 @@ interface ReviewFormProps {
 const ReviewForm: React.FC<ReviewFormProps> = ({ serviceProviderId, onSubmit, onCancel }) => {
   const [rating, setRating] = useState<number>(0);
   const [hoverRating, setHoverRating] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const { isDark } = useTheme();
 
@@ -37,7 +38,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ serviceProviderId, onSubmit, on
     },
   });
 
-  const handleSubmit = (data: ReviewFormValues) => {
+  const handleSubmit = async (data: ReviewFormValues) => {
     if (rating === 0) {
       toast({
         title: "Rating Required",
@@ -46,8 +47,40 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ serviceProviderId, onSubmit, on
       });
       return;
     }
-    
-    onSubmit({ ...data, rating });
+
+    setIsSubmitting(true);
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}/api/v1/reviews`,
+        {
+          serviceProviderId,
+          rating,
+          comment: data.comment,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+
+      if (response.data.success) {
+        onSubmit({ ...data, rating });
+        toast({
+          title: "Review Submitted",
+          description: "Thank you for your feedback!",
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit review. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -109,21 +142,22 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ serviceProviderId, onSubmit, on
             <p className="text-red-500 text-sm mt-1">{form.formState.errors.comment.message}</p>
           )}
         </div>
-        
-        <div className="flex justify-end gap-3 pt-2">
+
+        <div className="flex justify-end gap-2">
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
-            className={isDark ? 'border-gray-600 hover:bg-gray-700' : ''}
+            disabled={isSubmitting}
           >
             Cancel
           </Button>
-          <Button 
+          <Button
             type="submit"
-            className="hover:scale-105 transition-all duration-300 hover:shadow-glow"
+            disabled={isSubmitting}
+            className="hover:shadow-glow transition-all duration-300"
           >
-            Submit Review
+            {isSubmitting ? 'Submitting...' : 'Submit Review'}
           </Button>
         </div>
       </form>

@@ -2,92 +2,10 @@ const Car = require('../models/Car');
 const User = require('../models/User');
 const mongoose = require('mongoose');
 const ErrorResponse = require('../utils/errorResponse');
+const sendMail = require('../utils/mailer');
+const Notification = require('../models/Notification');
 
-const {sendMail} = require('../utils/mailer');
-// @route   GET /api/v1/cars
-// @access  Public
-// exports.getCars = async (req, res, next) => {
-//   try {
-//     // Copy req.query
-//     const reqQuery = { ...req.query };
 
-//     // Fields to exclude
-//     const removeFields = ['select', 'sort', 'page', 'limit'];
-
-//     // Loop over removeFields and delete them from reqQuery
-//     removeFields.forEach(param => delete reqQuery[param]);
-
-//     // Create query string
-//     let queryStr = JSON.stringify(reqQuery);
-
-//     // Create operators ($gt, $gte, etc)
-//     queryStr = queryStr.replace(/\b(gt|gte|lt|lte|in)\b/g, match => `$${match}`);
-
-//     // Finding resource
-//     let query = Car.find(JSON.parse(queryStr)).populate({
-//       path: 'seller',
-//       select: 'name'
-//     });
-
-//     // Select Fields
-//     if (req.query.select) {
-//       const fields = req.query.select.split(',').join(' ');
-//       query = query.select(fields);
-//     }
-
-//     // Sort
-//     if (req.query.sort) {
-//       const sortBy = req.query.sort.split(',').join(' ');
-//       query = query.sort(sortBy);
-//     } else {
-//       query = query.sort('-createdAt');
-//     }
-
-//     // Pagination
-//     const page = parseInt(req.query.page, 10) || 1;
-//     const limit = parseInt(req.query.limit, 10) || 10;
-//     const startIndex = (page - 1) * limit;
-//     const endIndex = page * limit;
-//     const total = await Car.countDocuments(JSON.parse(queryStr));
-
-//     query = query.skip(startIndex).limit(limit);
-
-//     // Executing query
-//     const cars = await query;
-
-//     // Pagination result
-//     const pagination = {};
-
-//     if (endIndex < total) {
-//       pagination.next = {
-//         page: page + 1,
-//         limit
-//       };
-//     }
-
-//     if (startIndex > 0) {
-//       pagination.prev = {
-//         page: page - 1,
-//         limit
-//       };
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       data: {
-//         cars,
-//         pagination: {
-//           total,
-//           pages: Math.ceil(total / limit),
-//           currentPage: page,
-//           limit
-//         }
-//       }
-//     });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
 // @desc    Get all car listings
 // @route   GET /api/v1/cars
 // @access  Public
@@ -214,13 +132,25 @@ exports.createCar = async (req, res, next) => {
     });
 
     const car = await Car.create(req.body);
+
+    // Send email to admin
     const adminEmailText = `
     A new car listing has been created and requires verification:
     - Title: ${car.title}
     - Seller: ${req.user.name} (${req.user.email})
-  `;
-  sendMail("mohammedashhad017@gmail.com", 'New Car Listing Created', adminEmailText);
+    `;
+    sendMail("mohammedashhad017@gmail.com", 'New Car Listing Created', adminEmailText);
 
+    // Create notification for admin
+    const admin = await User.findOne({ role: 'admin' });
+    if (admin) {
+      await Notification.create({
+        user: admin._id,
+        title: 'New Car Listing',
+        description: `A new car listing "${car.title}" has been created by ${req.user.name}`,
+        type: 'system'
+      });
+    }
 
     res.status(201).json({
       success: true,

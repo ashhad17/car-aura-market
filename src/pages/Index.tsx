@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
@@ -8,7 +7,6 @@ import Features from "@/components/home/Features";
 import CarListingPreview from "@/components/home/CarListingPreview";
 import ServiceSection from "@/components/home/ServiceSection";
 import Testimonials from "@/components/home/Testimonials";
-import { services } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/context/ThemeContext";
 import { motion } from "framer-motion";
@@ -73,7 +71,7 @@ const Index = () => {
             </motion.div>
           </div>
         </motion.section>
-        <ServiceSection services={services} />
+        <ServiceSection />
         <Testimonials />
       </main>
       <Footer />

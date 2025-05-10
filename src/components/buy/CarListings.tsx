@@ -137,15 +137,15 @@ const CarListings = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {listings.map((car) => (
           <div key={car._id} className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-            <div className="aspect-w-16 aspect-h-9">
+            <div className="relative aspect-[16/9] w-full overflow-hidden">
               {car.images && car.images.length > 0 ? (
                 <img
                   src={car.images[0]}
                   alt={`${car.make} ${car.model}`}
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-contain object-center"
                 />
               ) : (
-                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                <div className="absolute inset-0 w-full h-full bg-gray-200 flex items-center justify-center">
                   <span className="text-gray-500">No image available</span>
                 </div>
               )}

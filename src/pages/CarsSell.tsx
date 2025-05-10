@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
+import Loader from "./Loader"
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,7 +20,44 @@ import { useTheme } from "@/context/ThemeContext";
 import axios from 'axios';
 import AuthModal from "@/components/auth/AuthModal";
 const makes = ["Toyota", "Honda", "Ford", "Chevrolet", "BMW", "Mercedes-Benz", "Audi", "Nissan", "Hyundai", "Kia"];
+const GOOGLE_API_KEY = 'AIzaSyD1B0trU512-4RPu4N_Bg-Zmxl9HeAQ_2Q';
 
+async function calculateEstimatedPrice(details: {
+  make: string;
+  model: string;
+  year: string;
+  mileage: string;
+  totalDriven: string;
+}): Promise<string | null> {
+  try {
+    const resp = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GOOGLE_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [{
+              text: `Provide an estimated resale price in rupees for a used car based on:
+Make: ${details.make},
+Model: ${details.model},
+Year: ${details.year},
+Kilometers Driven: ${details.totalDriven},
+Mileage: ${details.mileage}.
+Output just the number.`
+            }]
+          }]
+        }),
+      }
+    );
+    if (!resp.ok) throw new Error();
+    const data = await resp.json();
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text.trim() || null;
+  } catch {
+    console.error('AI price fetch failed');
+    return null;
+  }
+}
 const uploadToCloudinary = async (file: File): Promise<{ url: string; publicId: string }> => {
   const formData = new FormData();
   formData.append('file', file);
@@ -79,10 +117,30 @@ const CarsSell = () => {
     pucDocument: null as File | null,
   });
 
+  const [aiPrice, setAiPrice] = useState<string | null>(null);  // ← add this
+  const [estimating, setEstimating] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
+
+  const handleEstimate = async () => {
+    console.log("Starting estimation");    // ← add this
+    setEstimating(true);
+    const estimate = await calculateEstimatedPrice({
+      make: formData.make,
+      model: formData.model,
+      year: formData.year,
+      mileage: formData.mileage,
+      totalDriven: formData.totalDriven,
+    });
+    console.log("Got estimate:", estimate); // ← and this
+    setAiPrice(estimate);
+    setEstimating(false);
+  };
+  
+
 
   const handleDocumentUpload = (name: string, file: File) => {
     setFormData({ ...formData, [name]: file });
@@ -415,7 +473,18 @@ console.log("Car Data "+carData);
                   placeholder="e.g. 25000"
                 />
               </div>
-              
+              {/* AI Estimate */}
+            <div className="col-span-1 md:col-span-2 lg:col-span-3 flex items-center gap-4 mt-2">
+  <Button type="button" onClick={handleEstimate} disabled={estimating}>
+    {estimating ? 'Estimating…' : 'AI Estimated Price'}
+  </Button>
+  {estimating ? (
+  <Loader />
+) : (
+  aiPrice && <span>💰 {aiPrice}</span>
+)}
+
+</div>
               <div className="col-span-1 md:col-span-2 lg:col-span-3 space-y-2">
                 <label className="text-sm font-medium">Description</label>
                 <Textarea

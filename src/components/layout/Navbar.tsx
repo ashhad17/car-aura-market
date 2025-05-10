@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useScrollPosition, useIsMobile } from "@/hooks/use-mobile";
@@ -22,6 +21,7 @@ import {
 import { Menu, X, Bell, User, LogOut, Settings, Car, Sun, Moon, MessageCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useNotifications } from "@/hooks/useNotifications";
 
 const Navbar = () => {
   const scrolled = useScrollPosition(50);
@@ -30,6 +30,10 @@ const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const { notifications } = useNotifications();
+
+  // Calculate unread notifications count
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const handleLogin = () => {
     navigate('/login');
@@ -309,14 +313,21 @@ const Navbar = () => {
               )}
             </Button>
 
+            {isAuthenticated && (
+              <Link to="/notifications" className="relative">
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="h-5 w-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            )}
+
             {isAuthenticated ? (
               <>
-                <Link to="/notifications" className="relative">
-                  <Bell className="h-5 w-5 text-foreground hover:text-primary transition-colors" />
-                  <span className="absolute -top-1 -right-1 h-4 w-4 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
-                    3
-                  </span>
-                </Link>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <div className="cursor-pointer">
